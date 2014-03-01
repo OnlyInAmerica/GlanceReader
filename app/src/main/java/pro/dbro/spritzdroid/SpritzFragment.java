@@ -1,6 +1,8 @@
 package pro.dbro.spritzdroid;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -33,7 +35,7 @@ public class SpritzFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
-    private void feedEpubToSpritzer(String epubPath) {
+    private void feedEpubToSpritzer(Uri epubPath) {
         if (mSpritzer == null) {
             mSpritzer = new EpubSpritzer(mTextView, epubPath);
         } else {
@@ -57,6 +59,8 @@ public class SpritzFragment extends Fragment {
                     } else {
                         mSpritzer.start();
                     }
+                } else {
+                    chooseEpub();
                 }
             }
         });
@@ -71,8 +75,10 @@ public class SpritzFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        /**** Put an epub in ../../../assets/book/ *****/
-        feedEpubToSpritzer("book/pp.epub");
+        if (mSpritzer == null) {
+            mTextView.setText("Touch to Select .epub");
+        }
+
         mEventBus = new EventBus();
         mEventBus.register(this);
     }
@@ -80,7 +86,7 @@ public class SpritzFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(mEventBus != null)
+        if (mEventBus != null)
             mEventBus.unregister(this);
     }
 
@@ -92,6 +98,39 @@ public class SpritzFragment extends Fragment {
     @Subscribe
     public void onSpritzFinished(SpritzFinishedEvent event) {
 
+    }
+
+    private static final int SELECT_EPUB = 42;
+
+    /**
+     * Fires an intent to spin up the "file chooser" UI and select an image.
+     */
+    public void chooseEpub() {
+
+        // ACTION_OPEN_DOCUMENT is the intent to choose a file via the system's file
+        // browser.
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+
+        // Filter to only show results that can be "opened", such as a
+        // file (as opposed to a list of contacts or timezones)
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+        // Filter to show only images, using the image MIME data type.
+        // If one wanted to search for ogg vorbis files, the type would be "audio/ogg".
+        // To search for all documents available via installed storage providers,
+        // it would be "*/*".
+        intent.setType("*/*");
+
+        startActivityForResult(intent, SELECT_EPUB);
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == SELECT_EPUB) {
+            Uri uri = data.getData();
+            feedEpubToSpritzer(uri);
+            mTextView.setText("Touch to Start");
+
+        }
     }
 
 }

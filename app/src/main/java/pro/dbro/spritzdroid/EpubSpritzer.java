@@ -1,6 +1,7 @@
 package pro.dbro.spritzdroid;
 
 import android.content.res.AssetManager;
+import android.net.Uri;
 import android.text.Html;
 import android.util.Log;
 import android.widget.TextView;
@@ -20,14 +21,15 @@ public class EpubSpritzer extends Spritzer {
     private int mChapter;
     private int mMaxChapter;
 
-    public EpubSpritzer(TextView target, String epubPath) {
+    public EpubSpritzer(TextView target, Uri epubPath) {
         super(target);
         mChapter = 0;
 
         // Load Book and parse first "chapter"
         try {
-            AssetManager assetManager = target.getContext().getAssets();
-            InputStream epubInputStream = assetManager.open(epubPath);
+            //AssetManager assetManager = target.getContext().getAssets();
+            //InputStream epubInputStream = assetManager.open(epubPath);
+            InputStream epubInputStream = target.getContext().getContentResolver().openInputStream(epubPath);
             mBook = (new EpubReader()).readEpub(epubInputStream);
             mMaxChapter = mBook.getSpine().getSpineReferences().size();
             setText(loadCleanStringFromChapter(mChapter));
@@ -39,6 +41,7 @@ public class EpubSpritzer extends Spritzer {
     protected void processNextWord() throws InterruptedException {
         super.processNextWord();
         if (!mPlaying && mPlayingRequested && (mChapter < mMaxChapter)) {
+            mPlaying = true;
             Log.i(TAG, "Queue cleared, loading chapter " + mChapter);
             printNextChapter();
         }

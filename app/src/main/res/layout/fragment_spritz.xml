@@ -13,7 +13,6 @@
         android:layout_centerInParent="true"
         android:gravity="center"
         android:typeface="monospace"
-        android:text="Click to start"
         android:textSize="30sp"/>
 
 </RelativeLayout>

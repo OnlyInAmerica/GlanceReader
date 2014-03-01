@@ -1,7 +1,6 @@
 package pro.dbro.spritzdroid;
 
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -29,9 +28,10 @@ public class Spritzer {
     protected TextView mTarget;
     protected int mWPM;
     protected Handler mSpritzHandler;
-    protected Object mReadySync = new Object();
+    protected Object mPlayingSync = new Object();
     protected boolean mPlaying;
     protected boolean mPlayingRequested;
+    protected boolean mSpritzThreadStarted;
 
     protected EventBus mEventBus;
 
@@ -41,12 +41,12 @@ public class Spritzer {
         mSpritzHandler = new SpritzHandler(this);
     }
 
-    public void setText(String input){
+    public void setText(String input) {
         createWordArrayFromString(input);
         refillWordQueue();
     }
 
-    public void setEventBus(EventBus bus){
+    public void setEventBus(EventBus bus) {
         mEventBus = bus;
     }
 
@@ -61,15 +61,16 @@ public class Spritzer {
         mWPM = 600;
         mPlaying = false;
         mPlayingRequested = false;
+        mSpritzThreadStarted = false;
     }
 
     public void setWpm(int wpm) {
         mWPM = wpm;
     }
 
-    public void swapTextView(TextView target){
+    public void swapTextView(TextView target) {
         mTarget = target;
-        if(!mPlaying){
+        if (!mPlaying) {
             printLastWord();
         }
 
@@ -87,13 +88,14 @@ public class Spritzer {
         startTimerThread();
     }
 
-    private int getInterWordDelay(){
+    private int getInterWordDelay() {
         return 60000 / mWPM;
     }
 
     private void refillWordQueue() {
         mWords.clear();
         mWords.addAll(Arrays.asList(mWordArray));
+        Log.i("mWords", "Added items to mWords: " + mWords.size());
     }
 
     protected void processNextWord() throws InterruptedException {
@@ -109,15 +111,16 @@ public class Spritzer {
                 }
             }
         } else {
+            Log.i("mWords", "mWords is empty");
             mPlaying = false;
-            if(mEventBus != null){
+            if (mEventBus != null) {
                 mEventBus.post(new SpritzFinishedEvent());
             }
         }
     }
 
-    private void printLastWord(){
-        printWord(mWordArray[mWordArray.length-1]);
+    private void printLastWord() {
+        printWord(mWordArray[mWordArray.length - 1]);
     }
 
     private void printWord(String word) {
@@ -141,28 +144,34 @@ public class Spritzer {
     }
 
     private void startTimerThread() {
-        if (!mPlaying) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    mPlaying = true;
-                    while (mPlayingRequested) {
-                        try {
-                            processNextWord();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+        synchronized (mPlayingSync) {
+            if (!mSpritzThreadStarted) {
+                Log.i("Thread", "Starting new spritz thread");
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mPlaying = true;
+                        mSpritzThreadStarted = true;
+                        while (mPlayingRequested) {
+                            try {
+                                processNextWord();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
                         }
-                    }
-                    mPlaying = false;
+                        mPlaying = false;
+                        mSpritzThreadStarted = false;
+                        Log.i("Thread", "Stopping spritz thread");
 
-                }
-            }).start();
+                    }
+                }).start();
+            }
         }
     }
 
     private int delayMultiplierForWord(String word) {
         // double rest if length > 6 or contains (.,!?)
-        if (word.length() > 6 || word.contains(",") || word.contains(":") || word.contains(";") || word.contains(".") || word.contains("?") || word.contains("!") || word.contains("\"") ) {
+        if (word.length() > 6 || word.contains(",") || word.contains(":") || word.contains(";") || word.contains(".") || word.contains("?") || word.contains("!") || word.contains("\"")) {
             return 2;
         }
         return 1;
