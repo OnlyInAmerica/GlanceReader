@@ -38,7 +38,8 @@ public class EpubSpritzer extends Spritzer {
 
     protected void processNextWord() throws InterruptedException {
         super.processNextWord();
-        if (!mPlaying && (mChapter < mMaxChapter)) {
+        if (!mPlaying && mPlayingRequested && (mChapter < mMaxChapter)) {
+            Log.i(TAG, "Queue cleared, loading chapter " + mChapter);
             printNextChapter();
         }
     }

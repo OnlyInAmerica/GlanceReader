@@ -20,7 +20,7 @@ import pro.dbro.spritzdroid.events.SpritzFinishedEvent;
 /**
  * Created by davidbrodsky on 2/28/14.
  */
-public class Spritzer implements Runnable {
+public class Spritzer {
     protected static final String TAG = "Spritzer";
     protected static final int MSG_PRINT_WORD = 1;
 
@@ -31,7 +31,7 @@ public class Spritzer implements Runnable {
     protected Handler mSpritzHandler;
     protected Object mReadySync = new Object();
     protected boolean mPlaying;
-    protected boolean mStarted;
+    protected boolean mPlayingRequested;
 
     protected EventBus mEventBus;
 
@@ -60,7 +60,7 @@ public class Spritzer implements Runnable {
         mWords = new ArrayDeque<String>();
         mWPM = 600;
         mPlaying = false;
-        mStarted = false;
+        mPlayingRequested = false;
     }
 
     public void setWpm(int wpm) {
@@ -83,7 +83,7 @@ public class Spritzer implements Runnable {
             refillWordQueue();
         }
 
-        mPlaying = true;
+        mPlayingRequested = true;
         startTimerThread();
     }
 
@@ -133,7 +133,7 @@ public class Spritzer implements Runnable {
     }
 
     public void pause() {
-        mPlaying = false;
+        mPlayingRequested = false;
     }
 
     public boolean isPlaying() {
@@ -141,19 +141,19 @@ public class Spritzer implements Runnable {
     }
 
     private void startTimerThread() {
-        if (!mStarted) {
+        if (!mPlaying) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    mStarted = true;
-                    while (mPlaying) {
+                    mPlaying = true;
+                    while (mPlayingRequested) {
                         try {
                             processNextWord();
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                     }
-                    mStarted = false;
+                    mPlaying = false;
 
                 }
             }).start();
@@ -166,22 +166,6 @@ public class Spritzer implements Runnable {
             return 2;
         }
         return 1;
-    }
-
-    @Override
-    public void run() {
-        Looper.prepare();
-        synchronized (mReadySync) {
-            mStarted = true;
-            mSpritzHandler = new SpritzHandler(this);
-        }
-
-        Looper.loop();
-        synchronized (mReadySync) {
-            mStarted = false;
-            mSpritzHandler = null;
-        }
-
     }
 
     protected static class SpritzHandler extends Handler {

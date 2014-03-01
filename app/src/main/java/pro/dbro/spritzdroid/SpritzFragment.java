@@ -35,8 +35,7 @@ public class SpritzFragment extends Fragment {
 
     private void feedEpubToSpritzer(String epubPath) {
         if (mSpritzer == null) {
-            /**** Put an epub in ../../../assets/book/ *****/
-            mSpritzer = new EpubSpritzer(mTextView, "book/sc.epub");
+            mSpritzer = new EpubSpritzer(mTextView, epubPath);
         } else {
             // If the activity was destroyed & recreated, we need to update the TextView reference
             mSpritzer.swapTextView(mTextView);
@@ -72,6 +71,7 @@ public class SpritzFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        /**** Put an epub in ../../../assets/book/ *****/
         feedEpubToSpritzer("book/pp.epub");
         mEventBus = new EventBus();
         mEventBus.register(this);
