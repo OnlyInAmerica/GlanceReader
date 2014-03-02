@@ -7,4 +7,14 @@
         android:title="Speed"
         android:orderInCategory="100"
         app:showAsAction="always" />
+
+    <item android:id="@+id/action_theme"
+        android:title="Theme"
+        android:orderInCategory="100"
+        app:showAsAction="always" />
+
+    <!--<item android:id="@+id/action_open"-->
+        <!--android:title="Open"-->
+        <!--android:orderInCategory="100"-->
+        <!--app:showAsAction="always" />-->
 </menu>

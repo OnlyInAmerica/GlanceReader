@@ -95,7 +95,6 @@ public class Spritzer {
     private void refillWordQueue() {
         mWords.clear();
         mWords.addAll(Arrays.asList(mWordArray));
-        Log.i("mWords", "Added items to mWords: " + mWords.size());
     }
 
     protected void processNextWord() throws InterruptedException {
@@ -111,7 +110,6 @@ public class Spritzer {
                 }
             }
         } else {
-            Log.i("mWords", "mWords is empty");
             mPlaying = false;
             if (mEventBus != null) {
                 mEventBus.post(new SpritzFinishedEvent());
@@ -146,7 +144,6 @@ public class Spritzer {
     private void startTimerThread() {
         synchronized (mPlayingSync) {
             if (!mSpritzThreadStarted) {
-                Log.i("Thread", "Starting new spritz thread");
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -161,7 +158,6 @@ public class Spritzer {
                         }
                         mPlaying = false;
                         mSpritzThreadStarted = false;
-                        Log.i("Thread", "Stopping spritz thread");
 
                     }
                 }).start();
@@ -191,7 +187,6 @@ public class Spritzer {
 
             Spritzer spritzer = mWeakSpritzer.get();
             if (spritzer == null) {
-                Log.w(TAG, "spritzer is null");
                 return;
             }
 

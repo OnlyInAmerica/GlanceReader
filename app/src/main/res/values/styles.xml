@@ -9,4 +9,15 @@
         <item name="android:textColor">@color/pivot_text</item>
     </style>
 
+    <style name="SpritzTextStyle">
+        <item name="android:background">#ffffffff</item>
+        <item name="android:textColor">#ff1b1b1b</item>
+    </style>
+
+    <style name="SpritzTextStyle.Dark">
+        <item name="android:background">#ff171717</item>
+        <item name="android:textColor">#ffdddddd</item>
+    </style>
+
+
 </resources>

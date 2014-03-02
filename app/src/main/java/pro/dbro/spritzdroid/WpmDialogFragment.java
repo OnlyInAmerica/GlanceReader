@@ -5,8 +5,9 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -90,7 +91,9 @@ public class WpmDialogFragment extends DialogFragment {
                         dialog.dismiss();
                     }
                 });
-        return builder.create();
+        Dialog dialog = builder.create();
+        //dialog.getWindow().setBackgroundDrawableResource(R.drawable.fragment_dialog_wpm_bg);
+        return dialog;
     }
 
     public interface OnWpmSelectListener {
