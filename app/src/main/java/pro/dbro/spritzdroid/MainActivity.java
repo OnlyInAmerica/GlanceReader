@@ -1,18 +1,22 @@
 package pro.dbro.spritzdroid;
 
-import android.support.v7.app.ActionBarActivity;
+import android.app.DialogFragment;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements WpmDialogFragment.OnWpmSelectListener{
+
+    private int mWpm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, new SpritzFragment())
+                .replace(R.id.container, new SpritzFragment(), "spritsfrag")
                 .commit();
 
     }
@@ -32,10 +36,21 @@ public class MainActivity extends ActionBarActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_speed) {
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            DialogFragment newFragment = WpmDialogFragment.newInstance(mWpm);
+            newFragment.show(ft, "dialog");
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onWpmSelected(int wpm) {
+        if(((SpritzFragment) getSupportFragmentManager().findFragmentByTag("spritsfrag")).getSpritzer() != null){
+            ((SpritzFragment) getSupportFragmentManager().findFragmentByTag("spritsfrag")).getSpritzer()
+                    .setWpm(wpm);
+        }
+        mWpm = wpm;
+    }
 }

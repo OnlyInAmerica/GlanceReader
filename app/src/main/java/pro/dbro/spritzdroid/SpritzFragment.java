@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import com.google.common.eventbus.Subscribe;
 import pro.dbro.spritzdroid.events.SpritzFinishedEvent;
 
 public class SpritzFragment extends Fragment {
+    private static final String TAG = "SpritzFragment";
 
     private static EpubSpritzer mSpritzer;
     private TextView mTextView;
@@ -36,12 +38,7 @@ public class SpritzFragment extends Fragment {
     }
 
     private void feedEpubToSpritzer(Uri epubPath) {
-        if (mSpritzer == null) {
-            mSpritzer = new EpubSpritzer(mTextView, epubPath);
-        } else {
-            // If the activity was destroyed & recreated, we need to update the TextView reference
-            mSpritzer.swapTextView(mTextView);
-        }
+        mSpritzer = new EpubSpritzer(mTextView, epubPath);
     }
 
     @Override
@@ -76,7 +73,9 @@ public class SpritzFragment extends Fragment {
     public void onStart() {
         super.onStart();
         if (mSpritzer == null) {
-            mTextView.setText("Touch to Select .epub");
+            mTextView.setText(getActivity().getString(R.string.select_epub));
+        } else {
+            mSpritzer.swapTextView(mTextView);
         }
 
         mEventBus = new EventBus();
@@ -98,6 +97,10 @@ public class SpritzFragment extends Fragment {
     @Subscribe
     public void onSpritzFinished(SpritzFinishedEvent event) {
 
+    }
+
+    public EpubSpritzer getSpritzer(){
+        return mSpritzer;
     }
 
     private static final int SELECT_EPUB = 42;
@@ -125,7 +128,7 @@ public class SpritzFragment extends Fragment {
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == SELECT_EPUB) {
+        if (requestCode == SELECT_EPUB && data != null) {
             Uri uri = data.getData();
             feedEpubToSpritzer(uri);
             mTextView.setText("Touch to Start");

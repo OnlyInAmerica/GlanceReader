@@ -1,6 +1,5 @@
 package pro.dbro.spritzdroid;
 
-import android.content.res.AssetManager;
 import android.net.Uri;
 import android.text.Html;
 import android.util.Log;
@@ -15,6 +14,8 @@ import nl.siegmann.epublib.epub.EpubReader;
 /**
  * Created by davidbrodsky on 2/28/14.
  */
+// TODO: Save epub title : chapter-word
+//
 public class EpubSpritzer extends Spritzer {
 
     private Book mBook;
