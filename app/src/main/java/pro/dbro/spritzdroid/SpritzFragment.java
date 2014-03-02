@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,7 +39,11 @@ public class SpritzFragment extends Fragment {
     }
 
     private void feedEpubToSpritzer(Uri epubPath) {
-        mSpritzer = new EpubSpritzer(mTextView, epubPath);
+        if(mSpritzer == null){
+            mSpritzer = new EpubSpritzer(mTextView, epubPath);
+        } else {
+            mSpritzer.setEpubPath(epubPath);
+        }
     }
 
     @Override
@@ -50,7 +55,7 @@ public class SpritzFragment extends Fragment {
         mTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mSpritzer != null) {
+                if (mSpritzer != null && mSpritzer.bookSelected()) {
                     if (mSpritzer.isPlaying()) {
                         mSpritzer.pause();
                     } else {
@@ -136,8 +141,6 @@ public class SpritzFragment extends Fragment {
         if (requestCode == SELECT_EPUB && data != null) {
             Uri uri = data.getData();
             feedEpubToSpritzer(uri);
-            mTextView.setText("Touch to Start");
-
         }
     }
 

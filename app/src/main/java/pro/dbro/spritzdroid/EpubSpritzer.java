@@ -2,10 +2,14 @@ package pro.dbro.spritzdroid;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.text.Html;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +18,9 @@ import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.epub.EpubReader;
 
 /**
- * Created by davidbrodsky on 2/28/14.
+ * Parse an .epub into a Queue of words
+ * and display them on a TextView at
+ * a given WPM
  */
 // TODO: Save epub title : chapter-word
 // TODO: Save State for multiple books
@@ -30,18 +36,34 @@ public class EpubSpritzer extends Spritzer {
         super(target);
         mChapter = 0;
 
-        // Load Book and parse first "chapter"
+        openEpub(epubPath);
+        mTarget.getContext().getString(R.string.touch_to_start);
+    }
+
+    public void setEpubPath(Uri epubPath) {
+        pause();
+        openEpub(epubPath);
+        mTarget.setText(mTarget.getContext().getString(R.string.touch_to_start));
+    }
+
+    public void openEpub(Uri epubUri) {
         try {
-            //AssetManager assetManager = target.getContext().getAssets();
-            //InputStream epubInputStream = assetManager.open(epubPath);
-            InputStream epubInputStream = target.getContext().getContentResolver().openInputStream(epubPath);
+            InputStream epubInputStream = mTarget.getContext().getContentResolver().openInputStream(epubUri);
+            String epubPath = FileUtils.getPath(mTarget.getContext(), epubUri);
+            if(epubPath == null || !epubPath.contains("epub")){
+                reportFileUnsupported();
+                return;
+            }
             mBook = (new EpubReader()).readEpub(epubInputStream);
             mMaxChapter = mBook.getSpine().getSpineReferences().size();
             restoreState();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    public boolean bookSelected(){
+        return mBook != null;
     }
 
     protected void processNextWord() throws InterruptedException {
@@ -72,7 +94,7 @@ public class EpubSpritzer extends Spritzer {
     private void saveState() {
         SharedPreferences.Editor editor = mTarget.getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit();
         editor.putInt("Chapter", mChapter)
-                .putInt("Word", mWordArray.length - mWords.size())
+                .putInt("Word", mWordArray.length - mWordQueue.size())
                 .putString("Title", mBook.getTitle())
                 .apply();
     }
@@ -83,12 +105,43 @@ public class EpubSpritzer extends Spritzer {
             mChapter = prefs.getInt("Chapter", 0);
             setText(loadCleanStringFromChapter(mChapter));
             int oldSize = prefs.getInt("Word", 0);
-            while (mWords.size() > oldSize) {
-                mWords.remove();
+            while (mWordQueue.size() > oldSize) {
+                mWordQueue.remove();
             }
         } else {
             mChapter = 0;
             setText(loadCleanStringFromChapter(mChapter));
         }
+    }
+
+    private void reportFileUnsupported() {
+        Toast.makeText(mTarget.getContext(), mTarget.getContext().getString(R.string.unsupported_file), Toast.LENGTH_LONG).show();
+    }
+
+    private String getDocPathFromContentUri(Uri uri) {
+        String wholeID = DocumentsContract.getDocumentId(uri);
+
+        // Split at colon, use second item in the array
+        String id = wholeID.split(":")[1];
+
+        String[] column = {MediaStore.Images.Media.DATA};
+
+        // where id is equal to
+        String sel = MediaStore.Images.Media._ID + "=?";
+
+        Cursor cursor = mTarget.getContext().getContentResolver().
+                query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        column, sel, new String[]{id}, null);
+
+        String filePath = "";
+
+        int columnIndex = cursor.getColumnIndex(column[0]);
+
+        if (cursor.moveToFirst()) {
+            filePath = cursor.getString(columnIndex);
+        }
+
+        cursor.close();
+        return filePath;
     }
 }

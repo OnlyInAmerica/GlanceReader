@@ -1,20 +1,23 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="pro.dbro.spritzdroid.MainActivity" >
-    
-    <item android:id="@+id/action_speed"
+    tools:context="pro.dbro.spritzdroid.MainActivity">
+
+    <item
+        android:id="@+id/action_speed"
         android:title="Speed"
         android:orderInCategory="100"
         app:showAsAction="always" />
 
-    <item android:id="@+id/action_theme"
+    <item
+        android:id="@+id/action_theme"
         android:title="Theme"
         android:orderInCategory="100"
         app:showAsAction="always" />
 
-    <!--<item android:id="@+id/action_open"-->
-        <!--android:title="Open"-->
-        <!--android:orderInCategory="100"-->
-        <!--app:showAsAction="always" />-->
+    <item
+        android:id="@+id/action_open"
+        android:title="Open"
+        android:orderInCategory="100"
+        app:showAsAction="always" />
 </menu>

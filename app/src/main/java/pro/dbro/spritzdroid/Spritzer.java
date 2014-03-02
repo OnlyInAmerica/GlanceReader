@@ -5,7 +5,6 @@ import android.os.Message;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.TextAppearanceSpan;
-import android.util.Log;
 import android.widget.TextView;
 
 import com.google.common.eventbus.EventBus;
@@ -17,14 +16,16 @@ import java.util.Arrays;
 import pro.dbro.spritzdroid.events.SpritzFinishedEvent;
 
 /**
- * Created by davidbrodsky on 2/28/14.
+ * Spritzer parses a String into a Queue
+ * of words, and displays them one-by-one
+ * onto a TextView at a given WPM.
  */
 public class Spritzer {
     protected static final String TAG = "Spritzer";
     protected static final int MSG_PRINT_WORD = 1;
 
-    protected String[] mWordArray;
-    protected ArrayDeque<String> mWords;
+    protected String[] mWordArray;                  // The current list of words
+    protected ArrayDeque<String> mWordQueue;        // The queue being actively displayed
     protected TextView mTarget;
     protected int mWPM;
     protected Handler mSpritzHandler;
@@ -42,6 +43,7 @@ public class Spritzer {
     }
 
     public void setText(String input) {
+        pause();
         createWordArrayFromString(input);
         refillWordQueue();
     }
@@ -57,7 +59,7 @@ public class Spritzer {
     }
 
     protected void init() {
-        mWords = new ArrayDeque<String>();
+        mWordQueue = new ArrayDeque<String>();
         mWPM = 600;
         mPlaying = false;
         mPlayingRequested = false;
@@ -80,7 +82,7 @@ public class Spritzer {
         if (mPlaying || mWordArray == null) {
             return;
         }
-        if (mWords.isEmpty()) {
+        if (mWordQueue.isEmpty()) {
             refillWordQueue();
         }
 
@@ -93,13 +95,13 @@ public class Spritzer {
     }
 
     private void refillWordQueue() {
-        mWords.clear();
-        mWords.addAll(Arrays.asList(mWordArray));
+        mWordQueue.clear();
+        mWordQueue.addAll(Arrays.asList(mWordArray));
     }
 
     protected void processNextWord() throws InterruptedException {
-        if (!mWords.isEmpty()) {
-            String word = mWords.remove();
+        if (!mWordQueue.isEmpty()) {
+            String word = mWordQueue.remove();
             mSpritzHandler.sendMessage(mSpritzHandler.obtainMessage(MSG_PRINT_WORD, word));
             Thread.sleep(getInterWordDelay() * delayMultiplierForWord(word));
             // If word is end of a sentence, add three blanks
@@ -118,7 +120,9 @@ public class Spritzer {
     }
 
     private void printLastWord() {
-        printWord(mWordArray[mWordArray.length - 1]);
+        if(mWordArray != null){
+            printWord(mWordArray[mWordArray.length - 1]);
+        }
     }
 
     private void printWord(String word) {
