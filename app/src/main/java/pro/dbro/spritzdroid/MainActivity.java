@@ -55,9 +55,10 @@ public class MainActivity extends ActionBarActivity implements WpmDialogFragment
                 applyDarkTheme();
             }
             mStyleDark = !mStyleDark;
-        } else if (id == R.id.action_open) {
-            ((SpritzFragment) getSupportFragmentManager().findFragmentByTag("spritsfrag")).chooseEpub();
         }
+//        } else if (id == R.id.action_open) {
+//            ((SpritzFragment) getSupportFragmentManager().findFragmentByTag("spritsfrag")).chooseEpub();
+//        }
         return super.onOptionsItemSelected(item);
     }
 

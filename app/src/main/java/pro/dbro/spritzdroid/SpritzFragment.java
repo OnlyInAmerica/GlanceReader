@@ -3,9 +3,9 @@ package pro.dbro.spritzdroid;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -99,7 +99,7 @@ public class SpritzFragment extends Fragment {
 
     }
 
-    public EpubSpritzer getSpritzer(){
+    public EpubSpritzer getSpritzer() {
         return mSpritzer;
     }
 
@@ -112,7 +112,12 @@ public class SpritzFragment extends Fragment {
 
         // ACTION_OPEN_DOCUMENT is the intent to choose a file via the system's file
         // browser.
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        Intent intent;
+        if (Build.VERSION.SDK_INT >= 19) {
+            intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        } else {
+            intent = new Intent(Intent.ACTION_GET_CONTENT);
+        }
 
         // Filter to only show results that can be "opened", such as a
         // file (as opposed to a list of contacts or timezones)
