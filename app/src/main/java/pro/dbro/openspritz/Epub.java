@@ -1,4 +1,4 @@
-package pro.dbro.spritzdroid;
+package pro.dbro.openspritz;
 
 import android.util.Log;
 

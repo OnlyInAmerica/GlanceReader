@@ -1,11 +1,8 @@
-package pro.dbro.spritzdroid;
+package pro.dbro.openspritz;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.net.Uri;
-import android.provider.DocumentsContract;
-import android.provider.MediaStore;
 import android.text.Html;
 import android.util.Log;
 import android.widget.TextView;

@@ -1,4 +1,4 @@
-package pro.dbro.spritzdroid;
+package pro.dbro.openspritz;
 
 import android.app.ActionBar;
 import android.app.DialogFragment;

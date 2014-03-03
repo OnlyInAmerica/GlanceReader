@@ -1,4 +1,4 @@
-package pro.dbro.spritzdroid;
+package pro.dbro.openspritz;
 
 import android.os.Handler;
 import android.os.Message;
@@ -13,7 +13,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 
-import pro.dbro.spritzdroid.events.SpritzFinishedEvent;
+import pro.dbro.openspritz.events.SpritzFinishedEvent;
 
 /**
  * Spritzer parses a String into a Queue

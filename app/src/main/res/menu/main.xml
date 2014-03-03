@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="pro.dbro.spritzdroid.MainActivity">
+    tools:context="pro.dbro.openspritz.MainActivity">
 
     <item
         android:id="@+id/action_speed"
