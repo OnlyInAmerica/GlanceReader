@@ -60,7 +60,7 @@ public class Spritzer {
 
     protected void init() {
         mWordQueue = new ArrayDeque<String>();
-        mWPM = 600;
+        mWPM = 500;
         mPlaying = false;
         mPlayingRequested = false;
         mSpritzThreadStarted = false;

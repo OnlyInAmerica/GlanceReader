@@ -8,7 +8,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
@@ -24,7 +23,7 @@ public class MainActivity extends ActionBarActivity implements WpmDialogFragment
     protected void onCreate(Bundle savedInstanceState) {
         int theme = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
                 .getInt("THEME", 0);
-        switch(theme){
+        switch (theme) {
             case THEME_LIGHT:
                 setTheme(R.style.Light);
                 break;
@@ -36,6 +35,8 @@ public class MainActivity extends ActionBarActivity implements WpmDialogFragment
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
         ActionBar actionBar = getActionBar();
         actionBar.setTitle("");
+        actionBar.setDisplayShowHomeEnabled(false);
+        actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         setContentView(R.layout.activity_main);
 
@@ -63,6 +64,8 @@ public class MainActivity extends ActionBarActivity implements WpmDialogFragment
             if (mWpm == 0) {
                 if (((SpritzFragment) getSupportFragmentManager().findFragmentByTag("spritsfrag")).getSpritzer() != null) {
                     mWpm = ((SpritzFragment) getSupportFragmentManager().findFragmentByTag("spritsfrag")).getSpritzer().mWPM;
+                } else {
+                    mWpm = 500;
                 }
             }
             FragmentTransaction ft = getFragmentManager().beginTransaction();
@@ -97,8 +100,7 @@ public class MainActivity extends ActionBarActivity implements WpmDialogFragment
                 .putInt("THEME", THEME_DARK)
                 .commit();
         recreate();
-//        ((TextView) findViewById(R.id.spritzText)).setTextColor(Color.WHITE);
-//        ((TextView) findViewById(R.id.spritzText)).setBackgroundColor(Color.BLACK);
+
     }
 
     private void applyLightTheme() {
@@ -106,7 +108,5 @@ public class MainActivity extends ActionBarActivity implements WpmDialogFragment
                 .putInt("THEME", THEME_LIGHT)
                 .commit();
         recreate();
-//        ((TextView) findViewById(R.id.spritzText)).setTextColor(Color.BLACK);
-//        ((TextView) findViewById(R.id.spritzText)).setBackgroundColor(Color.WHITE);
     }
 }

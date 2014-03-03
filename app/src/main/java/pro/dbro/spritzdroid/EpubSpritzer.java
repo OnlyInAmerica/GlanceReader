@@ -96,6 +96,7 @@ public class EpubSpritzer extends Spritzer {
         editor.putInt("Chapter", mChapter)
                 .putInt("Word", mWordArray.length - mWordQueue.size())
                 .putString("Title", mBook.getTitle())
+                .putInt("Wpm", mWPM)
                 .apply();
     }
 
@@ -105,6 +106,7 @@ public class EpubSpritzer extends Spritzer {
             mChapter = prefs.getInt("Chapter", 0);
             setText(loadCleanStringFromChapter(mChapter));
             int oldSize = prefs.getInt("Word", 0);
+            setWpm(prefs.getInt("Wpm", 500));
             while (mWordQueue.size() > oldSize) {
                 mWordQueue.remove();
             }
@@ -118,30 +120,4 @@ public class EpubSpritzer extends Spritzer {
         Toast.makeText(mTarget.getContext(), mTarget.getContext().getString(R.string.unsupported_file), Toast.LENGTH_LONG).show();
     }
 
-    private String getDocPathFromContentUri(Uri uri) {
-        String wholeID = DocumentsContract.getDocumentId(uri);
-
-        // Split at colon, use second item in the array
-        String id = wholeID.split(":")[1];
-
-        String[] column = {MediaStore.Images.Media.DATA};
-
-        // where id is equal to
-        String sel = MediaStore.Images.Media._ID + "=?";
-
-        Cursor cursor = mTarget.getContext().getContentResolver().
-                query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                        column, sel, new String[]{id}, null);
-
-        String filePath = "";
-
-        int columnIndex = cursor.getColumnIndex(column[0]);
-
-        if (cursor.moveToFirst()) {
-            filePath = cursor.getString(columnIndex);
-        }
-
-        cursor.close();
-        return filePath;
-    }
 }

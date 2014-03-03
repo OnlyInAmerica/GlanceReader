@@ -5,19 +5,22 @@
 
     <item
         android:id="@+id/action_speed"
-        android:title="Speed"
+        android:icon="?attr/speed_icon"
+        android:title="@string/set_wpm"
         android:orderInCategory="100"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/action_theme"
-        android:title="Theme"
+        android:icon="?attr/theme_icon"
+        android:title="@string/theme"
         android:orderInCategory="100"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/action_open"
-        android:title="Open"
+        android:icon="?attr/book_icon"
+        android:title="@string/open_epub"
         android:orderInCategory="100"
         app:showAsAction="always" />
 </menu>

@@ -5,10 +5,10 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -18,8 +18,12 @@ import android.widget.TextView;
 public class WpmDialogFragment extends DialogFragment {
 
     public static final int MAX_WPM = 1800;
+    public static final int WHOAH_THRESHOLD_WPM = 1200;
     public static final int MIN_WPM = 60;
 
+    private View mView;
+    private Animation mCurrentAnimation;
+    private boolean mAnimationRunning;
     private SeekBar mWpmSeek;
     private TextView mWpmLabel;
     private OnWpmSelectListener mOnWpmSelectListener;
@@ -51,6 +55,7 @@ public class WpmDialogFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mWpm = Math.max(MIN_WPM, getArguments().getInt("wpm"));
+        mAnimationRunning = false;
     }
 
     @Override
@@ -69,6 +74,12 @@ public class WpmDialogFragment extends DialogFragment {
                 mWpm = Math.max(MIN_WPM, (int) ((progress / 100.0) * MAX_WPM));
                 mWpmLabel.setText(mWpm + " WPM");
                 mOnWpmSelectListener.onWpmSelected(mWpm);
+
+                if (mWpm >= WHOAH_THRESHOLD_WPM + 50 && !mAnimationRunning) {
+                    setTrippin(true);
+                } else if (mWpm <= WHOAH_THRESHOLD_WPM - 50 && mAnimationRunning) {
+                    setTrippin(false);
+                }
             }
 
             @Override
@@ -83,7 +94,7 @@ public class WpmDialogFragment extends DialogFragment {
         });
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Set WPM")
+        builder.setTitle(getActivity().getString(R.string.set_wpm))
                 .setView(v)
                 .setPositiveButton("Done", new DialogInterface.OnClickListener() {
                     @Override
@@ -91,9 +102,25 @@ public class WpmDialogFragment extends DialogFragment {
                         dialog.dismiss();
                     }
                 });
-        Dialog dialog = builder.create();
-        //dialog.getWindow().setBackgroundDrawableResource(R.drawable.fragment_dialog_wpm_bg);
-        return dialog;
+        mView = v;
+        return builder.create();
+    }
+
+    private void setTrippin(boolean beTrippin){
+        if(beTrippin){
+            getDialog().setTitle(getActivity().getString(R.string.whoa_dude));
+            mAnimationRunning = true;
+            if (mCurrentAnimation == null) {
+                mCurrentAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.wobble);
+                mView.startAnimation(mCurrentAnimation);
+            } else {
+                mView.startAnimation(mCurrentAnimation);
+            }
+        } else {
+            getDialog().setTitle(getActivity().getString(R.string.set_wpm));
+            mView.clearAnimation();
+            mAnimationRunning = false;
+        }
     }
 
     public interface OnWpmSelectListener {
