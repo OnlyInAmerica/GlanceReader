@@ -1,4 +1,4 @@
-apply plugin: 'android'
+apply plugin: 'android-library'
 
 android {
     compileSdkVersion 19
@@ -10,19 +10,14 @@ android {
         versionCode 1
         versionName "1.0"
     }
-    buildTypes {
-        release {
-            runProguard false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
-        }
+    release {
+        runProguard false
+        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
     }
 }
 
 dependencies {
     compile 'com.android.support:appcompat-v7:+'
-    compile 'org.slf4j:slf4j-android:1.7.6'
-    compile 'com.android.support:support-v4:+'
-
-    compile project(":lib")
+    compile 'com.google.guava:guava:16.0.1'
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }

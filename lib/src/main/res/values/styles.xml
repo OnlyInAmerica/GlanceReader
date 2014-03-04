@@ -1,0 +1,7 @@
+<resources>
+
+    <style name="PivotLetter">
+        <item name="android:textColor">@color/pivot_text</item>
+    </style>
+
+</resources>
