@@ -5,6 +5,7 @@ import android.os.Message;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.TextAppearanceSpan;
+import android.util.Log;
 import android.widget.TextView;
 
 import com.google.common.eventbus.EventBus;
@@ -22,6 +23,7 @@ import pro.dbro.openspritz.events.SpritzFinishedEvent;
  */
 public class Spritzer {
     protected static final String TAG = "Spritzer";
+    protected static final boolean VERBOSE = false;
     protected static final int MSG_PRINT_WORD = 1;
 
     protected String[] mWordArray;                  // The current list of words
@@ -43,7 +45,6 @@ public class Spritzer {
     }
 
     public void setText(String input) {
-        pause();
         createWordArrayFromString(input);
         refillWordQueue();
     }
@@ -112,7 +113,6 @@ public class Spritzer {
                 }
             }
         } else {
-            mPlaying = false;
             if (mEventBus != null) {
                 mEventBus.post(new SpritzFinishedEvent());
             }
@@ -151,15 +151,21 @@ public class Spritzer {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        if (VERBOSE) Log.i(TAG, "Starting spritzThread with queue length " + mWordQueue.size());
                         mPlaying = true;
                         mSpritzThreadStarted = true;
                         while (mPlayingRequested) {
                             try {
                                 processNextWord();
+                                if(mWordQueue.isEmpty()){
+                                    if (VERBOSE) Log.i(TAG, "Queue is empty after processNextWord. Pausing");
+                                    mPlayingRequested = false;
+                                }
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
                         }
+                        if (VERBOSE) Log.i(TAG, "Stopping spritzThread");
                         mPlaying = false;
                         mSpritzThreadStarted = false;
 

@@ -65,8 +65,7 @@ public class EpubSpritzer extends Spritzer {
 
     protected void processNextWord() throws InterruptedException {
         super.processNextWord();
-        if (!mPlaying && mPlayingRequested && (mChapter < mMaxChapter)) {
-            mPlaying = true;
+        if (mPlaying && mPlayingRequested && mWordQueue.isEmpty() && (mChapter < mMaxChapter)) {
             printNextChapter();
         }
     }
@@ -74,7 +73,7 @@ public class EpubSpritzer extends Spritzer {
     private void printNextChapter() {
         setText(loadCleanStringFromChapter(mChapter++));
         saveState();
-        start();
+        if (VERBOSE) Log.i(TAG, "starting next chapter: " + mChapter);
     }
 
     private String loadCleanStringFromChapter(int chapter) {
