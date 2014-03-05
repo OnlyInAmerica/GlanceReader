@@ -13,6 +13,8 @@ import java.io.InputStream;
 
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.epub.EpubReader;
+import pro.dbro.openspritz.events.NextChapterEvent;
+import pro.dbro.openspritz.events.SpritzFinishedEvent;
 
 /**
  * Parse an .epub into a Queue of words
@@ -47,7 +49,7 @@ public class EpubSpritzer extends Spritzer {
         try {
             InputStream epubInputStream = mTarget.getContext().getContentResolver().openInputStream(epubUri);
             String epubPath = FileUtils.getPath(mTarget.getContext(), epubUri);
-            if(epubPath == null || !epubPath.contains("epub")){
+            if (epubPath == null || !epubPath.contains("epub")) {
                 reportFileUnsupported();
                 return;
             }
@@ -59,7 +61,19 @@ public class EpubSpritzer extends Spritzer {
         }
     }
 
-    public boolean bookSelected(){
+    public Book getBook() {
+        return mBook;
+    }
+
+    public int getCurrentChapter() {
+        return mChapter;
+    }
+
+    public int getMaxChapter() {
+        return mMaxChapter;
+    }
+
+    public boolean bookSelected() {
         return mBook != null;
     }
 
@@ -67,6 +81,9 @@ public class EpubSpritzer extends Spritzer {
         super.processNextWord();
         if (mPlaying && mPlayingRequested && mWordQueue.isEmpty() && (mChapter < mMaxChapter)) {
             printNextChapter();
+            if(mEventBus != null){
+                mEventBus.post(new NextChapterEvent(mChapter));
+            }
         }
     }
 

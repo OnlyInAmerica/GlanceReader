@@ -67,6 +67,13 @@ public class Spritzer {
         mSpritzThreadStarted = false;
     }
 
+    public int getMinutesRemainingInQueue() {
+        if (mWordQueue.size() == 0) {
+            return 0;
+        }
+        return mWordQueue.size() / mWPM;
+    }
+
     public void setWpm(int wpm) {
         mWPM = wpm;
     }
@@ -120,7 +127,7 @@ public class Spritzer {
     }
 
     private void printLastWord() {
-        if(mWordArray != null){
+        if (mWordArray != null) {
             printWord(mWordArray[mWordArray.length - 1]);
         }
     }
@@ -151,14 +158,16 @@ public class Spritzer {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        if (VERBOSE) Log.i(TAG, "Starting spritzThread with queue length " + mWordQueue.size());
+                        if (VERBOSE)
+                            Log.i(TAG, "Starting spritzThread with queue length " + mWordQueue.size());
                         mPlaying = true;
                         mSpritzThreadStarted = true;
                         while (mPlayingRequested) {
                             try {
                                 processNextWord();
-                                if(mWordQueue.isEmpty()){
-                                    if (VERBOSE) Log.i(TAG, "Queue is empty after processNextWord. Pausing");
+                                if (mWordQueue.isEmpty()) {
+                                    if (VERBOSE)
+                                        Log.i(TAG, "Queue is empty after processNextWord. Pausing");
                                     mPlayingRequested = false;
                                 }
                             } catch (InterruptedException e) {

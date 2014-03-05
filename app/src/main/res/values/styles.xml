@@ -10,6 +10,8 @@
         <item name="theme_icon">@drawable/ic_theme_blk</item>
         <item name="speed_icon">@drawable/ic_gauge_blk</item>
         <item name="book_icon">@drawable/ic_book_blk</item>
+        <item name="subdued_text">@color/subdued_text</item>
+        <item name="ultra_subdued_text">@color/ultra_subdued_text</item>
     </style>
 
     <style name="Dark" parent="Theme.AppCompat">
@@ -20,23 +22,38 @@
         <item name="theme_icon">@drawable/ic_theme_white</item>
         <item name="speed_icon">@drawable/ic_gauge_white</item>
         <item name="book_icon">@drawable/ic_book_white</item>
+        <item name="subdued_text">@color/subdued_text_dark</item>
+        <item name="ultra_subdued_text">@color/ultra_subdued_text_dark</item>
     </style>
 
     <style name="PivotLetter">
         <item name="android:textColor">@color/pivot_text</item>
     </style>
-
+<!--
     <style name="SpritzTextStyle">
-        <item name="android:background">#ffffffff</item>
-        <item name="android:textColor">#ff1b1b1b</item>
+        <item name="android:background">@color/spritz_bg</item>
+        <item name="android:textColor">@color/spritz_text</item>
     </style>
 
     <style name="SpritzTextStyle.Dark">
-        <item name="android:background">#ff171717</item>
-        <item name="android:textColor">#ffdddddd</item>
+        <item name="android:background">@color/spritz_bg_dark</item>
+        <item name="android:textColor">@color/spritz_text_dark</item>
+    </style>
+-->
+    <style name="SubduedTextStyle">
+        <item name="android:textColor">?attr/subdued_text</item>
+    </style>
+
+    <style name="MinutesToGo">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">italic</item>
+        <item name="android:textColor">?attr/ultra_subdued_text</item>
     </style>
 
     <attr name="theme_icon" format="reference" />
     <attr name="speed_icon" format="reference" />
     <attr name="book_icon" format="reference" />
+
+    <attr name="subdued_text" format="reference" />
+    <attr name="ultra_subdued_text" format="reference" />
 </resources>
