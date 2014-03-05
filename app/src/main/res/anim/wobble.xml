@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <rotate xmlns:android="http://schemas.android.com/apk/res/android"
+        android:duration="100"
+        android:fromDegrees="-1"
+        android:toDegrees="1"
+        android:pivotX="50%"
+        android:pivotY="50%"
+        android:repeatCount="infinite"
+        android:repeatMode="reverse" />
+
+    <translate
+        android:duration="100"
+        android:fromYDelta="-2"
+        android:toYDelta="-4"
+        android:fromXDelta="-4"
+        android:toXDelta="2"
+        android:interpolator="@android:interpolator/anticipate_overshoot"
+        android:repeatCount="infinite"
+        android:repeatMode="reverse" />
+
+</set>

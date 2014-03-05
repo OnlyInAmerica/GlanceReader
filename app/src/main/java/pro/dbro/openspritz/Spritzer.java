@@ -1,12 +1,10 @@
-package pro.dbro.spritzdroid;
+package pro.dbro.openspritz;
 
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.TextAppearanceSpan;
-import android.util.Log;
 import android.widget.TextView;
 
 import com.google.common.eventbus.EventBus;
@@ -15,23 +13,26 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 
-import pro.dbro.spritzdroid.events.SpritzFinishedEvent;
+import pro.dbro.openspritz.events.SpritzFinishedEvent;
 
 /**
- * Created by davidbrodsky on 2/28/14.
+ * Spritzer parses a String into a Queue
+ * of words, and displays them one-by-one
+ * onto a TextView at a given WPM.
  */
-public class Spritzer implements Runnable {
+public class Spritzer {
     protected static final String TAG = "Spritzer";
     protected static final int MSG_PRINT_WORD = 1;
 
-    protected String[] mWordArray;
-    protected ArrayDeque<String> mWords;
+    protected String[] mWordArray;                  // The current list of words
+    protected ArrayDeque<String> mWordQueue;        // The queue being actively displayed
     protected TextView mTarget;
     protected int mWPM;
     protected Handler mSpritzHandler;
-    protected Object mReadySync = new Object();
+    protected Object mPlayingSync = new Object();
     protected boolean mPlaying;
-    protected boolean mStarted;
+    protected boolean mPlayingRequested;
+    protected boolean mSpritzThreadStarted;
 
     protected EventBus mEventBus;
 
@@ -41,12 +42,13 @@ public class Spritzer implements Runnable {
         mSpritzHandler = new SpritzHandler(this);
     }
 
-    public void setText(String input){
+    public void setText(String input) {
+        pause();
         createWordArrayFromString(input);
         refillWordQueue();
     }
 
-    public void setEventBus(EventBus bus){
+    public void setEventBus(EventBus bus) {
         mEventBus = bus;
     }
 
@@ -57,19 +59,20 @@ public class Spritzer implements Runnable {
     }
 
     protected void init() {
-        mWords = new ArrayDeque<String>();
-        mWPM = 600;
+        mWordQueue = new ArrayDeque<String>();
+        mWPM = 500;
         mPlaying = false;
-        mStarted = false;
+        mPlayingRequested = false;
+        mSpritzThreadStarted = false;
     }
 
     public void setWpm(int wpm) {
         mWPM = wpm;
     }
 
-    public void swapTextView(TextView target){
+    public void swapTextView(TextView target) {
         mTarget = target;
-        if(!mPlaying){
+        if (!mPlaying) {
             printLastWord();
         }
 
@@ -79,26 +82,26 @@ public class Spritzer implements Runnable {
         if (mPlaying || mWordArray == null) {
             return;
         }
-        if (mWords.isEmpty()) {
+        if (mWordQueue.isEmpty()) {
             refillWordQueue();
         }
 
-        mPlaying = true;
+        mPlayingRequested = true;
         startTimerThread();
     }
 
-    private int getInterWordDelay(){
+    private int getInterWordDelay() {
         return 60000 / mWPM;
     }
 
     private void refillWordQueue() {
-        mWords.clear();
-        mWords.addAll(Arrays.asList(mWordArray));
+        mWordQueue.clear();
+        mWordQueue.addAll(Arrays.asList(mWordArray));
     }
 
     protected void processNextWord() throws InterruptedException {
-        if (!mWords.isEmpty()) {
-            String word = mWords.remove();
+        if (!mWordQueue.isEmpty()) {
+            String word = mWordQueue.remove();
             mSpritzHandler.sendMessage(mSpritzHandler.obtainMessage(MSG_PRINT_WORD, word));
             Thread.sleep(getInterWordDelay() * delayMultiplierForWord(word));
             // If word is end of a sentence, add three blanks
@@ -110,14 +113,16 @@ public class Spritzer implements Runnable {
             }
         } else {
             mPlaying = false;
-            if(mEventBus != null){
+            if (mEventBus != null) {
                 mEventBus.post(new SpritzFinishedEvent());
             }
         }
     }
 
-    private void printLastWord(){
-        printWord(mWordArray[mWordArray.length-1]);
+    private void printLastWord() {
+        if(mWordArray != null){
+            printWord(mWordArray[mWordArray.length - 1]);
+        }
     }
 
     private void printWord(String word) {
@@ -133,7 +138,7 @@ public class Spritzer implements Runnable {
     }
 
     public void pause() {
-        mPlaying = false;
+        mPlayingRequested = false;
     }
 
     public boolean isPlaying() {
@@ -141,47 +146,35 @@ public class Spritzer implements Runnable {
     }
 
     private void startTimerThread() {
-        if (!mStarted) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    mStarted = true;
-                    while (mPlaying) {
-                        try {
-                            processNextWord();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+        synchronized (mPlayingSync) {
+            if (!mSpritzThreadStarted) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mPlaying = true;
+                        mSpritzThreadStarted = true;
+                        while (mPlayingRequested) {
+                            try {
+                                processNextWord();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
                         }
-                    }
-                    mStarted = false;
+                        mPlaying = false;
+                        mSpritzThreadStarted = false;
 
-                }
-            }).start();
+                    }
+                }).start();
+            }
         }
     }
 
     private int delayMultiplierForWord(String word) {
         // double rest if length > 6 or contains (.,!?)
-        if (word.length() > 6 || word.contains(",") || word.contains(":") || word.contains(";") || word.contains(".") || word.contains("?") || word.contains("!") || word.contains("\"") ) {
+        if (word.length() > 6 || word.contains(",") || word.contains(":") || word.contains(";") || word.contains(".") || word.contains("?") || word.contains("!") || word.contains("\"")) {
             return 2;
         }
         return 1;
-    }
-
-    @Override
-    public void run() {
-        Looper.prepare();
-        synchronized (mReadySync) {
-            mStarted = true;
-            mSpritzHandler = new SpritzHandler(this);
-        }
-
-        Looper.loop();
-        synchronized (mReadySync) {
-            mStarted = false;
-            mSpritzHandler = null;
-        }
-
     }
 
     protected static class SpritzHandler extends Handler {
@@ -198,7 +191,6 @@ public class Spritzer implements Runnable {
 
             Spritzer spritzer = mWeakSpritzer.get();
             if (spritzer == null) {
-                Log.w(TAG, "spritzer is null");
                 return;
             }
 

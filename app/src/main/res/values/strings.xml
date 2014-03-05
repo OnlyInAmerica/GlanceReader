@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">SpritzDroid</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="app_name">OpenSpritz</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="select_epub">Touch to Select .epub</string>
+    <string name="touch_to_start">Touch to Start</string>
+    <string name="unsupported_file">Unsupported file.</string>
+    <string name="set_wpm">Set WPM</string>
+    <string name="whoa_dude">Whoaaa dude</string>
+    <string name="theme">Toggle Light/Dark Theme</string>
+    <string name="open_epub">Open epub</string>
 
 </resources>
