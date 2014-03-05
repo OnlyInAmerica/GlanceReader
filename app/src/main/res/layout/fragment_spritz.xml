@@ -5,6 +5,20 @@
     tools:context="pro.dbro.openspritz.SpritzFragment">
 
     <TextView
+        android:id="@+id/topGuide"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:focusableInTouchMode="true"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:typeface="monospace"
+        android:textColor="#DDDDDD"
+        android:text="―――――――――ф―――――――――"
+        android:textSize="30sp"
+        android:paddingBottom="90sp"/>
+
+    <TextView
         android:id="@+id/spritzText"
         android:keepScreenOn="true"
         android:layout_width="match_parent"
@@ -15,5 +29,19 @@
         android:gravity="center"
         android:typeface="monospace"
         android:textSize="30sp"/>
+
+    <TextView
+        android:id="@+id/bottomGuide"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:focusableInTouchMode="true"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:typeface="monospace"
+        android:textColor="#DDDDDD"
+        android:text="―――――――――――――――――――"
+        android:textSize="30sp"
+        android:paddingTop="90sp"/>
 
 </RelativeLayout>
