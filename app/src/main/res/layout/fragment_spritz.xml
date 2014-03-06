@@ -8,12 +8,13 @@
     <TextView
         android:id="@+id/spritzText"
         android:keepScreenOn="true"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
         android:clickable="true"
         android:focusableInTouchMode="true"
+        android:gravity="left"
         android:layout_centerInParent="true"
-        android:gravity="center"
+        android:padding="20dp"
         android:typeface="monospace"
         android:textSize="30sp" />
 
@@ -22,10 +23,12 @@
         style="@style/UltraSubduedTextStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:gravity="left"
+        android:layout_alignLeft="@id/spritzText"
+        android:layout_alignRight="@id/spritzText"
         android:layout_centerInParent="true"
-        android:gravity="center"
         android:typeface="monospace"
-        android:text="――――――――ф――――――――"
+        android:text="――――ф―――――――――――"
         android:textSize="30sp"
         android:paddingBottom="90sp" />
 
@@ -34,10 +37,12 @@
         style="@style/UltraSubduedTextStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:gravity="left"
+        android:layout_alignLeft="@id/spritzText"
+        android:layout_alignRight="@id/spritzText"
         android:layout_centerInParent="true"
-        android:gravity="center"
         android:typeface="monospace"
-        android:text="―――――――――――――――――"
+        android:text="――――――――――――――――"
         android:textSize="30sp"
         android:paddingTop="90sp" />
 

@@ -1,14 +1,21 @@
 # OpenSpritz-Android
 
-![OpenSpritz](http://i.imgur.com/UPpz18r.gif)
+![OpenSpritz](http://i.imgur.com/3ACFJ5s.gif)
 
-OpenSpritz-Android is a Spritz-like .epub reader for Android. Inspired by Miserlou's [OpenSpritz](https://github.com/Miserlou/OpenSpritz).
+OpenSpritz-Android is a Spritz-like .epub reader for Android 3.0+ (API 11). Inspired by Miserlou's [OpenSpritz](https://github.com/Miserlou/OpenSpritz).
 
 ## Lend a hand
 
+#### Enhancements
+
++ Fortify epub parsing to whatever extent is possible with epublib
+    + CSS markup isn't currently stripped
++ More sophisticated pivot choosing
+
+#### Features
+
 + It'd be nice to digest `http://...` share intents, parse & spritz the resulting page.
-+ Progress indicator?
-+ More sophisticated pivot choosing.
++ Read text from clipboard
 
 ## Building
 

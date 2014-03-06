@@ -7,11 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 
 import nl.siegmann.epublib.domain.Book;
@@ -54,9 +56,22 @@ public class MainActivity extends ActionBarActivity implements WpmDialogFragment
     public void onResume() {
         super.onResume();
 
-        if(getIntent().getAction().equals(Intent.ACTION_VIEW) && getIntent().getData() != null) {
+        if (getIntent().getAction().equals(Intent.ACTION_VIEW) && getIntent().getData() != null) {
             SpritzFragment frag = ((SpritzFragment) getSupportFragmentManager().findFragmentByTag("spritsfrag"));
             frag.feedEpubToSpritzer(getIntent().getData());
+        }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            if (Build.VERSION.SDK_INT >= 19) {
+                getWindow().getDecorView().setSystemUiVisibility(
+                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+            }
         }
     }
 

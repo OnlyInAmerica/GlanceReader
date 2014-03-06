@@ -24,8 +24,10 @@ import pro.dbro.openspritz.events.SpritzFinishedEvent;
 public class Spritzer {
     protected static final String TAG = "Spritzer";
     protected static final boolean VERBOSE = false;
+
     protected static final int MSG_PRINT_WORD = 1;
 
+    protected static final int CHARS_LEFT_OF_PIVOT = 3;
     protected String[] mWordArray;                  // The current list of words
     protected ArrayDeque<String> mWordQueue;        // The queue being actively displayed
     protected TextView mTarget;
@@ -133,22 +135,36 @@ public class Spritzer {
     }
 
     private void printWord(String word) {
-        // Ensure no more than 4 characters appear before pivot
-        if (word.length() > 7) {
+        int startSpan = 0;
+        int endSpan = 0;
+        word = word.trim();
+        if (VERBOSE) Log.i(TAG + word.length(), word);
+        if (word.length() == 1) {
             StringBuilder builder = new StringBuilder();
-            int beginPad = (word.length() / 2) - 3;
+            for (int x = 0; x < CHARS_LEFT_OF_PIVOT; x++) {
+                builder.append(" ");
+            }
+            builder.append(word);
+            word = builder.toString();
+            startSpan = CHARS_LEFT_OF_PIVOT;
+            endSpan =  startSpan + 1;
+        } else if ( word.length() <= CHARS_LEFT_OF_PIVOT * 2 ) {
+            StringBuilder builder = new StringBuilder();
+            int halfPoint = word.length() / 2;
+            int beginPad = CHARS_LEFT_OF_PIVOT - halfPoint;
             for(int x = 0; x <= beginPad; x++) {
                 builder.append(" ");
             }
             builder.append(word);
             word = builder.toString();
+            startSpan = halfPoint + beginPad;
+            endSpan = startSpan + 1;
+            if (VERBOSE) Log.i(TAG + word.length(), "pivot: " + word.substring(startSpan, endSpan));
+        } else {
+            startSpan = CHARS_LEFT_OF_PIVOT;
+            endSpan = startSpan + 1;
         }
-        // Make sure word is odd length to ensure pivot character is centered
-        if (word.length() % 2 == 0) {
-            word += " ";
-        }
-        int startSpan = word.length() / 2;
-        int endSpan = startSpan + 1;
+
         Spannable spanRange = new SpannableString(word);
         TextAppearanceSpan tas = new TextAppearanceSpan(mTarget.getContext(), R.style.PivotLetter);
         spanRange.setSpan(tas, startSpan, endSpan, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
