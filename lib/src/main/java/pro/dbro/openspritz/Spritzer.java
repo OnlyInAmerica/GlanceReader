@@ -136,8 +136,8 @@ public class Spritzer {
         // Ensure no more than 4 characters appear before pivot
         if (word.length() > 7) {
             StringBuilder builder = new StringBuilder();
-            int beginPad = (word.length() / 2) - 4;
-            for(int x = 0; x < beginPad; x++) {
+            int beginPad = (word.length() / 2) - 3;
+            for(int x = 0; x <= beginPad; x++) {
                 builder.append(" ");
             }
             builder.append(word);
