@@ -137,7 +137,7 @@ public class Spritzer {
         if (word.length() > 7) {
             StringBuilder builder = new StringBuilder();
             int beginPad = (word.length() / 2) - 3;
-            for(int x = 0; x < beginPad; x++) {
+            for(int x = 0; x <= beginPad; x++) {
                 builder.append(" ");
             }
             builder.append(word);
