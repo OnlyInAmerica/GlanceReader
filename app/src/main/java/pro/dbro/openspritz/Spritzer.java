@@ -8,7 +8,7 @@ import android.text.style.TextAppearanceSpan;
 import android.util.Log;
 import android.widget.TextView;
 
-import com.google.common.eventbus.EventBus;
+import com.squareup.otto.Bus;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
@@ -36,7 +36,7 @@ public class Spritzer {
     protected boolean mPlayingRequested;
     protected boolean mSpritzThreadStarted;
 
-    protected EventBus mEventBus;
+    protected Bus mBus;
 
     public Spritzer(TextView target) {
         init();
@@ -49,8 +49,8 @@ public class Spritzer {
         refillWordQueue();
     }
 
-    public void setEventBus(EventBus bus) {
-        mEventBus = bus;
+    public void setEventBus(Bus bus) {
+        mBus = bus;
     }
 
     private void createWordArrayFromString(String input) {
@@ -120,8 +120,8 @@ public class Spritzer {
                 }
             }
         } else {
-            if (mEventBus != null) {
-                mEventBus.post(new SpritzFinishedEvent());
+            if (mBus != null) {
+                mBus.post(new SpritzFinishedEvent());
             }
         }
     }

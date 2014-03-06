@@ -15,8 +15,9 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
+import com.squareup.otto.ThreadEnforcer;
 
 import nl.siegmann.epublib.domain.Author;
 import nl.siegmann.epublib.domain.Book;
@@ -33,7 +34,7 @@ public class SpritzFragment extends Fragment {
     private TextView mChapterView;
     private ProgressBar mProgress;
     private TextView mSpritzView;
-    private EventBus mEventBus;
+    private Bus mBus;
 
     private SpritzFragmentListener mSpritzFragmentListener;
 
@@ -54,7 +55,7 @@ public class SpritzFragment extends Fragment {
     private void feedEpubToSpritzer(Uri epubPath) {
         if (mSpritzer == null) {
             mSpritzer = new EpubSpritzer(mSpritzView, epubPath);
-            mSpritzer.setEventBus(mEventBus);
+            mSpritzer.setEventBus(mBus);
         } else {
             mSpritzer.setEpubPath(epubPath);
         }
@@ -175,12 +176,12 @@ public class SpritzFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        mEventBus = new EventBus();
-        mEventBus.register(this);
+        mBus = new Bus(ThreadEnforcer.ANY);
+        mBus.register(this);
         if (mSpritzer == null) {
             mSpritzView.setText(getActivity().getString(R.string.select_epub));
         } else {
-            mSpritzer.setEventBus(mEventBus);
+            mSpritzer.setEventBus(mBus);
             mSpritzer.swapTextView(mSpritzView);
             if (!mSpritzer.isPlaying()) {
                 updateMetaUi();
@@ -192,8 +193,8 @@ public class SpritzFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mEventBus != null)
-            mEventBus.unregister(this);
+        if (mBus != null)
+            mBus.unregister(this);
     }
 
     @Override

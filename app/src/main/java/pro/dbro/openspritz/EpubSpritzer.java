@@ -86,8 +86,8 @@ public class EpubSpritzer extends Spritzer {
         super.processNextWord();
         if (mPlaying && mPlayingRequested && mWordQueue.isEmpty() && (mChapter < mMaxChapter)) {
             printNextChapter();
-            if (mEventBus != null) {
-                mEventBus.post(new NextChapterEvent(mChapter));
+            if (mBus != null) {
+                mBus.post(new NextChapterEvent(mChapter));
             }
         }
     }
