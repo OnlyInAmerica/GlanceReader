@@ -4,6 +4,7 @@ import android.app.ActionBar;
 import android.app.DialogFragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -47,6 +48,16 @@ public class MainActivity extends ActionBarActivity implements WpmDialogFragment
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, new SpritzFragment(), "spritsfrag")
                 .commit();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if(getIntent().getAction().equals(Intent.ACTION_VIEW) && getIntent().getData() != null) {
+            SpritzFragment frag = ((SpritzFragment) getSupportFragmentManager().findFragmentByTag("spritsfrag"));
+            frag.feedEpubToSpritzer(getIntent().getData());
+        }
     }
 
 

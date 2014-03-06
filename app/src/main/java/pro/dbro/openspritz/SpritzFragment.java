@@ -52,7 +52,7 @@ public class SpritzFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
-    private void feedEpubToSpritzer(Uri epubPath) {
+    public void feedEpubToSpritzer(Uri epubPath) {
         if (mSpritzer == null) {
             mSpritzer = new EpubSpritzer(mSpritzView, epubPath);
             mSpritzer.setEventBus(mBus);

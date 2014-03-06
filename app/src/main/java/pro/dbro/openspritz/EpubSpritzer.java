@@ -132,6 +132,9 @@ public class EpubSpritzer extends Spritzer {
             mChapter = 0;
             setText(loadCleanStringFromChapter(mChapter));
         }
+        if (!mPlaying) {
+            mTarget.setText(mTarget.getContext().getString(R.string.touch_to_start));
+        }
     }
 
     private void reportFileUnsupported() {
