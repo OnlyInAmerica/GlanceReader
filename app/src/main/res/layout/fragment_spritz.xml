@@ -18,6 +18,30 @@
         android:textSize="30sp" />
 
     <TextView
+        android:id="@+id/topGuide"
+        style="@style/UltraSubduedTextStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:typeface="monospace"
+        android:text="――――――――ф――――――――"
+        android:textSize="30sp"
+        android:paddingBottom="90sp" />
+
+    <TextView
+        android:id="@+id/bottomGuide"
+        style="@style/UltraSubduedTextStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:typeface="monospace"
+        android:text="―――――――――――――――――"
+        android:textSize="30sp"
+        android:paddingTop="90sp" />
+
+    <TextView
         android:id="@+id/title"
         style="@style/SubduedTextStyle"
         android:layout_width="wrap_content"

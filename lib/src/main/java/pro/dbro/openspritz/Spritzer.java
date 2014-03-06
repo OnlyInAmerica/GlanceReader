@@ -133,6 +133,17 @@ public class Spritzer {
     }
 
     private void printWord(String word) {
+        // Ensure no more than 4 characters appear before pivot
+        if (word.length() > 7) {
+            StringBuilder builder = new StringBuilder();
+            int beginPad = (word.length() / 2) - 3;
+            for(int x = 0; x < beginPad; x++) {
+                builder.append(" ");
+            }
+            builder.append(word);
+            word = builder.toString();
+        }
+        // Make sure word is odd length to ensure pivot character is centered
         if (word.length() % 2 == 0) {
             word += " ";
         }

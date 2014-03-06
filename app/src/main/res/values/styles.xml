@@ -44,6 +44,10 @@
         <item name="android:textColor">?attr/subdued_text</item>
     </style>
 
+    <style name="UltraSubduedTextStyle">
+        <item name="android:textColor">?attr/ultra_subdued_text</item>
+    </style>
+
     <style name="MinutesToGo">
         <item name="android:textSize">18sp</item>
         <item name="android:textStyle">normal</item>

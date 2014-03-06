@@ -13,4 +13,6 @@
 
     <color name="spritz_bg">#ffececec</color>
     <color name="spritz_bg_dark">#ff171717</color>
+
+    <color name="guide">#DDDDDD</color>
 </resources>
