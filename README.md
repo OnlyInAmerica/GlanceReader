@@ -19,18 +19,23 @@ OpenSpritz-Android is a Spritz-like .epub reader for Android 3.0+ (API 11). Insp
 
 ## Building
 
-Make sure you've installed the following from the Android SDK Manager before building:
+0. Make sure you've installed the following from the Android SDK Manager before building:
+  	+ Android SDK Build-tools 19.0.2
+	+ Android SDK tools 22.3
+	+ SDK Platform 19
+	+ Android Support Repository 4
+	
+1. Define the `ANDROID_HOME` environmental variable as your Android SDK location.
+	
+	If you need help check out [this guide](http://spring.io/guides/gs/android/).
 
-+ Android SDK Build-tools 19.0.2
-+ Android SDK tools 22.3
-+ SDK Platform 19
-+ Android Support Repository 4
+3. Build!
+	
+  	To build an .apk from this directory, make sure `./gradlew` is executable and run:
 
-To build an .apk from this directory, make sure `./gradlew` is executable and run:
-
-    $ ./gradlew assemble
+    	$ ./gradlew assemble
     
-The resulting .apk will be availble in `./app/build/apk`.
+	The resulting .apk will be availble in `./app/build/apk`.
 
 
 ## Thanks
