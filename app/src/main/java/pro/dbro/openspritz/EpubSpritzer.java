@@ -13,6 +13,7 @@ import java.io.InputStream;
 
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.epub.EpubReader;
+import pro.dbro.openspritz.events.NextChapterEvent;
 
 /**
  * Parse an .epub into a Queue of words
@@ -47,7 +48,7 @@ public class EpubSpritzer extends Spritzer {
         try {
             InputStream epubInputStream = mTarget.getContext().getContentResolver().openInputStream(epubUri);
             String epubPath = FileUtils.getPath(mTarget.getContext(), epubUri);
-            if(epubPath == null || !epubPath.contains("epub")){
+            if (epubPath == null || !epubPath.contains("epub")) {
                 reportFileUnsupported();
                 return;
             }
@@ -59,22 +60,42 @@ public class EpubSpritzer extends Spritzer {
         }
     }
 
-    public boolean bookSelected(){
+    public Book getBook() {
+        return mBook;
+    }
+
+    public void printChapter(int chapter) {
+        mChapter = chapter;
+        setText(loadCleanStringFromChapter(mChapter));
+        saveState();
+    }
+
+    public int getCurrentChapter() {
+        return mChapter;
+    }
+
+    public int getMaxChapter() {
+        return mMaxChapter;
+    }
+
+    public boolean bookSelected() {
         return mBook != null;
     }
 
     protected void processNextWord() throws InterruptedException {
         super.processNextWord();
-        if (!mPlaying && mPlayingRequested && (mChapter < mMaxChapter)) {
-            mPlaying = true;
+        if (mPlaying && mPlayingRequested && mWordQueue.isEmpty() && (mChapter < mMaxChapter)) {
             printNextChapter();
+            if (mBus != null) {
+                mBus.post(new NextChapterEvent(mChapter));
+            }
         }
     }
 
     private void printNextChapter() {
         setText(loadCleanStringFromChapter(mChapter++));
         saveState();
-        start();
+        if (VERBOSE) Log.i(TAG, "starting next chapter: " + mChapter);
     }
 
     private String loadCleanStringFromChapter(int chapter) {

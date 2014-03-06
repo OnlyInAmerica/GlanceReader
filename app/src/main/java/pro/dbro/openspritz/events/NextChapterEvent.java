@@ -1,0 +1,17 @@
+package pro.dbro.openspritz.events;
+
+/**
+ * Created by davidbrodsky on 3/5/14.
+ */
+public class NextChapterEvent {
+
+    private int mChapter;
+
+    public NextChapterEvent(int chapter){
+        mChapter = chapter;
+    }
+
+    public int getChapter(){
+        return mChapter;
+    }
+}

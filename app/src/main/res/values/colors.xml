@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="pivot_text">#DE0000</color>
+    <color name="pivot_text">#fff7000e</color>
+
+    <color name="subdued_text">#ff444444</color>
+    <color name="subdued_text_dark">#ffb9b9b9</color>
+
+    <color name="ultra_subdued_text">#ff7f7f7f</color>
+    <color name="ultra_subdued_text_dark">#ff808080</color>
+
+    <color name="spritz_text">#ff1b1b1b</color>
+    <color name="spritz_text_dark">#ffdddddd</color>
+
+    <color name="spritz_bg">#ffececec</color>
+    <color name="spritz_bg_dark">#ff171717</color>
+
     <color name="guide">#DDDDDD</color>
 </resources>
