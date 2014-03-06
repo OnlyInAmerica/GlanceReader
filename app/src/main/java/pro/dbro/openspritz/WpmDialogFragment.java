@@ -72,9 +72,10 @@ public class WpmDialogFragment extends DialogFragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 mWpm = Math.max(MIN_WPM, (int) ((progress / 100.0) * MAX_WPM));
-                mWpmLabel.setText(mWpm + " WPM");
+                String wpmStr = mWpm + " WPM";
+                mWpmLabel.setText(wpmStr);
                 mOnWpmSelectListener.onWpmSelected(mWpm);
-
+                getDialog().setTitle(wpmStr);
                 if (mWpm >= WHOAH_THRESHOLD_WPM + 50 && !mAnimationRunning) {
                     setTrippin(true);
                 } else if (mWpm <= WHOAH_THRESHOLD_WPM - 50 && mAnimationRunning) {
@@ -95,20 +96,13 @@ public class WpmDialogFragment extends DialogFragment {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(getActivity().getString(R.string.set_wpm))
-                .setView(v)
-                .setPositiveButton("Done", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
+                .setView(v);
         mView = v;
         return builder.create();
     }
 
     private void setTrippin(boolean beTrippin){
         if(beTrippin){
-            getDialog().setTitle(getActivity().getString(R.string.whoa_dude));
             mAnimationRunning = true;
             if (mCurrentAnimation == null) {
                 mCurrentAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.wobble);
@@ -117,7 +111,6 @@ public class WpmDialogFragment extends DialogFragment {
                 mView.startAnimation(mCurrentAnimation);
             }
         } else {
-            getDialog().setTitle(getActivity().getString(R.string.set_wpm));
             mView.clearAnimation();
             mAnimationRunning = false;
         }

@@ -9,7 +9,6 @@ import android.support.v4.app.Fragment;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.TextAppearanceSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +35,8 @@ public class SpritzFragment extends Fragment {
     private TextView mSpritzView;
     private EventBus mEventBus;
 
+    private SpritzFragmentListener mSpritzFragmentListener;
+
     public static SpritzFragment newInstance() {
         SpritzFragment fragment = new SpritzFragment();
         return fragment;
@@ -59,7 +60,7 @@ public class SpritzFragment extends Fragment {
         }
     }
 
-    private void updateMetaUi() {
+    public void updateMetaUi() {
         Book book = mSpritzer.getBook();
         Metadata meta = book.getMetadata();
         Author author = meta.getAuthors().get(0);
@@ -75,7 +76,7 @@ public class SpritzFragment extends Fragment {
         }
 
         int startSpan = chapterText.length();
-        chapterText = String.format("%s %s m to go", chapterText,
+        chapterText = String.format("%s  %s m left", chapterText,
                 (mSpritzer.getMinutesRemainingInQueue() == 0) ? "<1" : String.valueOf(mSpritzer.getMinutesRemainingInQueue()));
         int endSpan = chapterText.length();
         Spannable spanRange = new SpannableString(chapterText);
@@ -87,7 +88,7 @@ public class SpritzFragment extends Fragment {
         mProgress.setProgress(curChapter);
     }
 
-    private void showMetaUi(boolean show) {
+    public void showMetaUi(boolean show) {
         if (show) {
             mAuthorView.setVisibility(View.VISIBLE);
             mTitleView.setVisibility(View.VISIBLE);
@@ -132,6 +133,12 @@ public class SpritzFragment extends Fragment {
         mAuthorView = ((TextView) root.findViewById(R.id.author));
         mTitleView = ((TextView) root.findViewById(R.id.title));
         mChapterView = ((TextView) root.findViewById(R.id.chapter));
+        mChapterView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mSpritzFragmentListener.onChapterSelectRequested();
+            }
+        });
         mProgress = ((ProgressBar) root.findViewById(R.id.progress));
         mSpritzView = (TextView) root.findViewById(R.id.spritzText);
         mSpritzView.setOnClickListener(new View.OnClickListener() {
@@ -157,6 +164,12 @@ public class SpritzFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+        try {
+            mSpritzFragmentListener = (SpritzFragmentListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement SpritzFragmentListener");
+        }
     }
 
     @Override
@@ -196,8 +209,6 @@ public class SpritzFragment extends Fragment {
 
     @Subscribe
     public void onNextChapter(NextChapterEvent event) {
-        Log.i(TAG, "onNextChapter " + event.getChapter());
-
         getActivity().runOnUiThread(new Runnable(){
 
             @Override
@@ -248,6 +259,10 @@ public class SpritzFragment extends Fragment {
             feedEpubToSpritzer(uri);
             updateMetaUi();
         }
+    }
+
+    public interface SpritzFragmentListener {
+        public abstract void onChapterSelectRequested();
     }
 
 }

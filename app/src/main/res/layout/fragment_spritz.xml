@@ -44,12 +44,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:indeterminate="false"
-        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_marginRight="8dp"
+        android:layout_marginLeft="8dp"
+        android:visibility="invisible"
+        style="?android:attr/progressBarStyleHorizontal"
         android:layout_alignParentBottom="true" />
 
     <TextView
         android:id="@+id/chapter"
         style="@style/SubduedTextStyle"
+        android:textColor="#33B5E5"
+        android:clickable="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"

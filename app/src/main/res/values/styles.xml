@@ -46,7 +46,7 @@
 
     <style name="MinutesToGo">
         <item name="android:textSize">18sp</item>
-        <item name="android:textStyle">italic</item>
+        <item name="android:textStyle">normal</item>
         <item name="android:textColor">?attr/ultra_subdued_text</item>
     </style>
 

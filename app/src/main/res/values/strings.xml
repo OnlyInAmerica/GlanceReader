@@ -10,5 +10,6 @@
     <string name="whoa_dude">Whoaaa dude</string>
     <string name="theme">Toggle Light/Dark Theme</string>
     <string name="open_epub">Open epub</string>
+    <string name="select_chapter">Select Chapter</string>
 
 </resources>
