@@ -213,8 +213,8 @@ public class Spritzer {
 
     private int delayMultiplierForWord(String word) {
         // double rest if length > 6 or contains (.,!?)
-        if (word.length() > 6 || word.contains(",") || word.contains(":") || word.contains(";") || word.contains(".") || word.contains("?") || word.contains("!") || word.contains("\"")) {
-            return 2;
+        if (word.length() >= 6 || word.contains(",") || word.contains(":") || word.contains(";") || word.contains(".") || word.contains("?") || word.contains("!") || word.contains("\"")) {
+            return 3;
         }
         return 1;
     }
