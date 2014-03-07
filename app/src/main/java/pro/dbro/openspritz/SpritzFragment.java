@@ -59,6 +59,7 @@ public class SpritzFragment extends Fragment {
         } else {
             mSpritzer.setEpubPath(epubPath);
         }
+        updateMetaUi();
     }
 
     public void updateMetaUi() {

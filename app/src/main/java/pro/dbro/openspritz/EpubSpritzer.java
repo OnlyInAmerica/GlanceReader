@@ -48,7 +48,10 @@ public class EpubSpritzer extends Spritzer {
         try {
             InputStream epubInputStream = mTarget.getContext().getContentResolver().openInputStream(epubUri);
             String epubPath = FileUtils.getPath(mTarget.getContext(), epubUri);
-            if (epubPath == null || !epubPath.contains("epub")) {
+            // Opening an attachment in Gmail may produce
+            // content://gmail-ls/xxx@xxx.com/messages/9852/attachments/0.1/BEST/false
+            // and no path
+            if (epubPath != null && !epubPath.contains("epub")) {
                 reportFileUnsupported();
                 return;
             }
