@@ -27,6 +27,7 @@ public class Spritzer {
 
     protected static final int MSG_PRINT_WORD = 1;
 
+    protected static final int MAX_WORD_LENGTH = 13;
     protected static final int CHARS_LEFT_OF_PIVOT = 3;
     protected String[] mWordArray;                  // The current list of words
     protected ArrayDeque<String> mWordQueue;        // The queue being actively displayed
@@ -112,6 +113,29 @@ public class Spritzer {
     protected void processNextWord() throws InterruptedException {
         if (!mWordQueue.isEmpty()) {
             String word = mWordQueue.remove();
+            // Split long words, at hyphen if present
+            if (word.length() > MAX_WORD_LENGTH) {
+                String firstSegment;
+                int splitIndex;
+                if (word.contains("-")) {
+                    splitIndex = word.indexOf("-") + 1;
+                } else if (word.contains(".")) {
+                    splitIndex = word.indexOf(".") + 1;
+                } else {
+                    splitIndex = MAX_WORD_LENGTH;
+                }
+                if (VERBOSE) {
+                    Log.i(TAG, "Splitting long word " + word + " into " + word.substring(0, splitIndex) + " and " + word.substring(splitIndex));
+                }
+                firstSegment = word.substring(0, splitIndex);
+                // A word split is always indicated with a hyphen
+                if (!firstSegment.contains("-")) {
+                    firstSegment = firstSegment + "-";
+                }
+                mWordQueue.addFirst(word.substring(splitIndex));
+                word = firstSegment;
+
+            }
             mSpritzHandler.sendMessage(mSpritzHandler.obtainMessage(MSG_PRINT_WORD, word));
             Thread.sleep(getInterWordDelay() * delayMultiplierForWord(word));
             // If word is end of a sentence, add three blanks
@@ -147,12 +171,12 @@ public class Spritzer {
             builder.append(word);
             word = builder.toString();
             startSpan = CHARS_LEFT_OF_PIVOT;
-            endSpan =  startSpan + 1;
-        } else if ( word.length() <= CHARS_LEFT_OF_PIVOT * 2 ) {
+            endSpan = startSpan + 1;
+        } else if (word.length() <= CHARS_LEFT_OF_PIVOT * 2) {
             StringBuilder builder = new StringBuilder();
             int halfPoint = word.length() / 2;
             int beginPad = CHARS_LEFT_OF_PIVOT - halfPoint;
-            for(int x = 0; x <= beginPad; x++) {
+            for (int x = 0; x <= beginPad; x++) {
                 builder.append(" ");
             }
             builder.append(word);

@@ -49,26 +49,26 @@
     <TextView
         android:id="@+id/title"
         style="@style/SubduedTextStyle"
-        android:layout_width="150dp"
-        android:singleLine="true"
-        android:ellipsize="marquee"
+        android:layout_width="350dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
-        android:textSize="24sp"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:textSize="28sp"
         android:fontFamily="sans-serif-condensed" />
 
     <TextView
         android:id="@+id/author"
         style="@style/SubduedTextStyle"
-        android:layout_width="150dp"
+        android:layout_width="350dp"
         android:layout_height="wrap_content"
-        android:singleLine="true"
-        android:ellipsize="marquee"
         android:layout_below="@id/title"
         android:layout_alignLeft="@id/title"
-        android:textSize="18sp"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:textSize="22sp"
         android:fontFamily="sans-serif-condensed" />
 
     <ProgressBar
