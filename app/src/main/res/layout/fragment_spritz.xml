@@ -5,94 +5,66 @@
     android:animateLayoutChanges="true"
     tools:context="pro.dbro.openspritz.SpritzFragment">
 
-    <TextView
+    <pro.dbro.openspritz.SpritzerTextView
         android:id="@+id/spritzText"
-        android:keepScreenOn="true"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
         android:clickable="true"
         android:focusableInTouchMode="true"
         android:gravity="left"
-        android:layout_centerInParent="true"
+        android:keepScreenOn="true"
         android:padding="20dp"
-        android:typeface="monospace"
-        android:textSize="30sp" />
-
-    <TextView
-        android:id="@+id/topGuide"
-        style="@style/UltraSubduedTextStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="left"
-        android:layout_alignLeft="@id/spritzText"
-        android:layout_alignRight="@id/spritzText"
-        android:layout_centerInParent="true"
-        android:typeface="monospace"
-        android:text="――――ф―――――――――――"
         android:textSize="30sp"
-        android:paddingBottom="90sp" />
-
-    <TextView
-        android:id="@+id/bottomGuide"
-        style="@style/UltraSubduedTextStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="left"
-        android:layout_alignLeft="@id/spritzText"
-        android:layout_alignRight="@id/spritzText"
-        android:layout_centerInParent="true"
-        android:typeface="monospace"
-        android:text="――――――――――――――――"
-        android:textSize="30sp"
-        android:paddingTop="90sp" />
+        android:typeface="monospace" />
 
     <TextView
         android:id="@+id/title"
         style="@style/SubduedTextStyle"
         android:layout_width="150dp"
-        android:singleLine="true"
-        android:ellipsize="marquee"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
-        android:textSize="24sp"
-        android:fontFamily="sans-serif-condensed" />
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="8dp"
+        android:ellipsize="marquee"
+        android:fontFamily="sans-serif-condensed"
+        android:singleLine="true"
+        android:textSize="24sp" />
 
     <TextView
         android:id="@+id/author"
         style="@style/SubduedTextStyle"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:singleLine="true"
-        android:ellipsize="marquee"
-        android:layout_below="@id/title"
         android:layout_alignLeft="@id/title"
-        android:textSize="18sp"
-        android:fontFamily="sans-serif-condensed" />
+        android:layout_below="@id/title"
+        android:ellipsize="marquee"
+        android:fontFamily="sans-serif-condensed"
+        android:singleLine="true"
+        android:textSize="18sp" />
 
     <ProgressBar
         android:id="@+id/progress"
+        style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:indeterminate="false"
-        android:layout_marginRight="8dp"
+        android:layout_alignParentBottom="true"
         android:layout_marginLeft="8dp"
-        android:visibility="invisible"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_alignParentBottom="true" />
+        android:layout_marginRight="8dp"
+        android:indeterminate="false"
+        android:visibility="invisible" />
 
     <TextView
         android:id="@+id/chapter"
         style="@style/SubduedTextStyle"
-        android:textColor="#33B5E5"
-        android:clickable="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginBottom="8dp"
-        android:layout_alignParentLeft="true"
         android:layout_above="@id/progress"
-        android:textSize="22sp"
-        android:fontFamily="sans-serif-condensed" />
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:clickable="true"
+        android:fontFamily="sans-serif-condensed"
+        android:textColor="#33B5E5"
+        android:textSize="22sp" />
 </RelativeLayout>
