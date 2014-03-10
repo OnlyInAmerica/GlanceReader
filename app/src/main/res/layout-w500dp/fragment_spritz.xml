@@ -14,7 +14,6 @@
         android:focusableInTouchMode="true"
         android:gravity="left"
         android:keepScreenOn="true"
-        android:padding="20dp"
         android:textSize="30sp"
         android:typeface="monospace" />
 

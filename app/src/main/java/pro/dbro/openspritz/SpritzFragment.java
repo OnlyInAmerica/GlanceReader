@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.TextAppearanceSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -107,7 +108,7 @@ public class SpritzFragment extends Fragment {
     private void peekChapter() {
         mChapterView.setVisibility(View.VISIBLE);
         // Clean this up
-        new Thread(new Runnable(){
+        new Thread(new Runnable() {
 
             @Override
             public void run() {
@@ -116,7 +117,7 @@ public class SpritzFragment extends Fragment {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                getActivity().runOnUiThread(new Runnable(){
+                getActivity().runOnUiThread(new Runnable() {
 
                     @Override
                     public void run() {
@@ -180,7 +181,14 @@ public class SpritzFragment extends Fragment {
         mBus = new Bus(ThreadEnforcer.ANY);
         mBus.register(this);
         if (mSpritzer == null) {
-            mSpritzView.setText(getActivity().getString(R.string.select_epub));
+            mSpritzer = new EpubSpritzer(mSpritzView);
+            if(mSpritzer.getBook() == null) {
+                mSpritzView.setText(getString(R.string.select_epub));
+            } else {
+                // EpubSpritzer loaded the last book being reads
+                updateMetaUi();
+                showMetaUi(true);
+            }
         } else {
             mSpritzer.setEventBus(mBus);
             mSpritzer.swapTextView(mSpritzView);
@@ -192,10 +200,20 @@ public class SpritzFragment extends Fragment {
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        if (mSpritzer != null) {
+            Log.i(TAG, "saving state");
+            mSpritzer.saveState();
+        }
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mBus != null)
+        if (mBus != null) {
             mBus.unregister(this);
+        }
     }
 
     @Override
@@ -211,11 +229,11 @@ public class SpritzFragment extends Fragment {
 
     @Subscribe
     public void onNextChapter(NextChapterEvent event) {
-        getActivity().runOnUiThread(new Runnable(){
+        getActivity().runOnUiThread(new Runnable() {
 
             @Override
             public void run() {
-                try{
+                try {
                     updateMetaUi();
                     peekChapter();
                 } catch (Exception e) {

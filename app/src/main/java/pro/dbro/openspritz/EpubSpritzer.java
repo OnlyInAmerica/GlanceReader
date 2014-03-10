@@ -26,16 +26,22 @@ public class EpubSpritzer extends Spritzer {
 
     private static final String PREFS = "espritz";
 
+    private Uri mEpubUri;
     private Book mBook;
     private int mChapter;
     private int mMaxChapter;
+
+    public EpubSpritzer(TextView target) {
+        super(target);
+        restoreState(true);
+    }
 
     public EpubSpritzer(TextView target, Uri epubPath) {
         super(target);
         mChapter = 0;
 
         openEpub(epubPath);
-        mTarget.getContext().getString(R.string.touch_to_start);
+        mTarget.setText(mTarget.getContext().getString(R.string.touch_to_start));
     }
 
     public void setEpubPath(Uri epubPath) {
@@ -55,9 +61,10 @@ public class EpubSpritzer extends Spritzer {
                 reportFileUnsupported();
                 return;
             }
+            mEpubUri = epubUri;
             mBook = (new EpubReader()).readEpub(epubInputStream);
             mMaxChapter = mBook.getSpine().getSpineReferences().size();
-            restoreState();
+            restoreState(false);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -112,18 +119,26 @@ public class EpubSpritzer extends Spritzer {
         }
     }
 
-    private void saveState() {
-        SharedPreferences.Editor editor = mTarget.getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit();
-        editor.putInt("Chapter", mChapter)
-                .putInt("Word", mWordArray.length - mWordQueue.size())
-                .putString("Title", mBook.getTitle())
-                .putInt("Wpm", mWPM)
-                .apply();
+    public void saveState() {
+        if (mBook != null) {
+            Log.i(TAG, "Saving state");
+            SharedPreferences.Editor editor = mTarget.getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit();
+            editor.putInt("Chapter", mChapter)
+                    .putString("epubUri", mEpubUri.toString())
+                    .putInt("Word", mWordArray.length - mWordQueue.size())
+                    .putString("Title", mBook.getTitle())
+                    .putInt("Wpm", mWPM)
+                    .apply();
+        }
     }
 
-    private void restoreState() {
+    private void restoreState(boolean openLastEpubUri) {
         SharedPreferences prefs = mTarget.getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        if (mBook.getTitle().compareTo(prefs.getString("Title", "<>?l")) == 0) {
+        if (openLastEpubUri) {
+            if (prefs.contains("epubUri")) {
+                openEpub(Uri.parse(prefs.getString("epubUri", "")));
+            }
+        } else if (mBook.getTitle().compareTo(prefs.getString("Title", "<>?l")) == 0) {
             mChapter = prefs.getInt("Chapter", 0);
             setText(loadCleanStringFromChapter(mChapter));
             int oldSize = prefs.getInt("Word", 0);
