@@ -5,6 +5,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 
@@ -13,10 +14,11 @@ import android.widget.TextView;
  */
 public class SpritzerTextView extends TextView implements View.OnClickListener {
 
-    public static final int PAINT_WIDTH = 10;         // thickness of spritz guide bars in pixels
-                                                      // For optimal drawing should be an even number
+    public static final int PAINT_WIDTH_DP = 4;          // thickness of spritz guide bars in dp
+                                                         // For optimal drawing should be an even number
     private Spritzer mSpritzer;
     private Paint mPaintGuides;
+    private float mPaintWidthPx;
     private String mTestString;
     private boolean mDefaultClickListener = false;
 
@@ -47,10 +49,11 @@ public class SpritzerTextView extends TextView implements View.OnClickListener {
     }
 
     private void init() {
+        mPaintWidthPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, PAINT_WIDTH_DP, getResources().getDisplayMetrics());
         mSpritzer = new Spritzer(this);
         mPaintGuides = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaintGuides.setColor(getCurrentTextColor());
-        mPaintGuides.setStrokeWidth(PAINT_WIDTH);
+        mPaintGuides.setStrokeWidth(mPaintWidthPx);
         mPaintGuides.setAlpha(128);
         if (mDefaultClickListener) {
             this.setOnClickListener(this);
@@ -84,8 +87,8 @@ public class SpritzerTextView extends TextView implements View.OnClickListener {
         final int pivotIndicatorLength = 15;
 
         // Paint the pivot indicator
-        canvas.drawLine(centerX, topY + (PAINT_WIDTH / 2), centerX, topY + (PAINT_WIDTH / 2) + (pivotIndicatorLength * 2), mPaintGuides); //line through center of circle
-        canvas.drawLine(centerX, bottomY - (PAINT_WIDTH / 2), centerX, bottomY - (PAINT_WIDTH / 2) - (pivotIndicatorLength * 2), mPaintGuides);
+        canvas.drawLine(centerX, topY + (mPaintWidthPx / 2), centerX, topY + (mPaintWidthPx / 2) + (pivotIndicatorLength * 2), mPaintGuides); //line through center of circle
+        canvas.drawLine(centerX, bottomY - (mPaintWidthPx / 2), centerX, bottomY - (mPaintWidthPx / 2) - (pivotIndicatorLength * 2), mPaintGuides);
     }
 
     private float calculatePivotXOffset() {
