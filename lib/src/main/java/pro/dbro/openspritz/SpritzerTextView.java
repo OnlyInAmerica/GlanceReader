@@ -99,7 +99,6 @@ public class SpritzerTextView extends TextView implements View.OnClickListener {
         canvas.drawLine(beginBottomX, bottomY, endBottomX, bottomY, mPaintGuides);
 
         // Measurements for pivot indicator
-        final float textSize = getTextSize();
         float centerX = calculatePivotXOffset() + getPaddingLeft();
         final int pivotIndicatorLength = getPivotIndicatorLength();
 
