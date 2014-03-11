@@ -142,6 +142,7 @@ public class Spritzer {
     }
     
     private int findSplitIndex(String thisWord){
+        int splitIndex;
         // Split long words, at hyphen or dot if present.
         if (thisWord.contains("-")) {
         	splitIndex = word.indexOf("-") + 1;
