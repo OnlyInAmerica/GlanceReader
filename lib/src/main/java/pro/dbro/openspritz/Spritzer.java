@@ -148,7 +148,7 @@ public class Spritzer {
         	splitIndex = thisWord.indexOf("-") + 1;
         } else if (thisWord.contains(".")) {
             splitIndex = thisWord.indexOf(".") + 1;
-        } else if (thisWord.length() > (MAX_WORD_LENGTH-1)*2)  {
+        } else if (thisWord.length() > MAX_WORD_LENGTH * 2)  {
         	// if the word is floccinaucinihilipilifcation, for example.
         	splitIndex = MAX_WORD_LENGTH-1;
         	// 12 characters plus a "-" == 13.
