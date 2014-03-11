@@ -145,9 +145,9 @@ public class Spritzer {
         int splitIndex;
         // Split long words, at hyphen or dot if present.
         if (thisWord.contains("-")) {
-        	splitIndex = word.indexOf("-") + 1;
+        	splitIndex = thisWord.indexOf("-") + 1;
         } else if (thisWord.contains(".")) {
-            splitIndex = word.indexOf(".") + 1;
+            splitIndex = thisWord.indexOf(".") + 1;
         } else if (thisWord.length() > (MAX_WORD_LENGTH-1)*2)  {
         	// if the word is floccinaucinihilipilifcation, for example.
         	splitIndex = MAX_WORD_LENGTH-1;
