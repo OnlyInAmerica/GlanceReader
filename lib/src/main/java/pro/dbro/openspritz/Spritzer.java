@@ -113,20 +113,9 @@ public class Spritzer {
     protected void processNextWord() throws InterruptedException {
         if (!mWordQueue.isEmpty()) {
             String word = mWordQueue.remove();
-            // Split long words, at hyphen if present
             if (word.length() > MAX_WORD_LENGTH) {
                 String firstSegment;
-                int splitIndex;
-                if (word.contains("-")) {
-                    splitIndex = word.indexOf("-") + 1;
-                } else if (word.contains(".")) {
-                    splitIndex = word.indexOf(".") + 1;
-                } else {
-                    splitIndex = MAX_WORD_LENGTH;
-                }
-                if (VERBOSE) {
-                    Log.i(TAG, "Splitting long word " + word + " into " + word.substring(0, splitIndex) + " and " + word.substring(splitIndex));
-                }
+                int splitIndex = findSplitIndex(word);
                 firstSegment = word.substring(0, splitIndex);
                 // A word split is always indicated with a hyphen
                 if (!firstSegment.contains("-")) {
@@ -150,6 +139,29 @@ public class Spritzer {
                 mBus.post(new SpritzFinishedEvent());
             }
         }
+    }
+    
+    private int findSplitIndex(String thisWord){
+        // Split long words, at hyphen or dot if present.
+        if (thisWord.contains("-")) {
+        	splitIndex = word.indexOf("-") + 1;
+        } else if (thisWord.contains(".")) {
+            splitIndex = word.indexOf(".") + 1;
+        } else if (thisWord.length() > (MAX_WORD_LENGTH-1)*2)  {
+        	// if the word is floccinaucinihilipilifcation, for example.
+        	splitIndex = MAX_WORD_LENGTH-1;
+        	// 12 characters plus a "-" == 13.
+        } else {
+        	// otherwise we want to split near the middle.
+        	splitIndex = Math.round(thisWord.length()/2F);
+        }
+        if (VERBOSE) {
+            Log.i(TAG, "Splitting long word " + thisWord + " into " + thisWord.substring(0, splitIndex) +
+            		" and " + thisWord.substring(splitIndex));
+        }
+        // in case we found a hyphen that was 18 characters in.
+        if (splitIndex > 13) return findSplitIndex(thisWord.substring(0, splitIndex));
+        return splitIndex;
     }
 
     private void printLastWord() {
