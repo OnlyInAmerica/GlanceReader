@@ -113,29 +113,8 @@ public class Spritzer {
     protected void processNextWord() throws InterruptedException {
         if (!mWordQueue.isEmpty()) {
             String word = mWordQueue.remove();
-            // Split long words, at hyphen if present
-            if (word.length() > MAX_WORD_LENGTH) {
-                String firstSegment;
-                int splitIndex;
-                if (word.contains("-")) {
-                    splitIndex = word.indexOf("-") + 1;
-                } else if (word.contains(".")) {
-                    splitIndex = word.indexOf(".") + 1;
-                } else {
-                    splitIndex = MAX_WORD_LENGTH;
-                }
-                if (VERBOSE) {
-                    Log.i(TAG, "Splitting long word " + word + " into " + word.substring(0, splitIndex) + " and " + word.substring(splitIndex));
-                }
-                firstSegment = word.substring(0, splitIndex);
-                // A word split is always indicated with a hyphen
-                if (!firstSegment.contains("-")) {
-                    firstSegment = firstSegment + "-";
-                }
-                mWordQueue.addFirst(word.substring(splitIndex));
-                word = firstSegment;
+            word = splitLongWord(word);
 
-            }
             mSpritzHandler.sendMessage(mSpritzHandler.obtainMessage(MSG_PRINT_WORD, word));
             Thread.sleep(getInterWordDelay() * delayMultiplierForWord(word));
             // If word is end of a sentence, add three blanks
@@ -150,6 +129,34 @@ public class Spritzer {
                 mBus.post(new SpritzFinishedEvent());
             }
         }
+    }
+
+    protected String splitLongWord(String word) {
+        if (word.length() > MAX_WORD_LENGTH) {
+            String firstSegment;
+            int splitIndex;
+            if (word.contains("-")) {
+                splitIndex = word.indexOf("-") + 1;
+            } else if (word.contains(".")) {
+                splitIndex = word.indexOf(".") + 1;
+            } else if (word.length() > MAX_WORD_LENGTH * 2) {
+                splitIndex = MAX_WORD_LENGTH;
+            } else {
+                splitIndex = word.length() / 2;
+            }
+            if (VERBOSE) {
+                Log.i(TAG, "Splitting long word " + word + " into " + word.substring(0, splitIndex) + " and " + word.substring(splitIndex));
+            }
+            firstSegment = word.substring(0, splitIndex);
+            // A word split is always indicated with a hyphen unless ending in a period
+            if (!firstSegment.contains("-") && !firstSegment.endsWith(".")) {
+                firstSegment = firstSegment + "-";
+            }
+            mWordQueue.addFirst(word.substring(splitIndex));
+            word = firstSegment;
+
+        }
+        return word;
     }
 
     private void printLastWord() {
