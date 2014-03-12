@@ -17,7 +17,7 @@ import nl.siegmann.epublib.domain.SpineReference;
 public class SpineReferenceAdapter extends ArrayAdapter<SpineReference> {
 
     public SpineReferenceAdapter(final Context context, int resource, List<SpineReference> objects) {
-        super(context, R.layout.chapter_list_item, objects);
+        super(context, resource, objects);
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {

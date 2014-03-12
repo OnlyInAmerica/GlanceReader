@@ -50,11 +50,6 @@ public class SpritzFragment extends Fragment {
         // Required empty public constructor
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
     public void feedEpubToSpritzer(Uri epubPath) {
         if (mSpritzer == null) {
             mSpritzer = new EpubSpritzer(mSpritzView, epubPath);
@@ -241,11 +236,6 @@ public class SpritzFragment extends Fragment {
         if (mBus != null) {
             mBus.unregister(this);
         }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
     }
 
     @Subscribe
