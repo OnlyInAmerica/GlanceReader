@@ -64,6 +64,10 @@ public class SpritzFragment extends Fragment {
     }
 
     public void updateMetaUi() {
+        if(!mSpritzer.bookSelected()){
+            return;
+        }
+        
         Book book = mSpritzer.getBook();
         Metadata meta = book.getMetadata();
         Author author = meta.getAuthors().get(0);
