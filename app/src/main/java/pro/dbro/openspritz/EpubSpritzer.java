@@ -97,7 +97,7 @@ public class EpubSpritzer extends Spritzer {
         return mMaxChapter;
     }
 
-    public boolean bookSelected() {
+    public boolean isBookSelected() {
         return mBook != null;
     }
 

@@ -63,8 +63,12 @@ public class SpritzFragment extends Fragment {
         updateMetaUi();
     }
 
+    /**
+     * Update the UI related to Book Title, Author,
+     * and current progress
+     */
     public void updateMetaUi() {
-        if(!mSpritzer.bookSelected()){
+        if(!mSpritzer.isBookSelected()){
             return;
         }
         
@@ -95,6 +99,11 @@ public class SpritzFragment extends Fragment {
         mProgress.setProgress(curChapter);
     }
 
+    /**
+     * Hide or Show the UI related to Book Title, Author,
+     * and current progress
+     * @param show
+     */
     public void showMetaUi(boolean show) {
         if (show) {
             mAuthorView.setVisibility(View.VISIBLE);
@@ -109,6 +118,10 @@ public class SpritzFragment extends Fragment {
         }
     }
 
+    /**
+     * Temporarily fade in the Chapter label.
+     * Used when user crosses a chapter boundary.
+     */
     private void peekChapter() {
         mChapterView.setVisibility(View.VISIBLE);
         // Clean this up
@@ -151,7 +164,7 @@ public class SpritzFragment extends Fragment {
         mSpritzView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mSpritzer != null && mSpritzer.bookSelected()) {
+                if (mSpritzer != null && mSpritzer.isBookSelected()) {
                     if (mSpritzer.isPlaying()) {
                         updateMetaUi();
                         showMetaUi(true);
