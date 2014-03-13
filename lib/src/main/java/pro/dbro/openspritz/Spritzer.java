@@ -228,13 +228,23 @@ public class Spritzer {
         	// otherwise we want to split near the middle.
         	splitIndex = Math.round(thisWord.length()/2F);
         }
+        // in case we found a split character that was > MAX_WORD_LENGTH characters in.
+        if (splitIndex > MAX_WORD_LENGTH) {
+            // If we split the word at a splitting char like "-" or ".", we added one to the splitIndex
+            // in order to ensure the splitting char appears at the head of the split. Not accounting
+            // for this in the recursive call will cause a StackOverflowException
+            return findSplitIndex(thisWord.substring(0,
+                    wordContainsSplittingCharacter(thisWord) ? splitIndex - 1 : splitIndex));
+        }
         if (VERBOSE) {
             Log.i(TAG, "Splitting long word " + thisWord + " into " + thisWord.substring(0, splitIndex) +
-            		" and " + thisWord.substring(splitIndex));
+                    " and " + thisWord.substring(splitIndex));
         }
-        // in case we found a hyphen that was 18 characters in.
-        if (splitIndex > 13) return findSplitIndex(thisWord.substring(0, splitIndex));
         return splitIndex;
+    }
+
+    private boolean wordContainsSplittingCharacter(String word) {
+        return (word.contains(".") || word.contains("-"));
     }
 
 
