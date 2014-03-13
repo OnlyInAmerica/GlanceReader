@@ -162,18 +162,8 @@ public class Spritzer {
     protected void processNextWord() throws InterruptedException {
         if (!mWordQueue.isEmpty()) {
             String word = mWordQueue.remove();
-            if (word.length() > MAX_WORD_LENGTH) {
-                String firstSegment;
-                int splitIndex = findSplitIndex(word);
-                firstSegment = word.substring(0, splitIndex);
-                // A word split is always indicated with a hyphen
-                if (!firstSegment.contains("-")) {
-                    firstSegment = firstSegment + "-";
-                }
-                mWordQueue.addFirst(word.substring(splitIndex));
-                word = firstSegment;
+            word = splitLongWord(word);
 
-            }
             mSpritzHandler.sendMessage(mSpritzHandler.obtainMessage(MSG_PRINT_WORD, word));
             Thread.sleep(getInterWordDelay() * delayMultiplierForWord(word));
             // If word is end of a sentence, add three blanks
@@ -191,8 +181,35 @@ public class Spritzer {
     }
 
     /**
-     * Determine the split index on a given
-     * word, corresponding to the Pivot.
+     * Split the given String if appropriate and
+     * add the tail of the split to the head of
+     * {@link #mWordQueue}
+     * @param word
+     * @return
+     */
+    protected String splitLongWord(String word) {
+        if (word.length() > MAX_WORD_LENGTH) {
+            int splitIndex = findSplitIndex(word);
+            String firstSegment;
+            if (VERBOSE) {
+                Log.i(TAG, "Splitting long word " + word + " into " + word.substring(0, splitIndex) + " and " + word.substring(splitIndex));
+            }
+            firstSegment = word.substring(0, splitIndex);
+            // A word split is always indicated with a hyphen unless ending in a period
+            if (!firstSegment.contains("-") && !firstSegment.endsWith(".")) {
+                firstSegment = firstSegment + "-";
+            }
+            mWordQueue.addFirst(word.substring(splitIndex));
+            word = firstSegment;
+
+        }
+        return word;
+    }
+
+    /**
+     * Determine the split index on a given String
+     * e.g If it exceeds MAX_WORD_LENGTH or contains a hyphen
+     *
      * @param thisWord
      * @return the index on which to split the given String
      */
@@ -219,6 +236,7 @@ public class Spritzer {
         if (splitIndex > 13) return findSplitIndex(thisWord.substring(0, splitIndex));
         return splitIndex;
     }
+
 
     private void printLastWord() {
         if (mWordArray != null) {
