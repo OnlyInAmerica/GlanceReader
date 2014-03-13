@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="pro.dbro.openspritz" >
 
+    <!-- Allows opening previously opened document URI directly. Else, have to show document chooser
+     on each launch-->
+    <uses-permission android:name="android.permission.MANAGE_DOCUMENTS" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <application

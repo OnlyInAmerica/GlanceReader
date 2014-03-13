@@ -276,6 +276,12 @@ public class SpritzFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == SELECT_EPUB && data != null) {
             Uri uri = data.getData();
+            if (Build.VERSION.SDK_INT >= 19) {
+                final int takeFlags = data.getFlags()
+                        & (Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                getActivity().getContentResolver().takePersistableUriPermission(uri, takeFlags);
+            }
             feedEpubToSpritzer(uri);
             updateMetaUi();
         }

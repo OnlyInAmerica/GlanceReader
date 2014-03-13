@@ -2,7 +2,9 @@ package pro.dbro.openspritz;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.UriPermission;
 import android.net.Uri;
+import android.os.Build;
 import android.text.Html;
 import android.util.Log;
 import android.widget.TextView;
@@ -10,6 +12,7 @@ import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.epub.EpubReader;
@@ -23,8 +26,14 @@ import pro.dbro.openspritz.events.NextChapterEvent;
 // TODO: Save epub title : chapter-word
 // TODO: Save State for multiple books
 public class EpubSpritzer extends Spritzer {
+    public static final boolean VERBOSE = false;
 
     private static final String PREFS = "espritz";
+    private static final String PREF_URI = "uri";
+    private static final String PREF_TITLE = "title";
+    private static final String PREF_CHAPTER = "chapter";
+    private static final String PREF_WORD = "word";
+    private static final String PREF_WPM = "wpm";
 
     private Uri mEpubUri;
     private Book mBook;
@@ -121,13 +130,13 @@ public class EpubSpritzer extends Spritzer {
 
     public void saveState() {
         if (mBook != null) {
-            Log.i(TAG, "Saving state");
+            if (VERBOSE) Log.i(TAG, "Saving state");
             SharedPreferences.Editor editor = mTarget.getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit();
-            editor.putInt("Chapter", mChapter)
-                    .putString("epubUri", mEpubUri.toString())
-                    .putInt("Word", mWordArray.length - mWordQueue.size())
-                    .putString("Title", mBook.getTitle())
-                    .putInt("Wpm", mWPM)
+            editor.putInt(PREF_CHAPTER, mChapter)
+                    .putString(PREF_URI, mEpubUri.toString())
+                    .putInt(PREF_WORD, mWordArray.length - mWordQueue.size())
+                    .putString(PREF_TITLE, mBook.getTitle())
+                    .putInt(PREF_WPM, mWPM)
                     .apply();
         }
     }
@@ -135,14 +144,33 @@ public class EpubSpritzer extends Spritzer {
     private void restoreState(boolean openLastEpubUri) {
         SharedPreferences prefs = mTarget.getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         if (openLastEpubUri) {
-            if (prefs.contains("epubUri")) {
-                openEpub(Uri.parse(prefs.getString("epubUri", "")));
+            if (prefs.contains(PREF_URI)) {
+                Uri epubUri = Uri.parse(prefs.getString(PREF_URI, ""));
+                if (Build.VERSION.SDK_INT >= 19) {
+                    boolean uriPermissionPersisted = false;
+                    List<UriPermission> uriPermissions = mTarget.getContext().getContentResolver().getPersistedUriPermissions();
+                    for (UriPermission permission : uriPermissions) {
+                        if (permission.getUri().equals(epubUri)) {
+                            Log.i(TAG, "Found persisted url");
+                            uriPermissionPersisted = true;
+                            openEpub(epubUri);
+                            break;
+                        }
+                    }
+                    if (!uriPermissionPersisted) {
+                        Log.w(TAG, String.format("Permission not persisted for uri: %s. Clearing SharedPreferences " + epubUri.toString()));
+                        prefs.edit().clear().apply();
+                        return;
+                    }
+                } else {
+                    openEpub(epubUri);
+                }
             }
-        } else if (mBook.getTitle().compareTo(prefs.getString("Title", "<>?l")) == 0) {
-            mChapter = prefs.getInt("Chapter", 0);
+        } else if (prefs.contains(PREF_TITLE) && mBook.getTitle().compareTo(prefs.getString(PREF_TITLE, "")) == 0) {
+            mChapter = prefs.getInt(PREF_CHAPTER, 0);
             setText(loadCleanStringFromChapter(mChapter));
-            int oldSize = prefs.getInt("Word", 0);
-            setWpm(prefs.getInt("Wpm", 500));
+            int oldSize = prefs.getInt(PREF_WORD, 0);
+            setWpm(prefs.getInt(PREF_WPM, 500));
             while (mWordQueue.size() > oldSize) {
                 mWordQueue.remove();
             }
