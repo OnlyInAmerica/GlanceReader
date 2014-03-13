@@ -29,8 +29,8 @@ public class Spritzer {
 
     protected static final int MAX_WORD_LENGTH = 13;
     protected static final int CHARS_LEFT_OF_PIVOT = 3;
-    protected String[] mWordArray;                  // The current list of words
-    protected ArrayDeque<String> mWordQueue;        // The queue being actively displayed
+    protected String[] mWordArray;                  // A parsed list of words parsed from {@link #setText(String input)}
+    protected ArrayDeque<String> mWordQueue;        // The queue of words from mWordArray yet to be displayed
     protected TextView mTarget;
     protected int mWPM;
     protected Handler mSpritzHandler;
@@ -47,19 +47,35 @@ public class Spritzer {
         mSpritzHandler = new SpritzHandler(this);
     }
 
+    /**
+     * Prepare to Spritz the given String input
+     *
+     * Call {@link #start()} to begin display
+     * @param input
+     */
     public void setText(String input) {
         createWordArrayFromString(input);
         refillWordQueue();
     }
 
+    /**
+     * Pass a Bus to receive events on, such as
+     * when the display of a given String is finished
+     * @param bus
+     */
     public void setEventBus(Bus bus) {
         mBus = bus;
     }
 
+    /**
+     * Create a String[] from a given String, splitting
+     * on spaces but condensing adjacent spaces
+     * @param input
+     */
     private void createWordArrayFromString(String input) {
         mWordArray = input
                 .replaceAll("/\\s+/g", " ")      // condense adjacent spaces
-                .split(" ");                    // split on spaces
+                .split(" ");                     // split on spaces
     }
 
     protected void init() {
@@ -70,6 +86,11 @@ public class Spritzer {
         mSpritzThreadStarted = false;
     }
 
+    /**
+     * Get the estimated time remaining in the
+     * currently loaded String Queue
+     * @return
+     */
     public int getMinutesRemainingInQueue() {
         if (mWordQueue.size() == 0) {
             return 0;
@@ -77,10 +98,21 @@ public class Spritzer {
         return mWordQueue.size() / mWPM;
     }
 
+    /**
+     * Set the target Word Per Minute rate.
+     * Effective immediately.
+     * @param wpm
+     */
     public void setWpm(int wpm) {
         mWPM = wpm;
     }
 
+    /**
+     * Swap the target TextView. Call this if your
+     * host Activity is Destroyed and Re-Created.
+     * Effective immediately.
+     * @param target
+     */
     public void swapTextView(TextView target) {
         mTarget = target;
         if (!mPlaying) {
@@ -89,6 +121,10 @@ public class Spritzer {
 
     }
 
+    /**
+     * Start displaying the String input
+     * fed to {@link #setText(String)}
+     */
     public void start() {
         if (mPlaying || mWordArray == null) {
             return;
@@ -110,6 +146,19 @@ public class Spritzer {
         mWordQueue.addAll(Arrays.asList(mWordArray));
     }
 
+    /**
+     * Read the current head of mWordQueue and
+     * submit the appropriate Messages to mSpritzHandler.
+     *
+     * Split long words y submitting the first segment of a word
+     * and placing the second at the head of mWordQueue for processing
+     * during the next cycle.
+     *
+     * Must be called on a background thread, as this method uses
+     * {@link Thread#sleep(long)} to time pauses in display.
+     *
+     * @throws InterruptedException
+     */
     protected void processNextWord() throws InterruptedException {
         if (!mWordQueue.isEmpty()) {
             String word = mWordQueue.remove();
@@ -140,7 +189,13 @@ public class Spritzer {
             }
         }
     }
-    
+
+    /**
+     * Determine the split index on a given
+     * word, corresponding to the Pivot.
+     * @param thisWord
+     * @return the index on which to split the given String
+     */
     private int findSplitIndex(String thisWord){
         int splitIndex;
         // Split long words, at hyphen or dot if present.
@@ -171,6 +226,12 @@ public class Spritzer {
         }
     }
 
+    /**
+     * Applies the given String to this Spritzer's TextView,
+     * padding the beginning if necessary to align the pivot character.
+     * Styles the pivot character.
+     * @param word
+     */
     private void printWord(String word) {
         int startSpan = 0;
         int endSpan = 0;
@@ -216,22 +277,27 @@ public class Spritzer {
         return mPlaying;
     }
 
+    /**
+     * Begin the background timer thread
+     */
     private void startTimerThread() {
         synchronized (mPlayingSync) {
             if (!mSpritzThreadStarted) {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        if (VERBOSE)
+                        if (VERBOSE) {
                             Log.i(TAG, "Starting spritzThread with queue length " + mWordQueue.size());
+                        }
                         mPlaying = true;
                         mSpritzThreadStarted = true;
                         while (mPlayingRequested) {
                             try {
                                 processNextWord();
                                 if (mWordQueue.isEmpty()) {
-                                    if (VERBOSE)
+                                    if (VERBOSE) {
                                         Log.i(TAG, "Queue is empty after processNextWord. Pausing");
+                                    }
                                     mPlayingRequested = false;
                                 }
                             } catch (InterruptedException e) {
@@ -256,6 +322,12 @@ public class Spritzer {
         return 1;
     }
 
+    /**
+     * A Handler intended for creation on the Main thread.
+     * Messages are intended to be passed from a background
+     * timing thread. This Handler communicates timing
+     * thread events to the Main thread for UI update.
+     */
     protected static class SpritzHandler extends Handler {
         private WeakReference<Spritzer> mWeakSpritzer;
 
