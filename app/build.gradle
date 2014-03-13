@@ -23,6 +23,7 @@ dependencies {
     compile 'org.slf4j:slf4j-android:1.7.6'
     compile 'com.android.support:support-v4:+'
     compile 'com.squareup:otto:1.3.4'
+    compile 'org.jsoup:jsoup:1.7.3'
 
     compile project(":lib")
     compile fileTree(dir: 'libs', include: ['*.jar'])

@@ -10,6 +10,10 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.safety.Whitelist;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -117,10 +121,17 @@ public class EpubSpritzer extends Spritzer {
         if (VERBOSE) Log.i(TAG, "starting next chapter: " + mChapter);
     }
 
+    private static String extractText(String html) {
+        String filteredLineBreaks = Jsoup.clean(html, "", Whitelist.none().addTags("br", "p"), new Document.OutputSettings().prettyPrint(true));
+        return Jsoup.clean(filteredLineBreaks, "", Whitelist.none(), new Document.OutputSettings().prettyPrint(false));
+    }
+
     private String loadCleanStringFromChapter(int chapter) {
         try {
-            String bookStr = new String(mBook.getTableOfContents().getTocReferences().get(chapter).getResource().getData(), "UTF-8");
-            return Html.fromHtml(bookStr).toString().replace("\n", "").replaceAll("(?s)<!--.*?-->", "");
+            byte[] bookData = mBook.getTableOfContents().getTocReferences().get(chapter).getResource().getData();
+            String bookStr = new String(bookData, "UTF-8");
+
+            return extractText(bookStr);
         } catch (IOException e) {
             e.printStackTrace();
             Log.e(TAG, "Parsing failed " + e.getMessage());
