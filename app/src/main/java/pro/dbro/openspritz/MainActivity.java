@@ -54,7 +54,7 @@ public class MainActivity extends ActionBarActivity implements WpmDialogFragment
     public void onResume() {
         super.onResume();
 
-        if (getIntent().getAction().equals(Intent.ACTION_VIEW) && getIntent().getData() != null) {
+        if (Intent.ACTION_VIEW.equals(getIntent().getAction()) && getIntent().getData() != null) {
             SpritzFragment frag = ((SpritzFragment) getSupportFragmentManager().findFragmentByTag("spritsfrag"));
             frag.feedEpubToSpritzer(getIntent().getData());
         }
