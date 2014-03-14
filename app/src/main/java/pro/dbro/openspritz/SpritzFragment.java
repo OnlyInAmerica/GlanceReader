@@ -26,6 +26,8 @@ import nl.siegmann.epublib.domain.Metadata;
 import pro.dbro.openspritz.events.NextChapterEvent;
 import pro.dbro.openspritz.events.SpritzFinishedEvent;
 
+import java.util.List;
+
 public class SpritzFragment extends Fragment {
     private static final String TAG = "SpritzFragment";
 
@@ -74,10 +76,15 @@ public class SpritzFragment extends Fragment {
         
         Book book = mSpritzer.getBook();
         Metadata meta = book.getMetadata();
-        Author author = meta.getAuthors().get(0);
-        int curChapter = mSpritzer.getCurrentChapter();
 
-        mAuthorView.setText(author.getFirstname() + " " + author.getLastname());
+        //Set author if available
+        List<Author> authors = meta.getAuthors();
+        if(!authors.isEmpty()){
+            Author author = authors.get(0);
+            mAuthorView.setText(author.getFirstname() + " " + author.getLastname());
+        }
+
+        int curChapter = mSpritzer.getCurrentChapter();
         mTitleView.setText(meta.getFirstTitle());
         String chapterText;
         if (book.getSpine().getResource(curChapter).getTitle() == null || book.getSpine().getResource(curChapter).getTitle().trim().compareTo("") == 0) {
