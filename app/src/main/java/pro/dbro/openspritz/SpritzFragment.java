@@ -20,13 +20,13 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import com.squareup.otto.ThreadEnforcer;
 
+import java.util.List;
+
 import nl.siegmann.epublib.domain.Author;
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.domain.Metadata;
 import pro.dbro.openspritz.events.NextChapterEvent;
 import pro.dbro.openspritz.events.SpritzFinishedEvent;
-
-import java.util.List;
 
 public class SpritzFragment extends Fragment {
     private static final String TAG = "SpritzFragment";
@@ -70,18 +70,20 @@ public class SpritzFragment extends Fragment {
      * and current progress
      */
     public void updateMetaUi() {
-        if(!mSpritzer.isBookSelected()){
+        if (!mSpritzer.isBookSelected()) {
             return;
         }
-        
+
         Book book = mSpritzer.getBook();
         Metadata meta = book.getMetadata();
 
-        //Set author if available
+        // Set author if available
         List<Author> authors = meta.getAuthors();
-        if(!authors.isEmpty()){
+        if (!authors.isEmpty()) {
             Author author = authors.get(0);
             mAuthorView.setText(author.getFirstname() + " " + author.getLastname());
+        } else {
+            mAuthorView.setText("");
         }
 
         int curChapter = mSpritzer.getCurrentChapter();
@@ -109,6 +111,7 @@ public class SpritzFragment extends Fragment {
     /**
      * Hide or Show the UI related to Book Title, Author,
      * and current progress
+     *
      * @param show
      */
     public void showMetaUi(boolean show) {
@@ -206,7 +209,7 @@ public class SpritzFragment extends Fragment {
         mBus.register(this);
         if (mSpritzer == null) {
             mSpritzer = new EpubSpritzer(mSpritzView);
-            if(mSpritzer.getBook() == null) {
+            if (mSpritzer.getBook() == null) {
                 mSpritzView.setText(getString(R.string.select_epub));
             } else {
                 // EpubSpritzer loaded the last book being reads
