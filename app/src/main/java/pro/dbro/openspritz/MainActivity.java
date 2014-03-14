@@ -1,28 +1,26 @@
 package pro.dbro.openspritz;
 
-import android.app.ActionBar;
-import android.app.DialogFragment;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.WindowCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.Window;
 
 import nl.siegmann.epublib.domain.Book;
 
 public class MainActivity extends ActionBarActivity implements WpmDialogFragment.OnWpmSelectListener, ChapterListDialogFragment.OnChapterSelectListener, SpritzFragment.SpritzFragmentListener {
-    private static final String TAG = "MainActivity";
-    private static final String PREFS = "ui_prefs";
-    private static final int THEME_LIGHT = 0;
-    private static final int THEME_DARK = 1;
+    private static final String TAG         = "MainActivity";
+    private static final String PREFS       = "ui_prefs";
+    private static final int    THEME_LIGHT = 0;
+    private static final int    THEME_DARK  = 1;
 
     private int mWpm;
 
@@ -39,8 +37,8 @@ public class MainActivity extends ActionBarActivity implements WpmDialogFragment
                 break;
         }
         super.onCreate(savedInstanceState);
-        getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
-        ActionBar actionBar = getActionBar();
+        requestWindowFeature(WindowCompat.FEATURE_ACTION_BAR_OVERLAY);
+        ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle("");
         actionBar.setDisplayShowHomeEnabled(false);
         actionBar.setDisplayShowTitleEnabled(false);
@@ -56,7 +54,7 @@ public class MainActivity extends ActionBarActivity implements WpmDialogFragment
     public void onResume() {
         super.onResume();
 
-        if (getIntent().getAction().equals(Intent.ACTION_VIEW) && getIntent().getData() != null) {
+        if (Intent.ACTION_VIEW.equals(getIntent().getAction()) && getIntent().getData() != null) {
             SpritzFragment frag = ((SpritzFragment) getSupportFragmentManager().findFragmentByTag("spritsfrag"));
             frag.feedEpubToSpritzer(getIntent().getData());
         }
@@ -84,7 +82,7 @@ public class MainActivity extends ActionBarActivity implements WpmDialogFragment
                     mWpm = 500;
                 }
             }
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             DialogFragment newFragment = WpmDialogFragment.newInstance(mWpm);
             newFragment.show(ft, "dialog");
             return true;
@@ -111,19 +109,30 @@ public class MainActivity extends ActionBarActivity implements WpmDialogFragment
         mWpm = wpm;
     }
 
+    public void reload() {
+        Intent intent = getIntent();
+        overridePendingTransition(0, 0);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        finish();
+
+        overridePendingTransition(0, 0);
+        startActivity(intent);
+    }
+
     private void applyDarkTheme() {
         getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
                 .putInt("THEME", THEME_DARK)
                 .commit();
-        recreate();
 
+        reload();
     }
 
     private void applyLightTheme() {
         getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
                 .putInt("THEME", THEME_LIGHT)
                 .commit();
-        recreate();
+
+        reload();
     }
 
     @Override
@@ -142,7 +151,7 @@ public class MainActivity extends ActionBarActivity implements WpmDialogFragment
         SpritzFragment frag = ((SpritzFragment) getSupportFragmentManager().findFragmentByTag("spritsfrag"));
         if (frag.getSpritzer() != null) {
             Book book = frag.getSpritzer().getBook();
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             DialogFragment newFragment = ChapterListDialogFragment.newInstance(book);
             newFragment.show(ft, "dialog");
         } else {
