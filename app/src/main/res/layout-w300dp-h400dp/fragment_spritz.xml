@@ -14,7 +14,7 @@
         android:focusableInTouchMode="true"
         android:gravity="left"
         android:keepScreenOn="true"
-        android:textSize="30sp"
+        android:textSize="35sp"
         android:typeface="monospace" />
 
     <TextView
