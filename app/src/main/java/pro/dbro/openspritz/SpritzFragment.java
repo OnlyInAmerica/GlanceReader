@@ -50,11 +50,6 @@ public class SpritzFragment extends Fragment {
         // Required empty public constructor
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
     public void feedEpubToSpritzer(Uri epubPath) {
         if (mSpritzer == null) {
             mSpritzer = new EpubSpritzer(mSpritzView, epubPath);
@@ -89,10 +84,10 @@ public class SpritzFragment extends Fragment {
         int curChapter = mSpritzer.getCurrentChapter();
         mTitleView.setText(meta.getFirstTitle());
         String chapterText;
-        if (book.getSpine().getResource(curChapter).getTitle() == null || book.getSpine().getResource(curChapter).getTitle().trim().compareTo("") == 0) {
+        if (book.getTableOfContents().getTocReferences().get(curChapter).getResource().getTitle() == null || book.getTableOfContents().getTocReferences().get(curChapter).getResource().getTitle().compareTo("") == 0) {
             chapterText = String.format("Chapter %d", curChapter);
         } else {
-            chapterText = book.getSpine().getResource(curChapter).getTitle();
+            chapterText = book.getTableOfContents().getTocReferences().get(curChapter).getResource().getTitle();
         }
 
         int startSpan = chapterText.length();
@@ -241,11 +236,6 @@ public class SpritzFragment extends Fragment {
         if (mBus != null) {
             mBus.unregister(this);
         }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
     }
 
     @Subscribe

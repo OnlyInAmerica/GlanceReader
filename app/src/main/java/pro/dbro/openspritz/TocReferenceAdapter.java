@@ -7,17 +7,16 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import java.util.List;
-
-import nl.siegmann.epublib.domain.SpineReference;
+import nl.siegmann.epublib.domain.TOCReference;
+import nl.siegmann.epublib.domain.TableOfContents;
 
 /**
  * Created by davidbrodsky on 3/5/14.
  */
-public class SpineReferenceAdapter extends ArrayAdapter<SpineReference> {
+public class TocReferenceAdapter extends ArrayAdapter<TOCReference> {
 
-    public SpineReferenceAdapter(final Context context, int resource, List<SpineReference> objects) {
-        super(context, R.layout.chapter_list_item, objects);
+    public TocReferenceAdapter(final Context context, int resource, TableOfContents toc) {
+        super(context, resource, toc.getTocReferences());
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -27,11 +26,11 @@ public class SpineReferenceAdapter extends ArrayAdapter<SpineReference> {
             assert convertView != null;
 
         }
-        SpineReference ref = getItem(position);
-        if (ref.getResource().getTitle() == null || ref.getResource().getTitle().trim().compareTo("") == 0) {
+        TOCReference ref = getItem(position);
+        if (ref.getTitle() == null || ref.getTitle().trim().compareTo("") == 0) {
             ((TextView) convertView.findViewById(R.id.title)).setText(String.format("Chapter %d", position));
         } else {
-            ((TextView) convertView.findViewById(R.id.title)).setText(ref.getResource().getTitle());
+            ((TextView) convertView.findViewById(R.id.title)).setText(String.format("%d: %s", position, ref.getTitle()));
         }
         return convertView;
     }

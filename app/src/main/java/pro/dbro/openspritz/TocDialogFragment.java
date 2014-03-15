@@ -14,15 +14,15 @@ import nl.siegmann.epublib.domain.Book;
 /**
  * Created by davidbrodsky on 3/1/14.
  */
-public class ChapterListDialogFragment extends DialogFragment implements ListView.OnItemClickListener {
+public class TocDialogFragment extends DialogFragment implements ListView.OnItemClickListener {
 
     private Book mBook;
-    private SpineReferenceAdapter mAdapter;
+    private TocReferenceAdapter mAdapter;
     private ListView mList;
     private OnChapterSelectListener mOnChapterSelectListener;
 
-    static ChapterListDialogFragment newInstance(Book book) {
-        ChapterListDialogFragment f = new ChapterListDialogFragment();
+    static TocDialogFragment newInstance(Book book) {
+        TocDialogFragment f = new TocDialogFragment();
 
         Bundle args = new Bundle();
         args.putSerializable("book", book);
@@ -46,7 +46,7 @@ public class ChapterListDialogFragment extends DialogFragment implements ListVie
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBook = (Book) getArguments().getSerializable("book");
-        mAdapter = new SpineReferenceAdapter(getActivity(), R.layout.chapter_list_item, mBook.getSpine().getSpineReferences());
+        mAdapter = new TocReferenceAdapter(getActivity(), R.layout.chapter_list_item, mBook.getTableOfContents());
     }
 
     @Override
