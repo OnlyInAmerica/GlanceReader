@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.Window;
 
 import nl.siegmann.epublib.domain.Book;
+import pro.dbro.openspritz.formats.SpritzerBook;
 
 public class MainActivity extends ActionBarActivity implements WpmDialogFragment.OnWpmSelectListener, TocDialogFragment.OnChapterSelectListener, SpritzFragment.SpritzFragmentListener {
     private static final String TAG = "MainActivity";
@@ -139,7 +140,7 @@ public class MainActivity extends ActionBarActivity implements WpmDialogFragment
     public void onChapterSelectRequested() {
         SpritzFragment frag = ((SpritzFragment) getSupportFragmentManager().findFragmentByTag("spritsfrag"));
         if (frag.getSpritzer() != null) {
-            Book book = frag.getSpritzer().getBook();
+            SpritzerBook book = frag.getSpritzer().getBook();
             FragmentTransaction ft = getFragmentManager().beginTransaction();
             DialogFragment newFragment = TocDialogFragment.newInstance(book);
             newFragment.show(ft, "dialog");
