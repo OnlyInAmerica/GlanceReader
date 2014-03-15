@@ -7,40 +7,41 @@
 
     <pro.dbro.openspritz.SpritzerTextView
         android:id="@+id/spritzText"
-        android:layout_width="300dp"
+        android:layout_width="@dimen/spritzer_text_view_width"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:clickable="true"
         android:focusableInTouchMode="true"
         android:gravity="left"
         android:keepScreenOn="true"
-        android:textSize="30sp"
+        android:textSize="@dimen/spritzer_text_view_text_size"
         android:typeface="monospace" />
 
     <TextView
         android:id="@+id/title"
         style="@style/SubduedTextStyle"
-        android:layout_width="150dp"
+        android:layout_width="@dimen/spritzer_title_width"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_marginLeft="8dp"
+        android:layout_marginLeft="@dimen/spritzer_title_margin_left"
+        android:layout_marginTop="@dimen/spritzer_title_margin_top"
         android:ellipsize="marquee"
         android:fontFamily="sans-serif-condensed"
         android:singleLine="true"
-        android:textSize="24sp" />
+        android:textSize="@dimen/spritzer_title_text_size" />
 
     <TextView
         android:id="@+id/author"
         style="@style/SubduedTextStyle"
-        android:layout_width="150dp"
+        android:layout_width="@dimen/spritzer_author_width"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@id/title"
         android:layout_below="@id/title"
         android:ellipsize="marquee"
         android:fontFamily="sans-serif-condensed"
         android:singleLine="true"
-        android:textSize="18sp" />
+        android:textSize="@dimen/spritzer_author_text_size" />
 
     <ProgressBar
         android:id="@+id/progress"
@@ -48,8 +49,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
+        android:layout_marginLeft="@dimen/progress_margin"
+        android:layout_marginRight="@dimen/progress_margin"
         android:indeterminate="false"
         android:visibility="invisible" />
 
@@ -60,10 +61,10 @@
         android:layout_height="wrap_content"
         android:layout_above="@id/progress"
         android:layout_alignParentLeft="true"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
+        android:layout_marginBottom="@dimen/chapter_margin"
+        android:layout_marginLeft="@dimen/chapter_margin"
         android:clickable="true"
         android:fontFamily="sans-serif-condensed"
-        android:textColor="#33B5E5"
-        android:textSize="22sp" />
+        android:textColor="@color/chapter_text_color"
+        android:textSize="@dimen/chapter_text_size" />
 </RelativeLayout>

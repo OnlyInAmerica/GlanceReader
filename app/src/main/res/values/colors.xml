@@ -15,4 +15,5 @@
     <color name="spritz_bg_dark">#ff171717</color>
 
     <color name="guide">#DDDDDD</color>
+    <color name="chapter_text_color">#33B5E5</color>
 </resources>

@@ -3,4 +3,17 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
-    </resources>
+    <!-- Main spritzer view dimensions -->
+    <dimen name="spritzer_text_view_width">300dp</dimen>
+    <dimen name="spritzer_text_view_text_size">30sp</dimen>
+    <dimen name="spritzer_title_width">150dp</dimen>
+    <dimen name="spritzer_title_margin_left">8dp</dimen>
+    <dimen name="spritzer_title_margin_top">0dp</dimen>
+    <dimen name="spritzer_title_text_size">24sp</dimen>
+    <dimen name="spritzer_author_width">150dp</dimen>
+    <dimen name="spritzer_author_text_size">18sp</dimen>
+    <dimen name="progress_margin">8dp</dimen>
+    <dimen name="chapter_margin">8dp</dimen>
+    <dimen name="chapter_text_size">22sp</dimen>
+
+</resources>
