@@ -6,6 +6,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.TextAppearanceSpan;
 import android.util.Log;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.squareup.otto.Bus;
@@ -41,6 +42,9 @@ public class Spritzer {
 
     protected Bus mBus;
 
+    protected int mCurWordIdx;
+    private ProgressBar mProgressBar;
+
     public Spritzer(TextView target) {
         init();
         mTarget = target;
@@ -55,7 +59,13 @@ public class Spritzer {
      */
     public void setText(String input) {
         createWordArrayFromString(input);
+        setMaxProgress();
         refillWordQueue();
+    }
+    private void setMaxProgress() {
+        if (mWordArray != null && mProgressBar != null) {
+            mProgressBar.setMax(mWordArray.length);
+        }
     }
 
     /**
@@ -84,6 +94,7 @@ public class Spritzer {
         mPlaying = false;
         mPlayingRequested = false;
         mSpritzThreadStarted = false;
+        mCurWordIdx = 0;
     }
 
     /**
@@ -96,6 +107,10 @@ public class Spritzer {
             return 0;
         }
         return mWordQueue.size() / mWPM;
+    }
+
+    public int getWpm() {
+        return mWPM;
     }
 
     /**
@@ -142,9 +157,18 @@ public class Spritzer {
     }
 
     private void refillWordQueue() {
+        updateProgress();
+        mCurWordIdx = 0;
         mWordQueue.clear();
         mWordQueue.addAll(Arrays.asList(mWordArray));
     }
+
+    private void updateProgress() {
+        if (mProgressBar != null) {
+            mProgressBar.setProgress(mCurWordIdx);
+        }
+    }
+
 
     /**
      * Read the current head of mWordQueue and
@@ -162,6 +186,8 @@ public class Spritzer {
     protected void processNextWord() throws InterruptedException {
         if (!mWordQueue.isEmpty()) {
             String word = mWordQueue.remove();
+            mCurWordIdx += 1;
+            // Split long words, at hyphen if present
             word = splitLongWord(word);
 
             mSpritzHandler.sendMessage(mSpritzHandler.obtainMessage(MSG_PRINT_WORD, word));
@@ -178,6 +204,7 @@ public class Spritzer {
                 mBus.post(new SpritzFinishedEvent());
             }
         }
+        updateProgress();
     }
 
     /**
@@ -199,6 +226,7 @@ public class Spritzer {
             if (!firstSegment.contains("-") && !firstSegment.endsWith(".")) {
                 firstSegment = firstSegment + "-";
             }
+            mCurWordIdx--; //have to account for the added word in the queue
             mWordQueue.addFirst(word.substring(splitIndex));
             word = firstSegment;
 
@@ -348,6 +376,20 @@ public class Spritzer {
             return 3;
         }
         return 1;
+    }
+
+    public String[] getWordArray() {
+        return mWordArray;
+    }
+
+    public ArrayDeque<String> getWordQueue() {
+        return mWordQueue;
+    }
+
+    public void attachProgressBar(ProgressBar bar) {
+        if (bar != null) {
+            mProgressBar = bar;
+        }
     }
 
     /**
