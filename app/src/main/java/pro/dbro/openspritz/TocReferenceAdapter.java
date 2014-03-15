@@ -30,7 +30,7 @@ public class TocReferenceAdapter extends ArrayAdapter<TOCReference> {
         if (ref.getTitle() == null || ref.getTitle().trim().compareTo("") == 0) {
             ((TextView) convertView.findViewById(R.id.title)).setText(String.format("Chapter %d", position));
         } else {
-            ((TextView) convertView.findViewById(R.id.title)).setText(ref.getTitle());
+            ((TextView) convertView.findViewById(R.id.title)).setText(String.format("%d: %s", position, ref.getTitle()));
         }
         return convertView;
     }
