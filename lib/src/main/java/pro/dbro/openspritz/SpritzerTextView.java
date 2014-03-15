@@ -8,6 +8,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 /**
@@ -25,6 +26,35 @@ public class SpritzerTextView extends TextView implements View.OnClickListener {
     private String mTestString;
     private boolean mDefaultClickListener = false;
     private int mAdditonalPadding;
+
+    /**
+     * Interface definition for a callback to be invoked when the
+     * clickControls are enabled and the view is clicked
+     */
+    public static interface OnClickControlListener {
+        /**
+         * Called when the spritzer pauses upon click
+         */
+        void onPause();
+
+        /**
+         * Called when the spritzer plays upon clicked
+         */
+        void onPlay();
+    }
+    /**
+     * Register a callback for when the view has been clicked
+     * <p/>
+     * Note: it is mandatory to use the clickControls
+     *
+     * @param listener
+     */
+    public void setOnClickControlListener(OnClickControlListener listener) {
+        mClickControlListener = listener;
+    }
+
+    private OnClickControlListener mClickControlListener;
+
 
     public SpritzerTextView(Context context) {
         super(context);
@@ -170,6 +200,17 @@ public class SpritzerTextView extends TextView implements View.OnClickListener {
     }
 
     /**
+     * If true, this view will automatically pause or play spritz text upon view clicks
+     * <p/>
+     * If false, the callback OnClickControls are not invoked and
+     *
+     * @param useDefaultClickControls
+     */
+    public void setUseClickControls(boolean useDefaultClickControls) {
+        mDefaultClickListener = useDefaultClickControls;
+    }
+
+    /**
      * Will play the spritz text that was set in setSpritzText
      */
     public void play() {
@@ -180,6 +221,14 @@ public class SpritzerTextView extends TextView implements View.OnClickListener {
         mSpritzer.pause();
     }
 
+    public int getWpm() {
+        return mSpritzer.getWpm();
+    }
+
+    public void attachProgressBar(ProgressBar bar) {
+        mSpritzer.attachProgressBar(bar);
+
+    }
 
     public Spritzer getSpritzer() {
         return mSpritzer;
@@ -188,10 +237,20 @@ public class SpritzerTextView extends TextView implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         if (mSpritzer.isPlaying()) {
+            if (mClickControlListener != null) {
+                mClickControlListener.onPause();
+            }
             pause();
         } else {
+            if (mClickControlListener != null) {
+                mClickControlListener.onPlay();
+            }
             play();
         }
 
+    }
+
+    public int getCurrentWordIndex() {
+        return mSpritzer.mCurWordIdx;
     }
 }
