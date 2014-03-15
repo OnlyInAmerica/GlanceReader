@@ -7,18 +7,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.Window;
 
 import nl.siegmann.epublib.domain.Book;
+import pro.dbro.openspritz.formats.SpritzerBook;
 
-public class MainActivity extends ActionBarActivity implements WpmDialogFragment.OnWpmSelectListener, ChapterListDialogFragment.OnChapterSelectListener, SpritzFragment.SpritzFragmentListener {
+public class MainActivity extends ActionBarActivity implements WpmDialogFragment.OnWpmSelectListener, TocDialogFragment.OnChapterSelectListener, SpritzFragment.SpritzFragmentListener {
     private static final String TAG = "MainActivity";
     private static final String PREFS = "ui_prefs";
     private static final int THEME_LIGHT = 0;
@@ -141,9 +140,9 @@ public class MainActivity extends ActionBarActivity implements WpmDialogFragment
     public void onChapterSelectRequested() {
         SpritzFragment frag = ((SpritzFragment) getSupportFragmentManager().findFragmentByTag("spritsfrag"));
         if (frag.getSpritzer() != null) {
-            Book book = frag.getSpritzer().getBook();
+            SpritzerBook book = frag.getSpritzer().getBook();
             FragmentTransaction ft = getFragmentManager().beginTransaction();
-            DialogFragment newFragment = ChapterListDialogFragment.newInstance(book);
+            DialogFragment newFragment = TocDialogFragment.newInstance(book);
             newFragment.show(ft, "dialog");
         } else {
             Log.e(TAG, "SpritzFragment not available for chapter selection");
