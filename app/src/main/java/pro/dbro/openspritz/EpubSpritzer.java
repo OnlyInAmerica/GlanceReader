@@ -72,7 +72,7 @@ public class EpubSpritzer extends Spritzer {
             }
             mEpubUri = epubUri;
             mBook = (new EpubReader()).readEpub(epubInputStream);
-            mMaxChapter = mBook.getTableOfContents().size();
+            mMaxChapter = mBook.getTableOfContents().getTocReferences().size();
             restoreState(false);
         } catch (IOException e) {
             e.printStackTrace();
