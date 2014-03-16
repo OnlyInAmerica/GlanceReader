@@ -1,6 +1,5 @@
 package pro.dbro.openspritz;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -18,13 +17,13 @@ import android.widget.TextView;
 
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
-import com.squareup.otto.ThreadEnforcer;
 
 import java.util.List;
 
 import nl.siegmann.epublib.domain.Author;
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.domain.Metadata;
+import pro.dbro.openspritz.events.ChapterSelectRequested;
 import pro.dbro.openspritz.events.NextChapterEvent;
 import pro.dbro.openspritz.events.SpritzFinishedEvent;
 
@@ -38,8 +37,6 @@ public class SpritzFragment extends Fragment {
     private ProgressBar mProgress;
     private TextView mSpritzView;
     private Bus mBus;
-
-    private SpritzFragmentListener mSpritzFragmentListener;
 
     public static SpritzFragment newInstance() {
         SpritzFragment fragment = new SpritzFragment();
@@ -166,7 +163,7 @@ public class SpritzFragment extends Fragment {
         mChapterView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mSpritzFragmentListener.onChapterSelectRequested();
+                mBus.post(new ChapterSelectRequested());
             }
         });
         mProgress = ((ProgressBar) root.findViewById(R.id.progress));
@@ -192,20 +189,10 @@ public class SpritzFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mSpritzFragmentListener = (SpritzFragmentListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement SpritzFragmentListener");
-        }
-    }
-
-    @Override
     public void onStart() {
         super.onStart();
-        mBus = new Bus(ThreadEnforcer.ANY);
+        OpenSpritzApplication app = (OpenSpritzApplication) getActivity().getApplication();
+        mBus = app.getBus();
         mBus.register(this);
         if (mSpritzer == null) {
             mSpritzer = new EpubSpritzer(mSpritzView);
@@ -313,9 +300,4 @@ public class SpritzFragment extends Fragment {
             updateMetaUi();
         }
     }
-
-    public interface SpritzFragmentListener {
-        public abstract void onChapterSelectRequested();
-    }
-
 }

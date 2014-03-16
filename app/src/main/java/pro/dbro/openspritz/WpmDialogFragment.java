@@ -12,6 +12,10 @@ import android.view.animation.AnimationUtils;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.squareup.otto.Bus;
+
+import pro.dbro.openspritz.events.WpmSelectedEvent;
+
 /**
  * Created by davidbrodsky on 3/1/14.
  */
@@ -26,8 +30,8 @@ public class WpmDialogFragment extends DialogFragment {
     private boolean mAnimationRunning;
     private SeekBar mWpmSeek;
     private TextView mWpmLabel;
-    private OnWpmSelectListener mOnWpmSelectListener;
     private int mWpm;
+    private Bus mBus;
 
     static WpmDialogFragment newInstance(int wpm) {
         WpmDialogFragment f = new WpmDialogFragment();
@@ -41,21 +45,13 @@ public class WpmDialogFragment extends DialogFragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mOnWpmSelectListener = (OnWpmSelectListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnWpmSelectListener");
-        }
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mWpm = Math.max(MIN_WPM, getArguments().getInt("wpm"));
         mAnimationRunning = false;
+
+        OpenSpritzApplication app = (OpenSpritzApplication) getActivity().getApplication();
+        this.mBus = app.getBus();
     }
 
     @Override
@@ -74,7 +70,7 @@ public class WpmDialogFragment extends DialogFragment {
                 mWpm = Math.max(MIN_WPM, (int) ((progress / 100.0) * MAX_WPM));
                 String wpmStr = mWpm + " WPM";
                 mWpmLabel.setText(wpmStr);
-                mOnWpmSelectListener.onWpmSelected(mWpm);
+                mBus.post(new WpmSelectedEvent(mWpm));
                 getDialog().setTitle(wpmStr);
                 if (mWpm >= WHOAH_THRESHOLD_WPM + 50 && !mAnimationRunning) {
                     setTrippin(true);
@@ -114,9 +110,5 @@ public class WpmDialogFragment extends DialogFragment {
             mView.clearAnimation();
             mAnimationRunning = false;
         }
-    }
-
-    public interface OnWpmSelectListener {
-        public abstract void onWpmSelected(int wpm);
     }
 }
