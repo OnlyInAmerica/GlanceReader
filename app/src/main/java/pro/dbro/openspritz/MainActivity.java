@@ -7,24 +7,30 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.Window;
 
-import nl.siegmann.epublib.domain.Book;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 
-public class MainActivity extends ActionBarActivity implements WpmDialogFragment.OnWpmSelectListener, ChapterListDialogFragment.OnChapterSelectListener, SpritzFragment.SpritzFragmentListener {
+import pro.dbro.openspritz.events.ChapterSelectRequested;
+import pro.dbro.openspritz.events.ChapterSelectedEvent;
+import pro.dbro.openspritz.events.WpmSelectedEvent;
+import pro.dbro.openspritz.formats.SpritzerBook;
+
+public class MainActivity extends ActionBarActivity {
     private static final String TAG = "MainActivity";
+    public static final String SPRITZ_FRAG_TAG = "spritzfrag";
     private static final String PREFS = "ui_prefs";
     private static final int THEME_LIGHT = 0;
     private static final int THEME_DARK = 1;
 
     private int mWpm;
+    private Bus mBus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +45,7 @@ public class MainActivity extends ActionBarActivity implements WpmDialogFragment
                 break;
         }
         super.onCreate(savedInstanceState);
+
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
         ActionBar actionBar = getActionBar();
         actionBar.setTitle("");
@@ -48,8 +55,12 @@ public class MainActivity extends ActionBarActivity implements WpmDialogFragment
         setContentView(R.layout.activity_main);
 
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, new SpritzFragment(), "spritsfrag")
+                .replace(R.id.container, new SpritzFragment(), SPRITZ_FRAG_TAG)
                 .commit();
+
+        OpenSpritzApplication app = (OpenSpritzApplication) getApplication();
+        this.mBus = app.getBus();
+        this.mBus.register(this);
     }
 
     @Override
@@ -57,8 +68,16 @@ public class MainActivity extends ActionBarActivity implements WpmDialogFragment
         super.onResume();
 
         if (getIntent().getAction().equals(Intent.ACTION_VIEW) && getIntent().getData() != null) {
-            SpritzFragment frag = ((SpritzFragment) getSupportFragmentManager().findFragmentByTag("spritsfrag"));
+            SpritzFragment frag = getSpritzFragment();
             frag.feedEpubToSpritzer(getIntent().getData());
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mBus != null) {
+            mBus.unregister(this);
         }
     }
 
@@ -78,8 +97,8 @@ public class MainActivity extends ActionBarActivity implements WpmDialogFragment
         int id = item.getItemId();
         if (id == R.id.action_speed) {
             if (mWpm == 0) {
-                if (((SpritzFragment) getSupportFragmentManager().findFragmentByTag("spritsfrag")).getSpritzer() != null) {
-                    mWpm = ((SpritzFragment) getSupportFragmentManager().findFragmentByTag("spritsfrag")).getSpritzer().mWPM;
+                if (getSpritzFragment().getSpritzer() != null) {
+                    mWpm = getSpritzFragment().getSpritzer().mWPM;
                 } else {
                     mWpm = 500;
                 }
@@ -97,18 +116,18 @@ public class MainActivity extends ActionBarActivity implements WpmDialogFragment
                 applyLightTheme();
             }
         } else if (id == R.id.action_open) {
-            ((SpritzFragment) getSupportFragmentManager().findFragmentByTag("spritsfrag")).chooseEpub();
+            getSpritzFragment().chooseEpub();
         }
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onWpmSelected(int wpm) {
-        if (((SpritzFragment) getSupportFragmentManager().findFragmentByTag("spritsfrag")).getSpritzer() != null) {
-            ((SpritzFragment) getSupportFragmentManager().findFragmentByTag("spritsfrag")).getSpritzer()
-                    .setWpm(wpm);
+    @Subscribe
+    public void onWpmSelected(WpmSelectedEvent event) {
+        if (getSpritzFragment() != null) {
+            getSpritzFragment().getSpritzer()
+                    .setWpm(event.getWpm());
         }
-        mWpm = wpm;
+        mWpm = event.getWpm();
     }
 
     private void applyDarkTheme() {
@@ -126,27 +145,31 @@ public class MainActivity extends ActionBarActivity implements WpmDialogFragment
         recreate();
     }
 
-    @Override
-    public void onChapterSelected(int chapter) {
-        SpritzFragment frag = ((SpritzFragment) getSupportFragmentManager().findFragmentByTag("spritsfrag"));
-        if (frag.getSpritzer() != null) {
-            frag.getSpritzer().printChapter(chapter);
+    @Subscribe
+    public void onChapterSelected(ChapterSelectedEvent event) {
+        SpritzFragment frag = getSpritzFragment();
+        if (frag != null && frag.getSpritzer() != null) {
+            frag.getSpritzer().printChapter(event.getChapter());
             frag.updateMetaUi();
+        } else {
+            Log.e(TAG, "SpritzFragment not available to apply chapter selection");
+        }
+    }
+
+    @Subscribe
+    public void onChapterSelectRequested(ChapterSelectRequested ignored) {
+        SpritzFragment frag = getSpritzFragment();
+        if (frag != null && frag.getSpritzer() != null) {
+            SpritzerBook book = frag.getSpritzer().getBook();
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            DialogFragment newFragment = TocDialogFragment.newInstance(book);
+            newFragment.show(ft, "dialog");
         } else {
             Log.e(TAG, "SpritzFragment not available for chapter selection");
         }
     }
 
-    @Override
-    public void onChapterSelectRequested() {
-        SpritzFragment frag = ((SpritzFragment) getSupportFragmentManager().findFragmentByTag("spritsfrag"));
-        if (frag.getSpritzer() != null) {
-            Book book = frag.getSpritzer().getBook();
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
-            DialogFragment newFragment = ChapterListDialogFragment.newInstance(book);
-            newFragment.show(ft, "dialog");
-        } else {
-            Log.e(TAG, "SpritzFragment not available for chapter selection");
-        }
+    private SpritzFragment getSpritzFragment() {
+        return ((SpritzFragment) getSupportFragmentManager().findFragmentByTag(SPRITZ_FRAG_TAG));
     }
 }

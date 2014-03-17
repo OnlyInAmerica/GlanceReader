@@ -9,20 +9,24 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.squareup.otto.Bus;
+
 import nl.siegmann.epublib.domain.Book;
+import pro.dbro.openspritz.formats.SpritzerBook;
+import pro.dbro.openspritz.events.ChapterSelectedEvent;
 
 /**
  * Created by davidbrodsky on 3/1/14.
  */
-public class ChapterListDialogFragment extends DialogFragment implements ListView.OnItemClickListener {
+public class TocDialogFragment extends DialogFragment implements ListView.OnItemClickListener {
 
-    private Book mBook;
-    private SpineReferenceAdapter mAdapter;
+    private SpritzerBook mBook;
+    private TocReferenceAdapter mAdapter;
     private ListView mList;
-    private OnChapterSelectListener mOnChapterSelectListener;
+    private Bus mBus;
 
-    static ChapterListDialogFragment newInstance(Book book) {
-        ChapterListDialogFragment f = new ChapterListDialogFragment();
+    static TocDialogFragment newInstance(SpritzerBook book) {
+        TocDialogFragment f = new TocDialogFragment();
 
         Bundle args = new Bundle();
         args.putSerializable("book", book);
@@ -32,21 +36,10 @@ public class ChapterListDialogFragment extends DialogFragment implements ListVie
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mOnChapterSelectListener = (OnChapterSelectListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement SpritzFragmentListener");
-        }
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBook = (Book) getArguments().getSerializable("book");
-        mAdapter = new SpineReferenceAdapter(getActivity(), R.layout.chapter_list_item, mBook.getSpine().getSpineReferences());
+        mBook = (SpritzerBook) getArguments().getSerializable("book");
+        mAdapter = new TocReferenceAdapter(getActivity(), R.layout.chapter_list_item, mBook);
     }
 
     @Override
@@ -57,6 +50,9 @@ public class ChapterListDialogFragment extends DialogFragment implements ListVie
         mList.setAdapter(mAdapter);
         mList.setOnItemClickListener(this);
 
+        OpenSpritzApplication app = (OpenSpritzApplication) getActivity().getApplication();
+        this.mBus = ((OpenSpritzApplication)getActivity().getApplication()).getBus();
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(getActivity().getString(R.string.select_chapter))
                 .setView(v);
@@ -65,11 +61,7 @@ public class ChapterListDialogFragment extends DialogFragment implements ListVie
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        mOnChapterSelectListener.onChapterSelected(position);
+        mBus.post(new ChapterSelectedEvent(position));
         getDialog().dismiss();
-    }
-
-    public interface OnChapterSelectListener {
-        public abstract void onChapterSelected(int chapter);
     }
 }

@@ -1,6 +1,5 @@
 package pro.dbro.openspritz;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -9,7 +8,6 @@ import android.support.v4.app.Fragment;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.TextAppearanceSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,28 +16,27 @@ import android.widget.TextView;
 
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
-import com.squareup.otto.ThreadEnforcer;
 
 import java.util.List;
 
 import nl.siegmann.epublib.domain.Author;
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.domain.Metadata;
+import pro.dbro.openspritz.events.ChapterSelectRequested;
 import pro.dbro.openspritz.events.NextChapterEvent;
 import pro.dbro.openspritz.events.SpritzFinishedEvent;
+import pro.dbro.openspritz.formats.SpritzerBook;
 
 public class SpritzFragment extends Fragment {
     private static final String TAG = "SpritzFragment";
 
-    private static EpubSpritzer mSpritzer;
+    private static AppSpritzer mSpritzer;
     private TextView mAuthorView;
     private TextView mTitleView;
     private TextView mChapterView;
     private ProgressBar mProgress;
     private TextView mSpritzView;
     private Bus mBus;
-
-    private SpritzFragmentListener mSpritzFragmentListener;
 
     public static SpritzFragment newInstance() {
         SpritzFragment fragment = new SpritzFragment();
@@ -50,19 +47,13 @@ public class SpritzFragment extends Fragment {
         // Required empty public constructor
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
     public void feedEpubToSpritzer(Uri epubPath) {
         if (mSpritzer == null) {
-            mSpritzer = new EpubSpritzer(mSpritzView, epubPath);
+            mSpritzer = new AppSpritzer(mSpritzView, epubPath);
             mSpritzer.setEventBus(mBus);
         } else {
             mSpritzer.setEpubPath(epubPath);
         }
-        updateMetaUi();
     }
 
     /**
@@ -74,25 +65,16 @@ public class SpritzFragment extends Fragment {
             return;
         }
 
-        Book book = mSpritzer.getBook();
-        Metadata meta = book.getMetadata();
+        SpritzerBook book = mSpritzer.getBook();
 
-        // Set author if available
-        List<Author> authors = meta.getAuthors();
-        if (!authors.isEmpty()) {
-            Author author = authors.get(0);
-            mAuthorView.setText(author.getFirstname() + " " + author.getLastname());
-        } else {
-            mAuthorView.setText("");
-        }
+        mAuthorView.setText(book.getAuthor());
+        mTitleView.setText(book.getTitle());
 
         int curChapter = mSpritzer.getCurrentChapter();
-        mTitleView.setText(meta.getFirstTitle());
-        String chapterText;
-        if (book.getSpine().getResource(curChapter).getTitle() == null || book.getSpine().getResource(curChapter).getTitle().trim().compareTo("") == 0) {
+
+        String chapterText = mSpritzer.getBook().getChapterTitle(curChapter);
+        if (chapterText == null) {
             chapterText = String.format("Chapter %d", curChapter);
-        } else {
-            chapterText = book.getSpine().getResource(curChapter).getTitle();
         }
 
         int startSpan = chapterText.length();
@@ -144,13 +126,15 @@ public class SpritzFragment extends Fragment {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                getActivity().runOnUiThread(new Runnable() {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(new Runnable() {
 
-                    @Override
-                    public void run() {
-                        mChapterView.setVisibility(View.INVISIBLE);
-                    }
-                });
+                        @Override
+                        public void run() {
+                            mChapterView.setVisibility(View.INVISIBLE);
+                        }
+                    });
+                }
             }
         }).start();
     }
@@ -166,7 +150,7 @@ public class SpritzFragment extends Fragment {
         mChapterView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mSpritzFragmentListener.onChapterSelectRequested();
+                mBus.post(new ChapterSelectRequested());
             }
         });
         mProgress = ((ProgressBar) root.findViewById(R.id.progress));
@@ -192,27 +176,17 @@ public class SpritzFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mSpritzFragmentListener = (SpritzFragmentListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement SpritzFragmentListener");
-        }
-    }
-
-    @Override
     public void onStart() {
         super.onStart();
-        mBus = new Bus(ThreadEnforcer.ANY);
+        OpenSpritzApplication app = (OpenSpritzApplication) getActivity().getApplication();
+        mBus = app.getBus();
         mBus.register(this);
         if (mSpritzer == null) {
-            mSpritzer = new EpubSpritzer(mSpritzView);
+            mSpritzer = new AppSpritzer(mSpritzView);
             if (mSpritzer.getBook() == null) {
                 mSpritzView.setText(getString(R.string.select_epub));
             } else {
-                // EpubSpritzer loaded the last book being reads
+                // AppSpritzer loaded the last book being read
                 updateMetaUi();
                 showMetaUi(true);
             }
@@ -230,7 +204,6 @@ public class SpritzFragment extends Fragment {
     public void onStop() {
         super.onStop();
         if (mSpritzer != null) {
-            Log.i(TAG, "saving state");
             mSpritzer.saveState();
         }
     }
@@ -241,11 +214,6 @@ public class SpritzFragment extends Fragment {
         if (mBus != null) {
             mBus.unregister(this);
         }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
     }
 
     @Subscribe
@@ -271,7 +239,7 @@ public class SpritzFragment extends Fragment {
 
     }
 
-    public EpubSpritzer getSpritzer() {
+    public AppSpritzer getSpritzer() {
         return mSpritzer;
     }
 
@@ -313,9 +281,4 @@ public class SpritzFragment extends Fragment {
             updateMetaUi();
         }
     }
-
-    public interface SpritzFragmentListener {
-        public abstract void onChapterSelectRequested();
-    }
-
 }

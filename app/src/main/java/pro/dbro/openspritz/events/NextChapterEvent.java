@@ -5,7 +5,7 @@ package pro.dbro.openspritz.events;
  */
 public class NextChapterEvent {
 
-    private int mChapter;
+    private final int mChapter;
 
     public NextChapterEvent(int chapter){
         mChapter = chapter;

@@ -17,3 +17,7 @@
 #}
 
 -dontwarn javax.xml.**
+
+-keep public class org.jsoup.** {
+    public *;
+}

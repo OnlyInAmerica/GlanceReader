@@ -5,18 +5,16 @@ import android.content.SharedPreferences;
 import android.content.UriPermission;
 import android.net.Uri;
 import android.os.Build;
-import android.text.Html;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
-import nl.siegmann.epublib.domain.Book;
-import nl.siegmann.epublib.epub.EpubReader;
 import pro.dbro.openspritz.events.NextChapterEvent;
+import pro.dbro.openspritz.formats.EpubBook;
+import pro.dbro.openspritz.formats.SpritzerBook;
+import pro.dbro.openspritz.formats.UnsupportedFormatException;
 
 /**
  * Parse an .epub into a Queue of words
@@ -25,8 +23,8 @@ import pro.dbro.openspritz.events.NextChapterEvent;
  */
 // TODO: Save epub title : chapter-word
 // TODO: Save State for multiple books
-public class EpubSpritzer extends Spritzer {
-    public static final boolean VERBOSE = false;
+public class AppSpritzer extends Spritzer {
+    public static final boolean VERBOSE = true;
 
     private static final String PREFS = "espritz";
     private static final String PREF_URI = "uri";
@@ -35,20 +33,19 @@ public class EpubSpritzer extends Spritzer {
     private static final String PREF_WORD = "word";
     private static final String PREF_WPM = "wpm";
 
-    private Uri mEpubUri;
-    private Book mBook;
     private int mChapter;
-    private int mMaxChapter;
 
-    public EpubSpritzer(TextView target) {
+    private SpritzerBook mBook;
+
+    private Uri mEpubUri;
+
+    public AppSpritzer(TextView target) {
         super(target);
         restoreState(true);
     }
 
-    public EpubSpritzer(TextView target, Uri epubPath) {
+    public AppSpritzer(TextView target, Uri epubPath) {
         super(target);
-        mChapter = 0;
-
         openEpub(epubPath);
         mTarget.setText(mTarget.getContext().getString(R.string.touch_to_start));
     }
@@ -59,27 +56,18 @@ public class EpubSpritzer extends Spritzer {
         mTarget.setText(mTarget.getContext().getString(R.string.touch_to_start));
     }
 
-    public void openEpub(Uri epubUri) {
+    private void openEpub(Uri epubPath) {
         try {
-            InputStream epubInputStream = mTarget.getContext().getContentResolver().openInputStream(epubUri);
-            String epubPath = FileUtils.getPath(mTarget.getContext(), epubUri);
-            // Opening an attachment in Gmail may produce
-            // content://gmail-ls/xxx@xxx.com/messages/9852/attachments/0.1/BEST/false
-            // and no path
-            if (epubPath != null && !epubPath.contains("epub")) {
-                reportFileUnsupported();
-                return;
-            }
-            mEpubUri = epubUri;
-            mBook = (new EpubReader()).readEpub(epubInputStream);
-            mMaxChapter = mBook.getSpine().getSpineReferences().size();
+            mChapter = 0;
+            mBook = EpubBook.fromUri(mTarget.getContext(), epubPath);
+            mEpubUri = epubPath;
             restoreState(false);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (UnsupportedFormatException e) {
+            reportFileUnsupported();
         }
     }
 
-    public Book getBook() {
+    public SpritzerBook getBook() {
         return mBook;
     }
 
@@ -94,7 +82,7 @@ public class EpubSpritzer extends Spritzer {
     }
 
     public int getMaxChapter() {
-        return mMaxChapter;
+        return mBook.countChapters();
     }
 
     public boolean isBookSelected() {
@@ -103,7 +91,7 @@ public class EpubSpritzer extends Spritzer {
 
     protected void processNextWord() throws InterruptedException {
         super.processNextWord();
-        if (mPlaying && mPlayingRequested && mWordQueue.isEmpty() && (mChapter < mMaxChapter)) {
+        if (mPlaying && mPlayingRequested && mWordQueue.isEmpty() && (mChapter + 1 < getMaxChapter())) {
             printNextChapter();
             if (mBus != null) {
                 mBus.post(new NextChapterEvent(mChapter));
@@ -118,19 +106,12 @@ public class EpubSpritzer extends Spritzer {
     }
 
     private String loadCleanStringFromChapter(int chapter) {
-        try {
-            String bookStr = new String(mBook.getSpine().getResource(chapter).getData(), "UTF-8");
-            return Html.fromHtml(bookStr).toString().replace("\n", "").replaceAll("(?s)<!--.*?-->", "");
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.e(TAG, "Parsing failed " + e.getMessage());
-            return "";
-        }
+        return mBook.loadChapter(chapter);
     }
 
     public void saveState() {
         if (mBook != null) {
-            if (VERBOSE) Log.i(TAG, "Saving state");
+            if (VERBOSE) Log.i(TAG, "Saving state at chapter " + mChapter);
             SharedPreferences.Editor editor = mTarget.getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit();
             editor.putInt(PREF_CHAPTER, mChapter)
                     .putString(PREF_URI, mEpubUri.toString())
@@ -168,6 +149,7 @@ public class EpubSpritzer extends Spritzer {
             }
         } else if (prefs.contains(PREF_TITLE) && mBook.getTitle().compareTo(prefs.getString(PREF_TITLE, "")) == 0) {
             mChapter = prefs.getInt(PREF_CHAPTER, 0);
+            if (VERBOSE) Log.i(TAG, "Resuming " + mBook.getTitle() + " from chapter " + mChapter);
             setText(loadCleanStringFromChapter(mChapter));
             int oldSize = prefs.getInt(PREF_WORD, 0);
             setWpm(prefs.getInt(PREF_WPM, 500));

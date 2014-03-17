@@ -40,6 +40,8 @@ OpenSpritz-Android is a Spritz-like .epub reader for Android 3.0+ (API 11). Insp
 
 ## Thanks
 
++ [andrewgiang](https://github.com/andrewgiang)
++ [defer](https://github.com/defer)
 + [epublib](https://github.com/psiegman/epublib) by psiegman (LGPL)
 
 #### A Note About the Name
