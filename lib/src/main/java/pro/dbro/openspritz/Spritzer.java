@@ -15,6 +15,7 @@ import java.util.ArrayDeque;
 import java.util.Arrays;
 
 import pro.dbro.openspritz.events.SpritzFinishedEvent;
+import pro.dbro.openspritz.events.SpritzProgressEvent;
 
 /**
  * Spritzer parses a String into a Queue
@@ -40,6 +41,7 @@ public class Spritzer {
     protected boolean mSpritzThreadStarted;
 
     protected Bus mBus;
+    private int mCurWordIdx;
 
     public Spritzer(TextView target) {
         init();
@@ -142,6 +144,7 @@ public class Spritzer {
     }
 
     private void refillWordQueue() {
+        mCurWordIdx = 0;
         mWordQueue.clear();
         mWordQueue.addAll(Arrays.asList(mWordArray));
     }
@@ -161,9 +164,13 @@ public class Spritzer {
      */
     protected void processNextWord() throws InterruptedException {
         if (!mWordQueue.isEmpty()) {
+            mCurWordIdx++;
             String word = mWordQueue.remove();
             word = splitLongWord(word);
 
+            if (mBus != null) {
+                mBus.post(new SpritzProgressEvent(mCurWordIdx));
+            }
             mSpritzHandler.sendMessage(mSpritzHandler.obtainMessage(MSG_PRINT_WORD, word));
             Thread.sleep(getInterWordDelay() * delayMultiplierForWord(word));
             // If word is end of a sentence, add three blanks
@@ -199,6 +206,7 @@ public class Spritzer {
             if (!firstSegment.contains("-") && !firstSegment.endsWith(".")) {
                 firstSegment = firstSegment + "-";
             }
+            mCurWordIdx--;
             mWordQueue.addFirst(word.substring(splitIndex));
             word = firstSegment;
 
