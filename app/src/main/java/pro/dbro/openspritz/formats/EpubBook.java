@@ -64,8 +64,10 @@ public class EpubBook implements SpritzerBook {
     private boolean inferTocPresence(Book book) {
         TableOfContents contents = book.getTableOfContents();
 
+        // If the TableOfContents doesn't include all Spine resources
+        // ignore the TableOfContents alltogether
         return contents != null && contents.getTocReferences() != null &&
-                contents.getTocReferences().size() > 0;
+                contents.size() == book.getSpine().size();
     }
 
     /**
@@ -128,7 +130,7 @@ public class EpubBook implements SpritzerBook {
             // strip css and other data that aren't removed by
             // Android's Html.fromHtml. Jsoup processing
             // seems to be prohibitively slow
-            if(bookStr.contains("<body")) {
+            if (bookStr.contains("<body")) {
                 bookStr = bookStr.substring(bookStr.indexOf("<body"));
             }
             return Html.fromHtml(bookStr).toString().replace("\n", "").replaceAll("(?s)<!--.*?-->", "");
@@ -145,7 +147,7 @@ public class EpubBook implements SpritzerBook {
                 getChapterTitleFromToc(chapterNumber) :
                 mBook.getSpine().getResource(chapterNumber).getTitle();
         if (title == null || title.length() == 0) {
-            return null;
+            return String.format("Chapter %d", chapterNumber);
         } else {
             return title;
         }
@@ -165,13 +167,13 @@ public class EpubBook implements SpritzerBook {
 
     @Override
     public int countChapters() {
-        // If a book has a Toc, getTocReferences() returns TocReferences
+        // A book Toc does not necessarily contain all reading sections
+        // The Spine is the definitive source for in-order reading content
+        // Additionally, if a book has a Toc, getTocReferences() returns TocReferences
         // each of which may have several children Resources
         // E.g: TocReference describes "Part 1" of a novel, which contains
         // 4 chapter Resources.
-        return mHasToc ?
-                mBook.getTableOfContents().size() :
-                mBook.getSpine().getSpineReferences().size();
+        return mBook.getSpine().getSpineReferences().size();
     }
 
 

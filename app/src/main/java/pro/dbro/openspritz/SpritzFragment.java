@@ -68,9 +68,6 @@ public class SpritzFragment extends Fragment {
         int curChapter = mSpritzer.getCurrentChapter();
 
         String chapterText = mSpritzer.getBook().getChapterTitle(curChapter);
-        if (chapterText == null) {
-            chapterText = String.format("Chapter %d", curChapter);
-        }
 
         int startSpan = chapterText.length();
         chapterText = String.format("%s  %s m left", chapterText,
