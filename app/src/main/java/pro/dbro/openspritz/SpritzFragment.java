@@ -81,8 +81,10 @@ public class SpritzFragment extends Fragment {
         spanRange.setSpan(tas, startSpan, endSpan, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         mChapterView.setText(spanRange);
 
-        mProgress.setMax(mSpritzer.getMaxChapter());
-        mProgress.setProgress(curChapter);
+        final int progressScale = 10;
+        int progress = curChapter * progressScale + ( (int) (progressScale * (mSpritzer.getQueueCompleteness())) );
+        mProgress.setMax((mSpritzer.getMaxChapter() + 1) * progressScale);
+        mProgress.setProgress(progress);
     }
 
     /**

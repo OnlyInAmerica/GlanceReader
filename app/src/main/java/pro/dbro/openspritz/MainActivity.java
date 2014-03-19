@@ -24,13 +24,13 @@ import pro.dbro.openspritz.lib.events.ChapterSelectRequested;
 import pro.dbro.openspritz.lib.events.ChapterSelectedEvent;
 import pro.dbro.openspritz.lib.events.WpmSelectedEvent;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements View.OnSystemUiVisibilityChangeListener {
     private static final String TAG = "MainActivity";
     public static final String SPRITZ_FRAG_TAG = "spritzfrag";
     private static final String PREFS = "ui_prefs";
     private static final int THEME_LIGHT = 0;
     private static final int THEME_DARK = 1;
-
+    
     private int mWpm;
     private Bus mBus;
 
@@ -57,6 +57,8 @@ public class MainActivity extends ActionBarActivity {
         OpenSpritzApplication app = (OpenSpritzApplication) getApplication();
         this.mBus = app.getBus();
         this.mBus.register(this);
+
+        getWindow().getDecorView().setOnSystemUiVisibilityChangeListener(this);
     }
 
     @Override
@@ -189,6 +191,14 @@ public class MainActivity extends ActionBarActivity {
                 decorView.setSystemUiVisibility(0);
                 decorView.setOnSystemUiVisibilityChangeListener(null);
             }
+        }
+    }
+
+    @Override
+    public void onSystemUiVisibilityChange(int visibility) {
+        // Detect when we go out of low-profile mode, to also go out
+        if ((visibility & View.SYSTEM_UI_FLAG_LOW_PROFILE) != 0){
+            dimSystemUi(true);
         }
     }
 }

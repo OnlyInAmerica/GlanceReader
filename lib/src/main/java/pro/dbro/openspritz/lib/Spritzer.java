@@ -101,6 +101,15 @@ public class Spritzer {
     }
 
     /**
+     * Return the completeness of the current
+     * Spritz segment as a float between 0 and 1.
+     * @return a float between 0 (not started) and 1 (complete)
+     */
+    public float getQueueCompleteness() {
+        return  ((float) mCurWordIdx) / mWordArray.length;
+    }
+
+    /**
      * Return the current Word Per Minute rate.
      */
     public int getWpm() {
@@ -261,7 +270,7 @@ public class Spritzer {
     }
 
     private void peekNextWord() {
-        if (mWordArray != null) {
+        if (mWordQueue.peekFirst() != null) {
             printWord(mWordQueue.peekFirst());
         }
     }
