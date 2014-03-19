@@ -7,20 +7,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
+import pro.dbro.openspritz.formats.SpritzerBook;
 import pro.dbro.openspritz.lib.events.ChapterSelectRequested;
 import pro.dbro.openspritz.lib.events.ChapterSelectedEvent;
 import pro.dbro.openspritz.lib.events.WpmSelectedEvent;
-import pro.dbro.openspritz.formats.SpritzerBook;
 
 public class MainActivity extends ActionBarActivity {
     private static final String TAG = "MainActivity";
@@ -45,13 +47,7 @@ public class MainActivity extends ActionBarActivity {
                 break;
         }
         super.onCreate(savedInstanceState);
-
-        getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
-        ActionBar actionBar = getActionBar();
-        actionBar.setTitle("");
-        actionBar.setDisplayShowHomeEnabled(false);
-        actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        setupActionBar();
         setContentView(R.layout.activity_main);
 
         getSupportFragmentManager().beginTransaction()
@@ -66,7 +62,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public void onResume() {
         super.onResume();
-
+        dimSystemUi(true);
         if (getIntent().getAction().equals(Intent.ACTION_VIEW) && getIntent().getData() != null) {
             SpritzFragment frag = getSpritzFragment();
             frag.feedEpubToSpritzer(getIntent().getData());
@@ -171,5 +167,28 @@ public class MainActivity extends ActionBarActivity {
 
     private SpritzFragment getSpritzFragment() {
         return ((SpritzFragment) getSupportFragmentManager().findFragmentByTag(SPRITZ_FRAG_TAG));
+    }
+
+    private void setupActionBar() {
+        getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+        ActionBar actionBar = getActionBar();
+        actionBar.setTitle("");
+        actionBar.setDisplayShowHomeEnabled(false);
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+    }
+
+    private void dimSystemUi(boolean doDim) {
+        final boolean isIceCreamSandwich = Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH;
+        if (isIceCreamSandwich) {
+            final View decorView = getWindow().getDecorView();
+            if (doDim) {
+                int uiOptions = View.SYSTEM_UI_FLAG_LOW_PROFILE;
+                decorView.setSystemUiVisibility(uiOptions);
+            } else {
+                decorView.setSystemUiVisibility(0);
+                decorView.setOnSystemUiVisibilityChangeListener(null);
+            }
+        }
     }
 }

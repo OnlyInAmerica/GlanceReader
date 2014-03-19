@@ -123,10 +123,9 @@ public class Spritzer {
      */
     public void swapTextView(TextView target) {
         mTarget = target;
-        if (!mPlaying) {
-            printLastWord();
+        if (!mPlaying ) {
+            peekNextWord();
         }
-
     }
 
     /**
@@ -261,10 +260,9 @@ public class Spritzer {
         return (word.contains(".") || word.contains("-"));
     }
 
-
-    private void printLastWord() {
+    private void peekNextWord() {
         if (mWordArray != null) {
-            printWord(mWordArray[mWordArray.length - 1]);
+            printWord(mWordQueue.peekFirst());
         }
     }
 
