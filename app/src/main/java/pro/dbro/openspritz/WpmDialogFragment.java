@@ -1,6 +1,5 @@
 package pro.dbro.openspritz;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -13,7 +12,7 @@ import android.widget.TextView;
 
 import com.squareup.otto.Bus;
 
-import pro.dbro.openspritz.events.WpmSelectedEvent;
+import pro.dbro.openspritz.lib.events.WpmSelectedEvent;
 
 /**
  * Created by davidbrodsky on 3/1/14.

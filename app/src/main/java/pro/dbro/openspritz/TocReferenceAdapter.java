@@ -4,12 +4,9 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import nl.siegmann.epublib.domain.TOCReference;
-import nl.siegmann.epublib.domain.TableOfContents;
 import pro.dbro.openspritz.formats.SpritzerBook;
 
 /**

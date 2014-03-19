@@ -1,4 +1,4 @@
-package pro.dbro.openspritz.events;
+package pro.dbro.openspritz.lib.events;
 
 /**
  * Event that is fired whenever a chapter is selected.

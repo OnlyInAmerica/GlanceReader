@@ -1,4 +1,4 @@
-package pro.dbro.openspritz.events;
+package pro.dbro.openspritz.lib.events;
 
 /**
  * Created by davidbrodsky on 3/5/14.

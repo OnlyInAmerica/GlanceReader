@@ -17,15 +17,10 @@ import android.widget.TextView;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
-import java.util.List;
-
-import nl.siegmann.epublib.domain.Author;
-import nl.siegmann.epublib.domain.Book;
-import nl.siegmann.epublib.domain.Metadata;
-import pro.dbro.openspritz.events.ChapterSelectRequested;
-import pro.dbro.openspritz.events.NextChapterEvent;
-import pro.dbro.openspritz.events.SpritzFinishedEvent;
 import pro.dbro.openspritz.formats.SpritzerBook;
+import pro.dbro.openspritz.lib.events.ChapterSelectRequested;
+import pro.dbro.openspritz.lib.events.NextChapterEvent;
+import pro.dbro.openspritz.lib.events.SpritzFinishedEvent;
 
 public class SpritzFragment extends Fragment {
     private static final String TAG = "SpritzFragment";
@@ -110,6 +105,14 @@ public class SpritzFragment extends Fragment {
         }
     }
 
+    public void dimActionBar(boolean dim) {
+        if (dim) {
+            getActivity().getActionBar().hide();
+        } else {
+            getActivity().getActionBar().show();
+        }
+    }
+
     /**
      * Temporarily fade in the Chapter label.
      * Used when user crosses a chapter boundary.
@@ -162,9 +165,11 @@ public class SpritzFragment extends Fragment {
                     if (mSpritzer.isPlaying()) {
                         updateMetaUi();
                         showMetaUi(true);
+                        dimActionBar(false);
                         mSpritzer.pause();
                     } else {
                         showMetaUi(false);
+                        dimActionBar(true);
                         mSpritzer.start();
                     }
                 } else {

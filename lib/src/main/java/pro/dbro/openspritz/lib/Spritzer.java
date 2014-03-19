@@ -1,4 +1,4 @@
-package pro.dbro.openspritz;
+package pro.dbro.openspritz.lib;
 
 import android.os.Handler;
 import android.os.Message;
@@ -14,8 +14,8 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 
-import pro.dbro.openspritz.events.SpritzFinishedEvent;
-import pro.dbro.openspritz.events.SpritzProgressEvent;
+import pro.dbro.openspritz.lib.events.SpritzFinishedEvent;
+import pro.dbro.openspritz.lib.events.SpritzProgressEvent;
 
 /**
  * Spritzer parses a String into a Queue
@@ -100,6 +100,12 @@ public class Spritzer {
         return mWordQueue.size() / mWPM;
     }
 
+    /**
+     * Return the current Word Per Minute rate.
+     */
+    public int getWpm() {
+        return mWPM;
+    }
     /**
      * Set the target Word Per Minute rate.
      * Effective immediately.

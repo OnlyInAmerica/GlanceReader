@@ -1,4 +1,4 @@
-package pro.dbro.openspritz;
+package pro.dbro.openspritz.lib;
 
 import android.content.Context;
 import android.content.res.TypedArray;

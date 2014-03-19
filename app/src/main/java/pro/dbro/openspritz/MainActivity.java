@@ -17,9 +17,9 @@ import android.view.Window;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
-import pro.dbro.openspritz.events.ChapterSelectRequested;
-import pro.dbro.openspritz.events.ChapterSelectedEvent;
-import pro.dbro.openspritz.events.WpmSelectedEvent;
+import pro.dbro.openspritz.lib.events.ChapterSelectRequested;
+import pro.dbro.openspritz.lib.events.ChapterSelectedEvent;
+import pro.dbro.openspritz.lib.events.WpmSelectedEvent;
 import pro.dbro.openspritz.formats.SpritzerBook;
 
 public class MainActivity extends ActionBarActivity {
@@ -98,7 +98,7 @@ public class MainActivity extends ActionBarActivity {
         if (id == R.id.action_speed) {
             if (mWpm == 0) {
                 if (getSpritzFragment().getSpritzer() != null) {
-                    mWpm = getSpritzFragment().getSpritzer().mWPM;
+                    mWpm = getSpritzFragment().getSpritzer().getWpm();
                 } else {
                     mWpm = 500;
                 }

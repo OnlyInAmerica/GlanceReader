@@ -11,7 +11,8 @@ import android.widget.Toast;
 
 import java.util.List;
 
-import pro.dbro.openspritz.events.NextChapterEvent;
+import pro.dbro.openspritz.lib.Spritzer;
+import pro.dbro.openspritz.lib.events.NextChapterEvent;
 import pro.dbro.openspritz.formats.EpubBook;
 import pro.dbro.openspritz.formats.SpritzerBook;
 import pro.dbro.openspritz.formats.UnsupportedFormatException;
@@ -21,7 +22,6 @@ import pro.dbro.openspritz.formats.UnsupportedFormatException;
  * and display them on a TextView at
  * a given WPM
  */
-// TODO: Save epub title : chapter-word
 // TODO: Save State for multiple books
 public class AppSpritzer extends Spritzer {
     public static final boolean VERBOSE = true;

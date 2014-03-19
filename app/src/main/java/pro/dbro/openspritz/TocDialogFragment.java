@@ -1,6 +1,5 @@
 package pro.dbro.openspritz;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -11,9 +10,8 @@ import android.widget.ListView;
 
 import com.squareup.otto.Bus;
 
-import nl.siegmann.epublib.domain.Book;
 import pro.dbro.openspritz.formats.SpritzerBook;
-import pro.dbro.openspritz.events.ChapterSelectedEvent;
+import pro.dbro.openspritz.lib.events.ChapterSelectedEvent;
 
 /**
  * Created by davidbrodsky on 3/1/14.

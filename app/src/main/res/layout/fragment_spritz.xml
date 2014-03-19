@@ -5,7 +5,7 @@
     android:animateLayoutChanges="true"
     tools:context="pro.dbro.openspritz.SpritzFragment">
 
-    <pro.dbro.openspritz.SpritzerTextView
+    <pro.dbro.openspritz.lib.SpritzerTextView
         android:id="@+id/spritzText"
         android:layout_width="@dimen/spritzer_text_view_width"
         android:layout_height="wrap_content"

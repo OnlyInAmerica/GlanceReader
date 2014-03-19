@@ -3,6 +3,8 @@ package pro.dbro.openspritz;
 import android.test.AndroidTestCase;
 import android.widget.TextView;
 
+import pro.dbro.openspritz.lib.Spritzer;
+
 
 /**
  * Created by Andrew on 3/11/14.
