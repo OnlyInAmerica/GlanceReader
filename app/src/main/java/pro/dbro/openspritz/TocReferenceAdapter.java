@@ -37,7 +37,7 @@ public class TocReferenceAdapter extends BaseAdapter {
         if (chapterTitle == null) {
             ((TextView) convertView.findViewById(R.id.title)).setText(String.format("Chapter %d", position));
         } else {
-            ((TextView) convertView.findViewById(R.id.title)).setText(String.format("%d: %s", position, chapterTitle));
+            ((TextView) convertView.findViewById(R.id.title)).setText(chapterTitle);
         }
         return convertView;
     }

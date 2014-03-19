@@ -82,7 +82,7 @@ public class AppSpritzer extends Spritzer {
     }
 
     public int getMaxChapter() {
-        return mBook.countChapters();
+        return mBook.countChapters() - 1;
     }
 
     public boolean isBookSelected() {
@@ -91,10 +91,12 @@ public class AppSpritzer extends Spritzer {
 
     protected void processNextWord() throws InterruptedException {
         super.processNextWord();
-        if (mPlaying && mPlayingRequested && mWordQueue.isEmpty() && (mChapter + 1 < getMaxChapter())) {
-            printNextChapter();
-            if (mBus != null) {
-                mBus.post(new NextChapterEvent(mChapter));
+        if (mPlaying && mPlayingRequested && mWordQueue.isEmpty() && mChapter < getMaxChapter()) {
+            while (mWordQueue.isEmpty()) {
+                printNextChapter();
+                if (mBus != null) {
+                    mBus.post(new NextChapterEvent(mChapter));
+                }
             }
         }
     }
@@ -102,7 +104,7 @@ public class AppSpritzer extends Spritzer {
     private void printNextChapter() {
         setText(loadCleanStringFromChapter(mChapter++));
         saveState();
-        if (VERBOSE) Log.i(TAG, "starting next chapter: " + mChapter);
+        if (VERBOSE) Log.i(TAG, "starting next chapter: " + mChapter + " length " + mWordQueue.size());
     }
 
     private String loadCleanStringFromChapter(int chapter) {

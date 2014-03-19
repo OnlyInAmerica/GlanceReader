@@ -7,11 +7,13 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import nl.siegmann.epublib.domain.Author;
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.domain.Resource;
+import nl.siegmann.epublib.domain.TOCReference;
 import nl.siegmann.epublib.domain.TableOfContents;
 import nl.siegmann.epublib.epub.EpubReader;
 import pro.dbro.openspritz.FileUtils;
@@ -140,7 +142,7 @@ public class EpubBook implements SpritzerBook {
     @Override
     public String getChapterTitle(int chapterNumber) {
         String title = mHasToc ?
-                mBook.getTableOfContents().getTocReferences().get(chapterNumber).getTitle() :
+                getChapterTitleFromToc(chapterNumber) :
                 mBook.getSpine().getResource(chapterNumber).getTitle();
         if (title == null || title.length() == 0) {
             return null;
@@ -151,7 +153,7 @@ public class EpubBook implements SpritzerBook {
 
     private byte[] getChapterData(int chapterNumber) throws IOException {
         Resource resource = mHasToc ?
-                mBook.getTableOfContents().getTocReferences().get(chapterNumber).getResource() :
+                mBook.getTableOfContents().getAllUniqueResources().get(chapterNumber) :
                 mBook.getSpine().getResource(chapterNumber);
 
         if (resource != null) {
@@ -163,8 +165,33 @@ public class EpubBook implements SpritzerBook {
 
     @Override
     public int countChapters() {
+        // If a book has a Toc, getTocReferences() returns TocReferences
+        // each of which may have several children Resources
+        // E.g: TocReference describes "Part 1" of a novel, which contains
+        // 4 chapter Resources.
         return mHasToc ?
-                mBook.getTableOfContents().getTocReferences().size() :
+                mBook.getTableOfContents().size() :
                 mBook.getSpine().getSpineReferences().size();
+    }
+
+
+    private String getChapterTitleFromToc(int chapter) {
+        // Is there no easier way to connect a TOCReference
+        // to an absolute spine index?
+        String title = "";
+        int counter = 0;
+        Resource targetResource = mBook.getTableOfContents().getAllUniqueResources().get(chapter);
+        ArrayList<TOCReference> references = (ArrayList<TOCReference>) mBook.getTableOfContents().getTocReferences();
+        for (TOCReference ref : references) {
+            if (ref.getResource().equals(targetResource)) {
+                return ref.getTitle();
+            }
+            for (TOCReference childRef : ref.getChildren()) {
+                if (childRef.getResource().equals(targetResource)) {
+                    return childRef.getTitle();
+                }
+            }
+        }
+        return title;
     }
 }

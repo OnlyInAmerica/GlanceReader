@@ -30,7 +30,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
     private static final String PREFS = "ui_prefs";
     private static final int THEME_LIGHT = 0;
     private static final int THEME_DARK = 1;
-    
+
     private int mWpm;
     private Bus mBus;
 
@@ -196,8 +196,8 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
 
     @Override
     public void onSystemUiVisibilityChange(int visibility) {
-        // Detect when we go out of low-profile mode, to also go out
-        if ((visibility & View.SYSTEM_UI_FLAG_LOW_PROFILE) != 0){
+        // Stay in low-profile mode
+        if ((visibility & View.SYSTEM_UI_FLAG_LOW_PROFILE) == 0){
             dimSystemUi(true);
         }
     }

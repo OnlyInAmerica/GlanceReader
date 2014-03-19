@@ -167,7 +167,7 @@ public class Spritzer {
      * Read the current head of mWordQueue and
      * submit the appropriate Messages to mSpritzHandler.
      *
-     * Split long words y submitting the first segment of a word
+     * Split long words submitting the first segment of a word
      * and placing the second at the head of mWordQueue for processing
      * during the next cycle.
      *
@@ -212,9 +212,6 @@ public class Spritzer {
         if (word.length() > MAX_WORD_LENGTH) {
             int splitIndex = findSplitIndex(word);
             String firstSegment;
-            if (VERBOSE) {
-                Log.i(TAG, "Splitting long word " + word + " into " + word.substring(0, splitIndex) + " and " + word.substring(splitIndex));
-            }
             firstSegment = word.substring(0, splitIndex);
             // A word split is always indicated with a hyphen unless ending in a period
             if (!firstSegment.contains("-") && !firstSegment.endsWith(".")) {
@@ -285,7 +282,6 @@ public class Spritzer {
         int startSpan = 0;
         int endSpan = 0;
         word = word.trim();
-        if (VERBOSE) Log.i(TAG + word.length(), word);
         if (word.length() == 1) {
             StringBuilder builder = new StringBuilder();
             for (int x = 0; x < CHARS_LEFT_OF_PIVOT; x++) {
@@ -306,7 +302,6 @@ public class Spritzer {
             word = builder.toString();
             startSpan = halfPoint + beginPad;
             endSpan = startSpan + 1;
-            if (VERBOSE) Log.i(TAG + word.length(), "pivot: " + word.substring(startSpan, endSpan));
         } else {
             startSpan = CHARS_LEFT_OF_PIVOT;
             endSpan = startSpan + 1;

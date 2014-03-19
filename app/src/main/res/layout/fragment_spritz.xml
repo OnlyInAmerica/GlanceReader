@@ -26,6 +26,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginLeft="@dimen/spritzer_title_margin_left"
         android:layout_marginTop="@dimen/spritzer_title_margin_top"
+        android:textStyle="italic"
         android:ellipsize="marquee"
         android:fontFamily="sans-serif-condensed"
         android:singleLine="true"

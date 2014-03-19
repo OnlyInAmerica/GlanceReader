@@ -136,7 +136,9 @@ public class SpritzFragment extends Fragment {
 
                         @Override
                         public void run() {
-                            mChapterView.setVisibility(View.INVISIBLE);
+                            if(mSpritzer.isPlaying()) {
+                                mChapterView.setVisibility(View.INVISIBLE);
+                            }
                         }
                     });
                 }
@@ -190,6 +192,7 @@ public class SpritzFragment extends Fragment {
         mBus.register(this);
         if (mSpritzer == null) {
             mSpritzer = new AppSpritzer(mSpritzView);
+            mSpritzer.setEventBus(mBus);
             if (mSpritzer.getBook() == null) {
                 mSpritzView.setText(getString(R.string.select_epub));
             } else {
