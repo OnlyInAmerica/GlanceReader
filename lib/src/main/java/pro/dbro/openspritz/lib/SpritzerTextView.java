@@ -24,7 +24,9 @@ public class SpritzerTextView extends TextView implements View.OnClickListener {
     private float mPaintWidthPx;
     private String mTestString;
     private boolean mDefaultClickListener = false;
-    private int mAdditonalPadding;
+    private int mAdditionalPadding;
+    private int mPivotX;
+    private boolean mShouldRefreshMaxLineChars;
 
     public SpritzerTextView(Context context) {
         super(context);
@@ -63,14 +65,16 @@ public class SpritzerTextView extends TextView implements View.OnClickListener {
             final int padding = paddingArray.getDimensionPixelOffset(0, 0);
             final int paddingTop = paddingArray.getDimensionPixelOffset(1, 0);
             final int paddingBottom = paddingArray.getDimensionPixelOffset(2, 0);
-            mAdditonalPadding = Math.max(padding, Math.max(paddingTop, paddingBottom));
-            if (VERBOSE) Log.i(TAG, "Additional Padding " + mAdditonalPadding);
+            mAdditionalPadding = Math.max(padding, Math.max(paddingTop, paddingBottom));
+            if (VERBOSE) Log.i(TAG, "Additional Padding " + mAdditionalPadding);
         }finally {
             paddingArray.recycle();
         }
     }
 
     private void init() {
+        mShouldRefreshMaxLineChars = true;
+        mPivotX = -1;
         int pivotPadding = getPivotPadding();
         setPadding(getPaddingLeft(), pivotPadding, getPaddingRight(), pivotPadding);
         mPaintWidthPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, PAINT_WIDTH_DP, getResources().getDisplayMetrics());
@@ -103,7 +107,17 @@ public class SpritzerTextView extends TextView implements View.OnClickListener {
         canvas.drawLine(beginBottomX, bottomY, endBottomX, bottomY, mPaintGuides);
 
         // Measurements for pivot indicator
-        float centerX = calculatePivotXOffset() + getPaddingLeft();
+        if (mPivotX == -1) {
+            mPivotX = calculatePivotXOffset();
+        }
+
+        // Measurement for max chars for this TextView
+        if (mShouldRefreshMaxLineChars) {
+            mSpritzer.setMaxWordLength(calculateSingleLineCharacterLimit());
+            mShouldRefreshMaxLineChars = false;
+        }
+
+        float centerX = mPivotX + getPaddingLeft();
         final int pivotIndicatorLength = getPivotIndicatorLength();
 
         // Paint the pivot indicator
@@ -112,32 +126,45 @@ public class SpritzerTextView extends TextView implements View.OnClickListener {
     }
 
     private int getPivotPadding() {
-        return getPivotIndicatorLength() * 2 + mAdditonalPadding;
+        return getPivotIndicatorLength() * 2 + mAdditionalPadding;
     }
 
     @Override
     public void setTextSize(float size) {
         super.setTextSize(size);
         int pivotPadding = getPivotPadding();
-        setPadding(getPaddingLeft(), pivotPadding ,getPaddingRight(), pivotPadding);
+        setPadding(getPaddingLeft(), pivotPadding, getPaddingRight(), pivotPadding);
+        mPivotX = calculatePivotXOffset();
+        mShouldRefreshMaxLineChars = true;
+    }
 
+    /**
+     * Calculate the number of characters that can fit
+     * within this TextView's single line
+     */
+    private int calculateSingleLineCharacterLimit() {
+        int maxChars = Math.round(getWidth() / calculateLengthOfPrintedCharacters(1));
+        return maxChars;
     }
 
     private int getPivotIndicatorLength() {
-
         return getPaint().getFontMetricsInt().bottom;
     }
 
-    private float calculatePivotXOffset() {
+    private int calculatePivotXOffset() {
+        // Measure the rendered distance of CHARS_LEFT_OF_PIVOT chars
+        // plus half the pivot character
+        return calculateLengthOfPrintedCharacters(Spritzer.CHARS_LEFT_OF_PIVOT + .50f);
+    }
+
+    private int calculateLengthOfPrintedCharacters(float numCharacters) {
         // Craft a test String of precise length
         // to reach pivot character
         if (mTestString == null) {
-            // Spritzer requires monospace font so character is irrelevant
+            // Spritzer currently requires monospace font so character is irrelevant
             mTestString = "a";
         }
-        // Measure the rendered distance of CHARS_LEFT_OF_PIVOT chars
-        // plus half the pivot character
-        return (getPaint().measureText(mTestString, 0, 1) * (Spritzer.CHARS_LEFT_OF_PIVOT + .50f));
+        return (int) (getPaint().measureText(mTestString, 0, 1) * numCharacters);
     }
 
     /**

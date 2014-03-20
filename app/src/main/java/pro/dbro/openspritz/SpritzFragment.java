@@ -18,6 +18,7 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import pro.dbro.openspritz.formats.SpritzerBook;
+import pro.dbro.openspritz.lib.SpritzerTextView;
 import pro.dbro.openspritz.lib.events.ChapterSelectRequested;
 import pro.dbro.openspritz.lib.events.NextChapterEvent;
 import pro.dbro.openspritz.lib.events.SpritzFinishedEvent;
@@ -30,7 +31,7 @@ public class SpritzFragment extends Fragment {
     private TextView mTitleView;
     private TextView mChapterView;
     private ProgressBar mProgress;
-    private TextView mSpritzView;
+    private SpritzerTextView mSpritzView;
     private Bus mBus;
 
     public static SpritzFragment newInstance() {
@@ -46,6 +47,7 @@ public class SpritzFragment extends Fragment {
         if (mSpritzer == null) {
             mSpritzer = new AppSpritzer(mSpritzView, epubPath);
             mSpritzer.setEventBus(mBus);
+            mSpritzView.setSpritzer(mSpritzer);
         } else {
             mSpritzer.setEpubPath(epubPath);
         }
@@ -158,7 +160,7 @@ public class SpritzFragment extends Fragment {
             }
         });
         mProgress = ((ProgressBar) root.findViewById(R.id.progress));
-        mSpritzView = (TextView) root.findViewById(R.id.spritzText);
+        mSpritzView = (SpritzerTextView) root.findViewById(R.id.spritzText);
         mSpritzView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -190,6 +192,7 @@ public class SpritzFragment extends Fragment {
         if (mSpritzer == null) {
             mSpritzer = new AppSpritzer(mSpritzView);
             mSpritzer.setEventBus(mBus);
+            mSpritzView.setSpritzer(mSpritzer);
             if (mSpritzer.getBook() == null) {
                 mSpritzView.setText(getString(R.string.select_epub));
             } else {
@@ -199,7 +202,7 @@ public class SpritzFragment extends Fragment {
             }
         } else {
             mSpritzer.setEventBus(mBus);
-            mSpritzer.swapTextView(mSpritzView);
+            mSpritzView.setSpritzer(mSpritzer);
             if (!mSpritzer.isPlaying()) {
                 updateMetaUi();
                 showMetaUi(true);
@@ -223,10 +226,21 @@ public class SpritzFragment extends Fragment {
         }
     }
 
+    /**
+     * Called when the Spritzer finishes a section.
+     * Called on a background thread
+     */
     @Subscribe
     public void onSpritzFinished(SpritzFinishedEvent event) {
-        updateMetaUi();
-        showMetaUi(true);
+        getActivity().runOnUiThread(new Runnable(){
+
+            @Override
+            public void run() {
+                updateMetaUi();
+                showMetaUi(true);
+                dimActionBar(false);
+            }
+        });
     }
 
     @Subscribe
@@ -288,4 +302,5 @@ public class SpritzFragment extends Fragment {
             updateMetaUi();
         }
     }
+
 }

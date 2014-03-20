@@ -13,7 +13,7 @@ public class SpritzerTest extends AndroidTestCase {
     public static final String SEPARATOR = ":";
 
     /**
-     * Note: MAX_WORD_LENGTH  = 13
+     * Note: mMaxWordLength  = 13
      *
      * Test cases are in this format:
      *    "WordToTest"+ SEPARATOR +
@@ -24,7 +24,7 @@ public class SpritzerTest extends AndroidTestCase {
 
 
             /**
-             * Test a long word > MAX_WORD_LENGTH && word < MAX_WORD_LENGTH * 2
+             * Test a long word > mMaxWordLength && word < mMaxWordLength * 2
              *
              * Split index should be the word.length/2
              */
@@ -33,7 +33,7 @@ public class SpritzerTest extends AndroidTestCase {
                     "lmnopqrstuv",
 
             /**
-             * Test a word > MAX_WORD_LENGTH with a hyphen
+             * Test a word > mMaxWordLength with a hyphen
              *
              * Split index should be after the hypen
              */
@@ -53,7 +53,7 @@ public class SpritzerTest extends AndroidTestCase {
             /**
              * Test a word longer than 26 (MAX_CHARS_LENGTH *2)
              *
-             * Split index should be MAX_WORD_LENGTH - 1 so we can add a hypen to make it 13
+             * Split index should be mMaxWordLength - 1 so we can add a hypen to make it 13
              */
             "abcdefghijklmnopqrstuvwxyz0" + SEPARATOR +
                     "abcdefghijkl-" + SEPARATOR +
@@ -82,8 +82,8 @@ public class SpritzerTest extends AndroidTestCase {
             String expectedSplit = arry[1];
             String expectedAddedToQueue = arry[2];
             assertEquals(expectedSplit, spritzer.splitLongWord(longword));
-            assertEquals(expectedAddedToQueue, spritzer.mWordQueue.peek());
-            spritzer.mWordQueue.clear();
+            assertEquals(expectedAddedToQueue, spritzer.getNextWord());
+            spritzer.clearText();
         }
 
     }

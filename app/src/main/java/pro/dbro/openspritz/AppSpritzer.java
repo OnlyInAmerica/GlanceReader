@@ -91,8 +91,8 @@ public class AppSpritzer extends Spritzer {
 
     protected void processNextWord() throws InterruptedException {
         super.processNextWord();
-        if (mPlaying && mPlayingRequested && mWordQueue.isEmpty() && mChapter < getMaxChapter()) {
-            while (mWordQueue.isEmpty()) {
+        if (mPlaying && mPlayingRequested && isWordListComplete() && mChapter < getMaxChapter()) {
+            while (isWordListComplete()) {
                 printNextChapter();
                 if (mBus != null) {
                     mBus.post(new NextChapterEvent(mChapter));
@@ -104,7 +104,7 @@ public class AppSpritzer extends Spritzer {
     private void printNextChapter() {
         setText(loadCleanStringFromChapter(mChapter++));
         saveState();
-        if (VERBOSE) Log.i(TAG, "starting next chapter: " + mChapter + " length " + mWordQueue.size());
+        if (VERBOSE) Log.i(TAG, "starting next chapter: " + mChapter + " length " + mDisplayWordList.size());
     }
 
     private String loadCleanStringFromChapter(int chapter) {
@@ -117,7 +117,7 @@ public class AppSpritzer extends Spritzer {
             SharedPreferences.Editor editor = mTarget.getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit();
             editor.putInt(PREF_CHAPTER, mChapter)
                     .putString(PREF_URI, mEpubUri.toString())
-                    .putInt(PREF_WORD, mWordArray.length - mWordQueue.size())
+                    .putInt(PREF_WORD, mCurWordIdx)
                     .putString(PREF_TITLE, mBook.getTitle())
                     .putInt(PREF_WPM, mWPM)
                     .apply();
@@ -153,11 +153,8 @@ public class AppSpritzer extends Spritzer {
             mChapter = prefs.getInt(PREF_CHAPTER, 0);
             if (VERBOSE) Log.i(TAG, "Resuming " + mBook.getTitle() + " from chapter " + mChapter);
             setText(loadCleanStringFromChapter(mChapter));
-            int oldSize = prefs.getInt(PREF_WORD, 0);
             setWpm(prefs.getInt(PREF_WPM, 500));
-            while (mWordQueue.size() > oldSize) {
-                mWordQueue.remove();
-            }
+            mCurWordIdx = prefs.getInt(PREF_WORD, 0);
         } else {
             mChapter = 0;
             setText(loadCleanStringFromChapter(mChapter));

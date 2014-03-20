@@ -11,7 +11,7 @@ import android.widget.TextView;
 import com.squareup.otto.Bus;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import pro.dbro.openspritz.lib.events.SpritzFinishedEvent;
@@ -28,10 +28,10 @@ public class Spritzer {
 
     protected static final int MSG_PRINT_WORD = 1;
 
-    protected static final int MAX_WORD_LENGTH = 13;
     protected static final int CHARS_LEFT_OF_PIVOT = 3;
+    protected int mMaxWordLength = 13;
     protected String[] mWordArray;                  // A parsed list of words parsed from {@link #setText(String input)}
-    protected ArrayDeque<String> mWordQueue;        // The queue of words from mWordArray yet to be displayed
+    protected ArrayList<String> mDisplayWordList;        // The queue of words from mWordArray yet to be displayed
     protected TextView mTarget;
     protected int mWPM;
     protected Handler mSpritzHandler;
@@ -41,7 +41,7 @@ public class Spritzer {
     protected boolean mSpritzThreadStarted;
 
     protected Bus mBus;
-    private int mCurWordIdx;
+    protected int mCurWordIdx;
 
     public Spritzer(TextView target) {
         init();
@@ -51,18 +51,37 @@ public class Spritzer {
 
     /**
      * Prepare to Spritz the given String input
-     *
+     * <p/>
      * Call {@link #start()} to begin display
+     *
      * @param input
      */
     public void setText(String input) {
         createWordArrayFromString(input);
-        refillWordQueue();
+        refillWordDisplayList();
+    }
+
+    public void clearText() {
+        mDisplayWordList.clear();
+        mWordArray = null;
+        mCurWordIdx = 0;
+    }
+
+    public String getNextWord() {
+        if (!isWordListComplete()) {
+            return mDisplayWordList.get(mCurWordIdx);
+        }
+        return null;
+    }
+
+    public void setMaxWordLength(int maxWordLength) {
+        mMaxWordLength = maxWordLength;
     }
 
     /**
      * Pass a Bus to receive events on, such as
      * when the display of a given String is finished
+     *
      * @param bus
      */
     public void setEventBus(Bus bus) {
@@ -72,6 +91,7 @@ public class Spritzer {
     /**
      * Create a String[] from a given String, splitting
      * on spaces but condensing adjacent spaces
+     *
      * @param input
      */
     private void createWordArrayFromString(String input) {
@@ -81,7 +101,8 @@ public class Spritzer {
     }
 
     protected void init() {
-        mWordQueue = new ArrayDeque<String>();
+        mCurWordIdx = 0;
+        mDisplayWordList = new ArrayList<String>();
         mWPM = 500;
         mPlaying = false;
         mPlayingRequested = false;
@@ -89,24 +110,40 @@ public class Spritzer {
     }
 
     /**
+     * Rewind the spritzer by the specified
+     * amount of words
+     *
+     * @param numWords
+     */
+    public void rewind(int numWords) {
+        if (mCurWordIdx > numWords) {
+            mCurWordIdx -= numWords;
+        } else {
+            mCurWordIdx = 0;
+        }
+    }
+
+    /**
      * Get the estimated time remaining in the
      * currently loaded String Queue
+     *
      * @return
      */
     public int getMinutesRemainingInQueue() {
-        if (mWordQueue.size() == 0) {
+        if (mDisplayWordList.size() == 0) {
             return 0;
         }
-        return mWordQueue.size() / mWPM;
+        return mDisplayWordList.size() / mWPM;
     }
 
     /**
      * Return the completeness of the current
      * Spritz segment as a float between 0 and 1.
+     *
      * @return a float between 0 (not started) and 1 (complete)
      */
     public float getQueueCompleteness() {
-        return  ((float) mCurWordIdx) / mWordArray.length;
+        return ((float) mCurWordIdx) / mWordArray.length;
     }
 
     /**
@@ -115,9 +152,11 @@ public class Spritzer {
     public int getWpm() {
         return mWPM;
     }
+
     /**
      * Set the target Word Per Minute rate.
      * Effective immediately.
+     *
      * @param wpm
      */
     public void setWpm(int wpm) {
@@ -128,11 +167,12 @@ public class Spritzer {
      * Swap the target TextView. Call this if your
      * host Activity is Destroyed and Re-Created.
      * Effective immediately.
+     *
      * @param target
      */
     public void swapTextView(TextView target) {
         mTarget = target;
-        if (!mPlaying ) {
+        if (!mPlaying) {
             peekNextWord();
         }
     }
@@ -145,8 +185,8 @@ public class Spritzer {
         if (mPlaying || mWordArray == null) {
             return;
         }
-        if (mWordQueue.isEmpty()) {
-            refillWordQueue();
+        if (isWordListComplete()) {
+            refillWordDisplayList();
         }
 
         mPlayingRequested = true;
@@ -157,29 +197,29 @@ public class Spritzer {
         return 60000 / mWPM;
     }
 
-    private void refillWordQueue() {
+    private void refillWordDisplayList() {
         mCurWordIdx = 0;
-        mWordQueue.clear();
-        mWordQueue.addAll(Arrays.asList(mWordArray));
+        mDisplayWordList.clear();
+        mDisplayWordList.addAll(Arrays.asList(mWordArray));
     }
 
     /**
-     * Read the current head of mWordQueue and
+     * Read the current head of mDisplayWordList and
      * submit the appropriate Messages to mSpritzHandler.
-     *
+     * <p/>
      * Split long words submitting the first segment of a word
-     * and placing the second at the head of mWordQueue for processing
+     * and placing the second at the head of mDisplayWordList for processing
      * during the next cycle.
-     *
+     * <p/>
      * Must be called on a background thread, as this method uses
      * {@link Thread#sleep(long)} to time pauses in display.
      *
      * @throws InterruptedException
      */
     protected void processNextWord() throws InterruptedException {
-        if (!mWordQueue.isEmpty()) {
+        if (!isWordListComplete()) {
+            String word = mDisplayWordList.get(mCurWordIdx);
             mCurWordIdx++;
-            String word = mWordQueue.remove();
             word = splitLongWord(word);
 
             if (mBus != null) {
@@ -194,22 +234,21 @@ public class Spritzer {
                     Thread.sleep(getInterWordDelay());
                 }
             }
-        } else {
-            if (mBus != null) {
-                mBus.post(new SpritzFinishedEvent());
-            }
         }
     }
 
     /**
      * Split the given String if appropriate and
      * add the tail of the split to the head of
-     * {@link #mWordQueue}
+     * {@link #mDisplayWordList}
+     *
+     * Currently public for testing purposes
+     *
      * @param word
      * @return
      */
-    protected String splitLongWord(String word) {
-        if (word.length() > MAX_WORD_LENGTH) {
+    public String splitLongWord(String word) {
+        if (word.length() > mMaxWordLength) {
             int splitIndex = findSplitIndex(word);
             String firstSegment;
             firstSegment = word.substring(0, splitIndex);
@@ -217,38 +256,36 @@ public class Spritzer {
             if (!firstSegment.contains("-") && !firstSegment.endsWith(".")) {
                 firstSegment = firstSegment + "-";
             }
-            mCurWordIdx--;
-            mWordQueue.addFirst(word.substring(splitIndex));
+            mDisplayWordList.add(mCurWordIdx, word.substring(splitIndex));
             word = firstSegment;
-
         }
         return word;
     }
 
     /**
      * Determine the split index on a given String
-     * e.g If it exceeds MAX_WORD_LENGTH or contains a hyphen
+     * e.g If it exceeds mMaxWordLength or contains a hyphen
      *
      * @param thisWord
      * @return the index on which to split the given String
      */
-    private int findSplitIndex(String thisWord){
+    private int findSplitIndex(String thisWord) {
         int splitIndex;
         // Split long words, at hyphen or dot if present.
         if (thisWord.contains("-")) {
-        	splitIndex = thisWord.indexOf("-") + 1;
+            splitIndex = thisWord.indexOf("-") + 1;
         } else if (thisWord.contains(".")) {
             splitIndex = thisWord.indexOf(".") + 1;
-        } else if (thisWord.length() > MAX_WORD_LENGTH * 2)  {
-        	// if the word is floccinaucinihilipilifcation, for example.
-        	splitIndex = MAX_WORD_LENGTH-1;
-        	// 12 characters plus a "-" == 13.
+        } else if (thisWord.length() > mMaxWordLength * 2) {
+            // if the word is floccinaucinihilipilifcation, for example.
+            splitIndex = mMaxWordLength - 1;
+            // 12 characters plus a "-" == 13.
         } else {
-        	// otherwise we want to split near the middle.
-        	splitIndex = Math.round(thisWord.length()/2F);
+            // otherwise we want to split near the middle.
+            splitIndex = Math.round(thisWord.length() / 2F);
         }
-        // in case we found a split character that was > MAX_WORD_LENGTH characters in.
-        if (splitIndex > MAX_WORD_LENGTH) {
+        // in case we found a split character that was > mMaxWordLength characters in.
+        if (splitIndex > mMaxWordLength) {
             // If we split the word at a splitting char like "-" or ".", we added one to the splitIndex
             // in order to ensure the splitting char appears at the head of the split. Not accounting
             // for this in the recursive call will cause a StackOverflowException
@@ -267,8 +304,8 @@ public class Spritzer {
     }
 
     private void peekNextWord() {
-        if (mWordQueue.peekFirst() != null) {
-            printWord(mWordQueue.peekFirst());
+        if (mCurWordIdx >= 0 && !isWordListComplete() && mDisplayWordList.get(mCurWordIdx) != null) {
+            printWord(mDisplayWordList.get(mCurWordIdx));
         }
     }
 
@@ -276,6 +313,7 @@ public class Spritzer {
      * Applies the given String to this Spritzer's TextView,
      * padding the beginning if necessary to align the pivot character.
      * Styles the pivot character.
+     *
      * @param word
      */
     private void printWord(String word) {
@@ -331,18 +369,21 @@ public class Spritzer {
                     @Override
                     public void run() {
                         if (VERBOSE) {
-                            Log.i(TAG, "Starting spritzThread with queue length " + mWordQueue.size());
+                            Log.i(TAG, "Starting spritzThread with queue length " + mDisplayWordList.size());
                         }
                         mPlaying = true;
                         mSpritzThreadStarted = true;
                         while (mPlayingRequested) {
                             try {
                                 processNextWord();
-                                if (mWordQueue.isEmpty()) {
+                                if (isWordListComplete()) {
                                     if (VERBOSE) {
-                                        Log.i(TAG, "Queue is empty after processNextWord. Pausing");
+                                        Log.i(TAG, "Word list completely displayed after processNextWord. Pausing");
                                     }
                                     mPlayingRequested = false;
+                                    if (mBus != null) {
+                                        mBus.post(new SpritzFinishedEvent());
+                                    }
                                 }
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
@@ -364,6 +405,10 @@ public class Spritzer {
             return 3;
         }
         return 1;
+    }
+
+    protected boolean isWordListComplete() {
+        return mCurWordIdx >= mDisplayWordList.size();
     }
 
     /**
