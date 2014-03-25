@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import pro.dbro.openspritz.formats.SpritzerBook;
+import pro.dbro.openspritz.formats.SpritzerMedia;
 
 /**
  * Created by davidbrodsky on 3/5/14.
@@ -16,9 +16,9 @@ public class TocReferenceAdapter extends BaseAdapter {
 
     private final Context mContext;
     private final int mResource;
-    private final SpritzerBook mBook;
+    private final SpritzerMedia mBook;
 
-    public TocReferenceAdapter(final Context context, int resource, SpritzerBook book) {
+    public TocReferenceAdapter(final Context context, int resource, SpritzerMedia book) {
         this.mContext = context;
         this.mResource = resource;
         this.mBook = book;

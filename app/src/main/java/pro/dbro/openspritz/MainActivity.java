@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -19,10 +20,10 @@ import android.view.Window;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
-import pro.dbro.openspritz.formats.SpritzerBook;
-import pro.dbro.openspritz.lib.events.ChapterSelectRequested;
-import pro.dbro.openspritz.lib.events.ChapterSelectedEvent;
-import pro.dbro.openspritz.lib.events.WpmSelectedEvent;
+import pro.dbro.openspritz.events.ChapterSelectRequested;
+import pro.dbro.openspritz.events.ChapterSelectedEvent;
+import pro.dbro.openspritz.events.WpmSelectedEvent;
+import pro.dbro.openspritz.formats.SpritzerMedia;
 
 public class MainActivity extends ActionBarActivity implements View.OnSystemUiVisibilityChangeListener {
     private static final String TAG = "MainActivity";
@@ -65,10 +66,23 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
     public void onResume() {
         super.onResume();
         dimSystemUi(true);
-        if (getIntent().getAction().equals(Intent.ACTION_VIEW) && getIntent().getData() != null) {
-            SpritzFragment frag = getSpritzFragment();
-            frag.feedEpubToSpritzer(getIntent().getData());
+        boolean intentIncludesMediaUri = false;
+        String action = getIntent().getAction();
+        Uri intentUri = null;
+        if (action.equals(Intent.ACTION_VIEW)) {
+            intentIncludesMediaUri = true;
+            intentUri = getIntent().getData();
+
+        } else if (action.equals(Intent.ACTION_SEND)) {
+            intentIncludesMediaUri = true;
+            intentUri = Uri.parse(getIntent().getStringExtra(Intent.EXTRA_TEXT));
         }
+
+        if (intentIncludesMediaUri && intentUri != null) {
+            SpritzFragment frag = getSpritzFragment();
+            frag.feedMediaUriToSpritzer(intentUri);
+        }
+
     }
 
     @Override
@@ -114,7 +128,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
                 applyLightTheme();
             }
         } else if (id == R.id.action_open) {
-            getSpritzFragment().chooseEpub();
+            getSpritzFragment().chooseMedia();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -158,7 +172,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
     public void onChapterSelectRequested(ChapterSelectRequested ignored) {
         SpritzFragment frag = getSpritzFragment();
         if (frag != null && frag.getSpritzer() != null) {
-            SpritzerBook book = frag.getSpritzer().getBook();
+            SpritzerMedia book = frag.getSpritzer().getMedia();
             FragmentTransaction ft = getFragmentManager().beginTransaction();
             DialogFragment newFragment = TocDialogFragment.newInstance(book);
             newFragment.show(ft, "dialog");
@@ -197,7 +211,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
     @Override
     public void onSystemUiVisibilityChange(int visibility) {
         // Stay in low-profile mode
-        if ((visibility & View.SYSTEM_UI_FLAG_LOW_PROFILE) == 0){
+        if ((visibility & View.SYSTEM_UI_FLAG_LOW_PROFILE) == 0) {
             dimSystemUi(true);
         }
     }

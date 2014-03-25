@@ -3,12 +3,12 @@ package pro.dbro.openspritz.formats;
 import java.io.Serializable;
 
 /**
- * SpritzerBook provides an interface that abstracts different
- * book types.
+ * SpritzerMedia provides an interface that abstracts different
+ * media types.
  *
  * @author defer (diogo@underdev.org)
  */
-public interface SpritzerBook extends Serializable {
+public interface SpritzerMedia extends Serializable {
     /**
      * Obtains the book title.
      * @return The book title, or {@code ""} if it is not available.

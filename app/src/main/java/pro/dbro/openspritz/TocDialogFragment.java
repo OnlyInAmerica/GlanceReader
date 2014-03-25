@@ -10,20 +10,20 @@ import android.widget.ListView;
 
 import com.squareup.otto.Bus;
 
-import pro.dbro.openspritz.formats.SpritzerBook;
-import pro.dbro.openspritz.lib.events.ChapterSelectedEvent;
+import pro.dbro.openspritz.events.ChapterSelectedEvent;
+import pro.dbro.openspritz.formats.SpritzerMedia;
 
 /**
  * Created by davidbrodsky on 3/1/14.
  */
 public class TocDialogFragment extends DialogFragment implements ListView.OnItemClickListener {
 
-    private SpritzerBook mBook;
+    private SpritzerMedia mBook;
     private TocReferenceAdapter mAdapter;
     private ListView mList;
     private Bus mBus;
 
-    static TocDialogFragment newInstance(SpritzerBook book) {
+    static TocDialogFragment newInstance(SpritzerMedia book) {
         TocDialogFragment f = new TocDialogFragment();
 
         Bundle args = new Bundle();
@@ -36,7 +36,7 @@ public class TocDialogFragment extends DialogFragment implements ListView.OnItem
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBook = (SpritzerBook) getArguments().getSerializable("book");
+        mBook = (SpritzerMedia) getArguments().getSerializable("book");
         mAdapter = new TocReferenceAdapter(getActivity(), R.layout.chapter_list_item, mBook);
     }
 

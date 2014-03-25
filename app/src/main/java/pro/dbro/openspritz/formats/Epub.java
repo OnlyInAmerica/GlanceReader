@@ -19,7 +19,7 @@ import nl.siegmann.epublib.epub.EpubReader;
 import pro.dbro.openspritz.FileUtils;
 
 /**
- * This provides an implementation of {@link pro.dbro.openspritz.formats.SpritzerBook}
+ * This provides an implementation of {@link SpritzerMedia}
  * that serves chapters in the Epub format.
  * <p/>
  * The chapters are provided in a best-effort way: If a TOC is available, those are the
@@ -29,11 +29,11 @@ import pro.dbro.openspritz.FileUtils;
  *
  * @author defer (diogo@underdev.org)
  */
-public class EpubBook implements SpritzerBook {
+public class Epub implements SpritzerMedia {
     /**
      * The logging tag.
      */
-    private static final String TAG = "EpubBook";
+    private static final String TAG = "Epub";
 
     /**
      * The epublib book.
@@ -46,11 +46,11 @@ public class EpubBook implements SpritzerBook {
     private final boolean mHasToc;
 
     /**
-     * Builds an EpubBook from a epublib {@link nl.siegmann.epublib.domain.Book}.
+     * Builds an Epub from a epublib {@link nl.siegmann.epublib.domain.Book}.
      *
      * @param book The book.
      */
-    private EpubBook(Book book) {
+    private Epub(Book book) {
         this.mBook = book;
         this.mHasToc = inferTocPresence(book);
     }
@@ -71,15 +71,15 @@ public class EpubBook implements SpritzerBook {
     }
 
     /**
-     * Creates an {@link pro.dbro.openspritz.formats.EpubBook} from a context and URI.
+     * Creates an {@link Epub} from a context and URI.
      *
      * @param context The context.
      * @param uri     The uri.
-     * @return An EpubBook from the URI.
+     * @return An Epub from the URI.
      * @throws UnsupportedFormatException If the book is in an unexpected format or if it fails to read for some reason.
      */
-    public static EpubBook fromUri(Context context, Uri uri) throws UnsupportedFormatException {
-        return new EpubBook(openEpub(context, uri));
+    public static Epub fromUri(Context context, Uri uri) throws UnsupportedFormatException {
+        return new Epub(openEpub(context, uri));
     }
 
     private static Book openEpub(Context context, Uri epubUri) throws UnsupportedFormatException {

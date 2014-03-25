@@ -143,7 +143,7 @@ public class Spritzer {
      * @return a float between 0 (not started) and 1 (complete)
      */
     public float getQueueCompleteness() {
-        return ((float) mCurWordIdx) / mWordArray.length;
+        return (mWordArray == null) ? 0 : ((float) mCurWordIdx) / mWordArray.length;
     }
 
     /**

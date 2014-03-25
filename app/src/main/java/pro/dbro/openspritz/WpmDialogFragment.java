@@ -12,7 +12,8 @@ import android.widget.TextView;
 
 import com.squareup.otto.Bus;
 
-import pro.dbro.openspritz.lib.events.WpmSelectedEvent;
+import pro.dbro.openspritz.events.WpmSelectedEvent;
+
 
 /**
  * Created by davidbrodsky on 3/1/14.

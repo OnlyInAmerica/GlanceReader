@@ -17,10 +17,11 @@ import android.widget.TextView;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
-import pro.dbro.openspritz.formats.SpritzerBook;
+import pro.dbro.openspritz.events.ChapterSelectRequested;
+import pro.dbro.openspritz.events.HttpUrlParsedEvent;
+import pro.dbro.openspritz.events.NextChapterEvent;
+import pro.dbro.openspritz.formats.SpritzerMedia;
 import pro.dbro.openspritz.lib.SpritzerTextView;
-import pro.dbro.openspritz.lib.events.ChapterSelectRequested;
-import pro.dbro.openspritz.lib.events.NextChapterEvent;
 import pro.dbro.openspritz.lib.events.SpritzFinishedEvent;
 
 public class SpritzFragment extends Fragment {
@@ -43,14 +44,21 @@ public class SpritzFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public void feedEpubToSpritzer(Uri epubPath) {
+    public void feedMediaUriToSpritzer(Uri mediaUri) {
         if (mSpritzer == null) {
-            mSpritzer = new AppSpritzer(mSpritzView, epubPath);
-            mSpritzer.setEventBus(mBus);
+            mSpritzer = new AppSpritzer(mBus, mSpritzView, mediaUri);
             mSpritzView.setSpritzer(mSpritzer);
         } else {
-            mSpritzer.setEpubPath(epubPath);
+            mSpritzer.setMediaUri(mediaUri);
         }
+
+        if (AppSpritzer.isHttpUri(mediaUri)) {
+            showIndeterminateProgress(true);
+        }
+    }
+
+    public void showIndeterminateProgress(boolean show) {
+        mProgress.setIndeterminate(show);
     }
 
     /**
@@ -58,18 +66,18 @@ public class SpritzFragment extends Fragment {
      * and current progress
      */
     public void updateMetaUi() {
-        if (!mSpritzer.isBookSelected()) {
+        if (!mSpritzer.isMediaSelected()) {
             return;
         }
 
-        SpritzerBook book = mSpritzer.getBook();
+        SpritzerMedia book = mSpritzer.getMedia();
 
         mAuthorView.setText(book.getAuthor());
         mTitleView.setText(book.getTitle());
 
         int curChapter = mSpritzer.getCurrentChapter();
 
-        String chapterText = mSpritzer.getBook().getChapterTitle(curChapter);
+        String chapterText = mSpritzer.getMedia().getChapterTitle(curChapter);
 
         int startSpan = chapterText.length();
         chapterText = String.format("%s  %s m left", chapterText,
@@ -81,7 +89,7 @@ public class SpritzFragment extends Fragment {
         mChapterView.setText(spanRange);
 
         final int progressScale = 10;
-        int progress = curChapter * progressScale + ( (int) (progressScale * (mSpritzer.getQueueCompleteness())) );
+        int progress = curChapter * progressScale + ((int) (progressScale * (mSpritzer.getQueueCompleteness())));
         mProgress.setMax((mSpritzer.getMaxChapter() + 1) * progressScale);
         mProgress.setProgress(progress);
     }
@@ -135,7 +143,7 @@ public class SpritzFragment extends Fragment {
 
                         @Override
                         public void run() {
-                            if(mSpritzer.isPlaying()) {
+                            if (mSpritzer.isPlaying()) {
                                 mChapterView.setVisibility(View.INVISIBLE);
                             }
                         }
@@ -164,7 +172,7 @@ public class SpritzFragment extends Fragment {
         mSpritzView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mSpritzer != null && mSpritzer.isBookSelected()) {
+                if (mSpritzer != null && mSpritzer.isMediaSelected()) {
                     if (mSpritzer.isPlaying()) {
                         updateMetaUi();
                         showMetaUi(true);
@@ -176,7 +184,7 @@ public class SpritzFragment extends Fragment {
                         mSpritzer.start();
                     }
                 } else {
-                    chooseEpub();
+                    chooseMedia();
                 }
             }
         });
@@ -190,10 +198,9 @@ public class SpritzFragment extends Fragment {
         mBus = app.getBus();
         mBus.register(this);
         if (mSpritzer == null) {
-            mSpritzer = new AppSpritzer(mSpritzView);
-            mSpritzer.setEventBus(mBus);
+            mSpritzer = new AppSpritzer(mBus, mSpritzView);
             mSpritzView.setSpritzer(mSpritzer);
-            if (mSpritzer.getBook() == null) {
+            if (mSpritzer.getMedia() == null) {
                 mSpritzView.setText(getString(R.string.select_epub));
             } else {
                 // AppSpritzer loaded the last book being read
@@ -232,7 +239,7 @@ public class SpritzFragment extends Fragment {
      */
     @Subscribe
     public void onSpritzFinished(SpritzFinishedEvent event) {
-        getActivity().runOnUiThread(new Runnable(){
+        getActivity().runOnUiThread(new Runnable() {
 
             @Override
             public void run() {
@@ -260,16 +267,24 @@ public class SpritzFragment extends Fragment {
 
     }
 
+    @Subscribe
+    public void onHttpUrlParsed(HttpUrlParsedEvent event) {
+        showIndeterminateProgress(false);
+        mSpritzer.pause();
+        updateMetaUi();
+        showMetaUi(true);
+    }
+
     public AppSpritzer getSpritzer() {
         return mSpritzer;
     }
 
-    private static final int SELECT_EPUB = 42;
+    private static final int SELECT_MEDIA = 42;
 
     /**
      * Fires an intent to spin up the "file chooser" UI and select an image.
      */
-    public void chooseEpub() {
+    public void chooseMedia() {
 
         // ACTION_OPEN_DOCUMENT is the new API 19 action for the Android file manager
         Intent intent;
@@ -286,11 +301,11 @@ public class SpritzFragment extends Fragment {
         // Currently no recognized epub MIME type
         intent.setType("*/*");
 
-        startActivityForResult(intent, SELECT_EPUB);
+        startActivityForResult(intent, SELECT_MEDIA);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == SELECT_EPUB && data != null) {
+        if (requestCode == SELECT_MEDIA && data != null) {
             Uri uri = data.getData();
             if (Build.VERSION.SDK_INT >= 19) {
                 final int takeFlags = data.getFlags()
@@ -298,7 +313,7 @@ public class SpritzFragment extends Fragment {
                         | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 getActivity().getContentResolver().takePersistableUriPermission(uri, takeFlags);
             }
-            feedEpubToSpritzer(uri);
+            feedMediaUriToSpritzer(uri);
             updateMetaUi();
         }
     }

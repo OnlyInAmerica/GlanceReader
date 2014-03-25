@@ -12,5 +12,7 @@ buildscript {
 allprojects {
     repositories {
         mavenCentral()
+
+        maven { url "https://github.com/karussell/mvnrepo/raw/master/releases" }
     }
 }

@@ -1,5 +1,6 @@
 package pro.dbro.openspritz;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.UriPermission;
@@ -9,16 +10,21 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.otto.Bus;
+
 import java.util.List;
 
-import pro.dbro.openspritz.lib.Spritzer;
-import pro.dbro.openspritz.lib.events.NextChapterEvent;
-import pro.dbro.openspritz.formats.EpubBook;
-import pro.dbro.openspritz.formats.SpritzerBook;
+import de.jetwick.snacktory.JResult;
+import pro.dbro.openspritz.events.HttpUrlParsedEvent;
+import pro.dbro.openspritz.events.NextChapterEvent;
+import pro.dbro.openspritz.formats.Epub;
+import pro.dbro.openspritz.formats.HtmlPage;
+import pro.dbro.openspritz.formats.SpritzerMedia;
 import pro.dbro.openspritz.formats.UnsupportedFormatException;
+import pro.dbro.openspritz.lib.Spritzer;
 
 /**
- * Parse an .epub into a Queue of words
+ * Parse a SpritzerMedia instance into a Queue of words
  * and display them on a TextView at
  * a given WPM
  */
@@ -34,41 +40,67 @@ public class AppSpritzer extends Spritzer {
     private static final String PREF_WPM = "wpm";
 
     private int mChapter;
+    private SpritzerMedia mMedia;
+    private Uri mMediaUri;
 
-    private SpritzerBook mBook;
-
-    private Uri mEpubUri;
-
-    public AppSpritzer(TextView target) {
+    public AppSpritzer(Bus bus, TextView target) {
         super(target);
+        setEventBus(bus);
         restoreState(true);
     }
 
-    public AppSpritzer(TextView target, Uri epubPath) {
+    public AppSpritzer(Bus bus, TextView target, Uri mediaUri) {
         super(target);
-        openEpub(epubPath);
+        setEventBus(bus);
+        openMedia(mediaUri);
         mTarget.setText(mTarget.getContext().getString(R.string.touch_to_start));
     }
 
-    public void setEpubPath(Uri epubPath) {
+    public void setMediaUri(Uri uri) {
         pause();
-        openEpub(epubPath);
+        openMedia(uri);
         mTarget.setText(mTarget.getContext().getString(R.string.touch_to_start));
     }
 
-    private void openEpub(Uri epubPath) {
+    private void openMedia(Uri uri) {
+        if (isHttpUri(uri)) {
+            openHtmlPage(uri);
+        } else {
+            openEpub(uri);
+        }
+    }
+
+    private void openEpub(Uri epubUri) {
         try {
             mChapter = 0;
-            mBook = EpubBook.fromUri(mTarget.getContext(), epubPath);
-            mEpubUri = epubPath;
+            mMediaUri = epubUri;
+            mMedia = Epub.fromUri(mTarget.getContext(), mMediaUri);
             restoreState(false);
         } catch (UnsupportedFormatException e) {
             reportFileUnsupported();
         }
     }
 
-    public SpritzerBook getBook() {
-        return mBook;
+    private void openHtmlPage(Uri htmlUri) {
+        try {
+            mChapter = 0;
+            mMediaUri = htmlUri;
+            mMedia = HtmlPage.fromUri(htmlUri.toString(), new HtmlPage.HtmlPageParsedCallback() {
+                @Override
+                public void onPageParsed(JResult result) {
+                    restoreState(false);
+                    if (mBus != null) {
+                        mBus.post(new HttpUrlParsedEvent(result));
+                    }
+                }
+            });
+        } catch (UnsupportedFormatException e) {
+            reportFileUnsupported();
+        }
+    }
+
+    public SpritzerMedia getMedia() {
+        return mMedia;
     }
 
     public void printChapter(int chapter) {
@@ -82,11 +114,11 @@ public class AppSpritzer extends Spritzer {
     }
 
     public int getMaxChapter() {
-        return mBook.countChapters() - 1;
+        return mMedia.countChapters() - 1;
     }
 
-    public boolean isBookSelected() {
-        return mBook != null;
+    public boolean isMediaSelected() {
+        return mMedia != null;
     }
 
     protected void processNextWord() throws InterruptedException {
@@ -104,54 +136,56 @@ public class AppSpritzer extends Spritzer {
     private void printNextChapter() {
         setText(loadCleanStringFromChapter(mChapter++));
         saveState();
-        if (VERBOSE) Log.i(TAG, "starting next chapter: " + mChapter + " length " + mDisplayWordList.size());
+        if (VERBOSE)
+            Log.i(TAG, "starting next chapter: " + mChapter + " length " + mDisplayWordList.size());
     }
 
     private String loadCleanStringFromChapter(int chapter) {
-        return mBook.loadChapter(chapter);
+        return mMedia.loadChapter(chapter);
     }
 
     public void saveState() {
-        if (mBook != null) {
+        if (mMedia != null) {
             if (VERBOSE) Log.i(TAG, "Saving state at chapter " + mChapter);
             SharedPreferences.Editor editor = mTarget.getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit();
             editor.putInt(PREF_CHAPTER, mChapter)
-                    .putString(PREF_URI, mEpubUri.toString())
+                    .putString(PREF_URI, mMediaUri.toString())
                     .putInt(PREF_WORD, mCurWordIdx)
-                    .putString(PREF_TITLE, mBook.getTitle())
+                    .putString(PREF_TITLE, mMedia.getTitle())
                     .putInt(PREF_WPM, mWPM)
                     .apply();
         }
     }
 
-    private void restoreState(boolean openLastEpubUri) {
+    @SuppressLint("NewApi")
+    private void restoreState(boolean openLastMediaUri) {
         SharedPreferences prefs = mTarget.getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        if (openLastEpubUri) {
+        if (openLastMediaUri) {
             if (prefs.contains(PREF_URI)) {
-                Uri epubUri = Uri.parse(prefs.getString(PREF_URI, ""));
-                if (Build.VERSION.SDK_INT >= 19) {
+                Uri mediaUri = Uri.parse(prefs.getString(PREF_URI, ""));
+                if (Build.VERSION.SDK_INT >= 19 && !isHttpUri(mediaUri)) {
                     boolean uriPermissionPersisted = false;
-                    List<UriPermission> uriPermissions = mTarget.getContext().getContentResolver().getPersistedUriPermissions();
+                     List<UriPermission> uriPermissions = mTarget.getContext().getContentResolver().getPersistedUriPermissions();
                     for (UriPermission permission : uriPermissions) {
-                        if (permission.getUri().equals(epubUri)) {
+                        if (permission.getUri().equals(mediaUri)) {
                             Log.i(TAG, "Found persisted url");
                             uriPermissionPersisted = true;
-                            openEpub(epubUri);
+                            openMedia(mediaUri);
                             break;
                         }
                     }
                     if (!uriPermissionPersisted) {
-                        Log.w(TAG, String.format("Permission not persisted for uri: %s. Clearing SharedPreferences " + epubUri.toString()));
+                        Log.w(TAG, String.format("Permission not persisted for uri: %s. Clearing SharedPreferences ", mediaUri.toString()));
                         prefs.edit().clear().apply();
                         return;
                     }
                 } else {
-                    openEpub(epubUri);
+                    openMedia(mediaUri);
                 }
             }
-        } else if (prefs.contains(PREF_TITLE) && mBook.getTitle().compareTo(prefs.getString(PREF_TITLE, "")) == 0) {
+        } else if (prefs.contains(PREF_TITLE) && mMedia.getTitle().compareTo(prefs.getString(PREF_TITLE, "")) == 0) {
             mChapter = prefs.getInt(PREF_CHAPTER, 0);
-            if (VERBOSE) Log.i(TAG, "Resuming " + mBook.getTitle() + " from chapter " + mChapter);
+            if (VERBOSE) Log.i(TAG, "Resuming " + mMedia.getTitle() + " from chapter " + mChapter);
             setText(loadCleanStringFromChapter(mChapter));
             setWpm(prefs.getInt(PREF_WPM, 500));
             mCurWordIdx = prefs.getInt(PREF_WORD, 0);
@@ -166,6 +200,10 @@ public class AppSpritzer extends Spritzer {
 
     private void reportFileUnsupported() {
         Toast.makeText(mTarget.getContext(), mTarget.getContext().getString(R.string.unsupported_file), Toast.LENGTH_LONG).show();
+    }
+
+    public static boolean isHttpUri(Uri uri) {
+        return uri.getScheme() != null && uri.getScheme().contains("http");
     }
 
 }

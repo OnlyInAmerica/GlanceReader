@@ -1,4 +1,4 @@
-package pro.dbro.openspritz.lib.events;
+package pro.dbro.openspritz.events;
 
 /**
  * Event that is fired whenever the user requests to change
