@@ -164,11 +164,14 @@ public class SpritzFragment extends Fragment {
         mChapterView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mBus.post(new ChapterSelectRequested());
+                if(mSpritzer.getMaxChapter() > 1) {
+                    mBus.post(new ChapterSelectRequested());
+                }
             }
         });
         mProgress = ((ProgressBar) root.findViewById(R.id.progress));
         mSpritzView = (SpritzerTextView) root.findViewById(R.id.spritzText);
+        //mSpritzView.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "UbuntuMono-R.ttf"));
         mSpritzView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

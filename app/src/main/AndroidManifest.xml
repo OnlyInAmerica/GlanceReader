@@ -4,6 +4,7 @@
 
     <!-- Allows opening previously opened document URI directly. Else, have to show document chooser
      on each launch-->
+    <uses-permission android:name="com.android.vending.BILLING" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.MANAGE_DOCUMENTS" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>

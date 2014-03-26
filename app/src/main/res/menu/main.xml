@@ -4,6 +4,13 @@
     tools:context="pro.dbro.openspritz.MainActivity">
 
     <item
+        android:id="@+id/action_donate"
+        android:icon="?attr/love_icon"
+        android:title="@string/set_wpm"
+        android:orderInCategory="100"
+        app:showAsAction="always" />
+
+    <item
         android:id="@+id/action_speed"
         android:icon="?attr/speed_icon"
         android:title="@string/set_wpm"
