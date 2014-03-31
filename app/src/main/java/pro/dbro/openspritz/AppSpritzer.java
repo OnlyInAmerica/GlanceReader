@@ -30,7 +30,7 @@ import pro.dbro.openspritz.lib.Spritzer;
  */
 // TODO: Save State for multiple books
 public class AppSpritzer extends Spritzer {
-    public static final boolean VERBOSE = true;
+    public static final boolean VERBOSE = false;
 
     private static final String PREFS = "espritz";
     private static final String PREF_URI = "uri";

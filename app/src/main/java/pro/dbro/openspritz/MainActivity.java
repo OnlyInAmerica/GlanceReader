@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -97,6 +98,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
                 Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
                 showDonateCompleteDialog();
                 mIsPremium = true;
+                invalidateOptionsMenu();
             }
         }
     };
@@ -341,14 +343,23 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
     private void showDonateDialog() {
         new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.dialog_donate_title))
-                .setMessage(getString(R.string.dialog_donate_msg))
+                .setMessage(Html.fromHtml(getString(R.string.dialog_donate_msg)))
                 .setPositiveButton(getString(R.string.dialog_donate_positive_btn), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         mBillingHelper.launchPurchaseFlow(MainActivity.this, Catalog.SKU_PREMIUM, Catalog.PREMIUM_REQUEST,
                                 mPurchaseFinishedListener, "");
                     }
-                }).show();
+                })
+                .setNeutralButton(getString(R.string.dialog_donate_neutral_btn), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent i = new Intent(Intent.ACTION_VIEW);
+                        i.setData(Uri.parse("https://github.com/OnlyInAmerica/OpenSpritz-Android"));
+                        startActivity(i);
+                    }
+                })
+                .show();
     }
 
     private void showDonateCompleteDialog() {
