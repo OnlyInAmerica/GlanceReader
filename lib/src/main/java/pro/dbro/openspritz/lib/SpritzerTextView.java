@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -27,6 +28,8 @@ public class SpritzerTextView extends TextView implements View.OnClickListener {
     private int mAdditionalPadding;
     private int mPivotX;
     private boolean mShouldRefreshMaxLineChars;
+    private Path topPivotPath;
+    private Path bottomPivotPath;
 
     public SpritzerTextView(Context context) {
         super(context);
@@ -57,7 +60,7 @@ public class SpritzerTextView extends TextView implements View.OnClickListener {
 
     private void setAdditionalPadding(AttributeSet attrs) {
         //check padding attributes
-        int [] attributes = new int [] {android.R.attr.padding, android.R.attr.paddingTop,
+        int[] attributes = new int[]{android.R.attr.padding, android.R.attr.paddingTop,
                 android.R.attr.paddingBottom};
 
         final TypedArray paddingArray = getContext().obtainStyledAttributes(attrs, attributes);
@@ -67,7 +70,7 @@ public class SpritzerTextView extends TextView implements View.OnClickListener {
             final int paddingBottom = paddingArray.getDimensionPixelOffset(2, 0);
             mAdditionalPadding = Math.max(padding, Math.max(paddingTop, paddingBottom));
             if (VERBOSE) Log.i(TAG, "Additional Padding " + mAdditionalPadding);
-        }finally {
+        } finally {
             paddingArray.recycle();
         }
     }
@@ -121,8 +124,34 @@ public class SpritzerTextView extends TextView implements View.OnClickListener {
         final int pivotIndicatorLength = getPivotIndicatorLength();
 
         // Paint the pivot indicator
-        canvas.drawLine(centerX, topY + (mPaintWidthPx / 2), centerX, topY + (mPaintWidthPx / 2) + pivotIndicatorLength, mPaintGuides); //line through center of circle
-        canvas.drawLine(centerX, bottomY - (mPaintWidthPx / 2), centerX, bottomY - (mPaintWidthPx / 2) - pivotIndicatorLength , mPaintGuides);
+        drawPivots(canvas, centerX);
+        //canvas.drawLine(centerX, topY + (mPaintWidthPx / 2), centerX, topY + (mPaintWidthPx / 2) + pivotIndicatorLength, mPaintGuides); //line through center of circle
+        //canvas.drawLine(centerX, bottomY - (mPaintWidthPx / 2), centerX, bottomY - (mPaintWidthPx / 2) - pivotIndicatorLength, mPaintGuides);
+    }
+
+    private void drawPivots(Canvas canvas, float centerX) {
+        int triSize = 3;
+        if (topPivotPath == null) {
+            topPivotPath = new Path();
+            topPivotPath.setFillType(Path.FillType.EVEN_ODD);
+            topPivotPath.moveTo(centerX - PAINT_WIDTH_DP * triSize, (mPaintWidthPx ));
+            topPivotPath.lineTo(centerX, PAINT_WIDTH_DP * triSize + (mPaintWidthPx ));
+            topPivotPath.lineTo(centerX + PAINT_WIDTH_DP * triSize, (mPaintWidthPx ));
+            topPivotPath.lineTo(centerX - PAINT_WIDTH_DP * triSize, (mPaintWidthPx ));
+            topPivotPath.close();
+        }
+        canvas.drawPath(topPivotPath, mPaintGuides);
+        if (bottomPivotPath == null) {
+            bottomPivotPath = new Path();
+            bottomPivotPath.setFillType(Path.FillType.EVEN_ODD);
+            bottomPivotPath.moveTo(centerX - PAINT_WIDTH_DP * triSize, getMeasuredHeight() - (mPaintWidthPx ));
+            bottomPivotPath.lineTo(centerX, getMeasuredHeight() - PAINT_WIDTH_DP * triSize - (mPaintWidthPx ));
+            bottomPivotPath.lineTo(centerX + PAINT_WIDTH_DP * triSize, getMeasuredHeight() - (mPaintWidthPx ));
+            bottomPivotPath.lineTo(centerX - PAINT_WIDTH_DP * triSize, getMeasuredHeight() - (mPaintWidthPx ));
+            bottomPivotPath.close();
+        }
+        canvas.drawPath(bottomPivotPath, mPaintGuides);
+
     }
 
     private int getPivotPadding() {
