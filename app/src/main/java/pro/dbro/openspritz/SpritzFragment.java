@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -17,6 +19,8 @@ import android.widget.TextView;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
+import java.lang.ref.WeakReference;
+
 import pro.dbro.openspritz.events.ChapterSelectRequested;
 import pro.dbro.openspritz.events.HttpUrlParsedEvent;
 import pro.dbro.openspritz.events.NextChapterEvent;
@@ -27,6 +31,10 @@ import pro.dbro.openspritz.lib.events.SpritzFinishedEvent;
 public class SpritzFragment extends Fragment {
     private static final String TAG = "SpritzFragment";
 
+    // SpritzFragmentHandler Message codes
+    protected static final int MSG_SPRITZ_TEXT = 1;
+    protected static final int MSG_HIDE_CHAPTER_LABEL = 2;
+
     private static AppSpritzer mSpritzer;
     private TextView mAuthorView;
     private TextView mTitleView;
@@ -34,6 +42,7 @@ public class SpritzFragment extends Fragment {
     private ProgressBar mProgress;
     private SpritzerTextView mSpritzView;
     private Bus mBus;
+    private SpritzFragmentHandler mHandler;
 
     public static SpritzFragment newInstance() {
         SpritzFragment fragment = new SpritzFragment();
@@ -53,6 +62,7 @@ public class SpritzFragment extends Fragment {
         }
 
         if (AppSpritzer.isHttpUri(mediaUri)) {
+            mSpritzer.setTextAndStart(getString(R.string.loading));
             showIndeterminateProgress(true);
         }
     }
@@ -89,8 +99,17 @@ public class SpritzFragment extends Fragment {
         mChapterView.setText(spanRange);
 
         final int progressScale = 10;
-        int progress = curChapter * progressScale + ((int) (progressScale * (mSpritzer.getQueueCompleteness())));
+        int progress;
+        // If the spritzer is showing a special message
+        // don't factor current word queue completeness
+        // into progress.
+        if (mSpritzer.isSpritzingSpecialMessage()) {
+            progress = curChapter;
+        } else {
+            progress = curChapter * progressScale + ((int) (progressScale * (mSpritzer.getQueueCompleteness())));
+        }
         mProgress.setMax((mSpritzer.getMaxChapter() + 1) * progressScale);
+
         mProgress.setProgress(progress);
     }
 
@@ -128,29 +147,7 @@ public class SpritzFragment extends Fragment {
      */
     private void peekChapter() {
         mChapterView.setVisibility(View.VISIBLE);
-        // Clean this up
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            if (mSpritzer.isPlaying()) {
-                                mChapterView.setVisibility(View.INVISIBLE);
-                            }
-                        }
-                    });
-                }
-            }
-        }).start();
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_HIDE_CHAPTER_LABEL), 2000);
     }
 
     @Override
@@ -194,14 +191,20 @@ public class SpritzFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         OpenSpritzApplication app = (OpenSpritzApplication) getActivity().getApplication();
         mBus = app.getBus();
         mBus.register(this);
+        mHandler = new SpritzFragmentHandler(this);
         if (mSpritzer == null) {
             mSpritzer = new AppSpritzer(mBus, mSpritzView);
             mSpritzView.setSpritzer(mSpritzer);
             if (mSpritzer.getMedia() == null) {
-                mSpritzView.setText(getString(R.string.select_epub));
+                mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SPRITZ_TEXT, getString(R.string.select_epub)), 1500);
             } else {
                 // AppSpritzer loaded the last book being read
                 updateMetaUi();
@@ -270,7 +273,7 @@ public class SpritzFragment extends Fragment {
     @Subscribe
     public void onHttpUrlParsed(HttpUrlParsedEvent event) {
         showIndeterminateProgress(false);
-        mSpritzer.pause();
+        //mSpritzer.pause();
         updateMetaUi();
         showMetaUi(true);
     }
@@ -316,6 +319,45 @@ public class SpritzFragment extends Fragment {
             feedMediaUriToSpritzer(uri);
             updateMetaUi();
         }
+    }
+
+    /**
+     * A Handler bound to the UI thread. Used to conveniently
+     * handle actions that should occur after some delay.
+     */
+    protected class SpritzFragmentHandler extends Handler {
+
+        private WeakReference<SpritzFragment> mWeakSpritzFragment;
+
+        public SpritzFragmentHandler(SpritzFragment fragment) {
+            mWeakSpritzFragment = new WeakReference<SpritzFragment>(fragment);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            int what = msg.what;
+            Object obj = msg.obj;
+
+            SpritzFragment spritzer = mWeakSpritzFragment.get();
+            if (spritzer == null) {
+                return;
+            }
+            switch (what) {
+                case MSG_HIDE_CHAPTER_LABEL:
+                    if (getActivity() != null) {
+                        if (mSpritzer != null && mSpritzer.isPlaying()) {
+                            spritzer.mChapterView.setVisibility(View.INVISIBLE);
+                        }
+                    }
+                    break;
+                case MSG_SPRITZ_TEXT:
+                    if (mSpritzer != null) {
+                        mSpritzer.setTextAndStart((String) obj);
+                    }
+                    break;
+            }
+        }
+
     }
 
 }

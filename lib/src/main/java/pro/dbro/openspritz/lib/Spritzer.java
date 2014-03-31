@@ -24,7 +24,7 @@ import pro.dbro.openspritz.lib.events.SpritzProgressEvent;
  */
 public class Spritzer {
     protected static final String TAG = "Spritzer";
-    protected static final boolean VERBOSE = false;
+    protected static final boolean VERBOSE = true;
 
     protected static final int MSG_PRINT_WORD = 1;
 
@@ -35,7 +35,7 @@ public class Spritzer {
     protected TextView mTarget;
     protected int mWPM;
     protected Handler mSpritzHandler;
-    protected Object mPlayingSync = new Object();
+    protected Object mSpritzThreadStartedSync = new Object();
     protected boolean mPlaying;
     protected boolean mPlayingRequested;
     protected boolean mSpritzThreadStarted;
@@ -43,10 +43,28 @@ public class Spritzer {
     protected Bus mBus;
     protected int mCurWordIdx;
 
+    public static interface SpritzerCallback {
+        public void onSpritzerFinished();
+    }
+
     public Spritzer(TextView target) {
         init();
         mTarget = target;
         mSpritzHandler = new SpritzHandler(this);
+    }
+
+    public void setTextAndStart(String input) {
+        if (VERBOSE) Log.i(TAG, "setTextAndStart, no cb");
+        pause();
+        setText(input);
+        start();
+    }
+
+    public void setTextAndStart(String input, SpritzerCallback cb) {
+        if (VERBOSE) Log.i(TAG, "setTextAndStart, with cb");
+        pause();
+        setText(input);
+        start(cb);
     }
 
     /**
@@ -182,15 +200,28 @@ public class Spritzer {
      * fed to {@link #setText(String)}
      */
     public void start() {
+        start(null);
+    }
+
+    /**
+     * Start displaying the String input
+     * fed to {@link #setText(String)}
+     *
+     * @param cb callback to be notified when Spritzer finished.
+     *           Called from background thread.
+     */
+    public void start(SpritzerCallback cb) {
         if (mPlaying || mWordArray == null) {
+            if (VERBOSE) Log.w(TAG, "Start called in invalid state");
             return;
         }
+        if (VERBOSE) Log.i(TAG, "Start called " + ((cb == null) ? "without" : "with") + " callback." );
         if (isWordListComplete()) {
             refillWordDisplayList();
         }
 
         mPlayingRequested = true;
-        startTimerThread();
+        startTimerThread(cb);
     }
 
     private int getInterWordDelay() {
@@ -217,9 +248,11 @@ public class Spritzer {
      * @throws InterruptedException
      */
     protected void processNextWord() throws InterruptedException {
-        if (!isWordListComplete()) {
+        if (mCurWordIdx < mDisplayWordList.size()) {
             String word = mDisplayWordList.get(mCurWordIdx);
-            mCurWordIdx++;
+            if(word.equals("HudsonCopyright")) {
+                Log.i(TAG, "Breakpoint");
+            }
             word = splitLongWord(word);
 
             if (mBus != null) {
@@ -234,6 +267,8 @@ public class Spritzer {
                     Thread.sleep(getInterWordDelay());
                 }
             }
+        } else {
+            if (VERBOSE) Log.i(TAG, "processNextWord called with invalid mCurWordIdx: " + mCurWordIdx + " array size " + mDisplayWordList.size());
         }
     }
 
@@ -241,7 +276,7 @@ public class Spritzer {
      * Split the given String if appropriate and
      * add the tail of the split to the head of
      * {@link #mDisplayWordList}
-     *
+     * <p/>
      * Currently public for testing purposes
      *
      * @param word
@@ -256,7 +291,7 @@ public class Spritzer {
             if (!firstSegment.contains("-") && !firstSegment.endsWith(".")) {
                 firstSegment = firstSegment + "-";
             }
-            mDisplayWordList.add(mCurWordIdx, word.substring(splitIndex));
+            mDisplayWordList.add(mCurWordIdx + 1, word.substring(splitIndex));
             word = firstSegment;
         }
         return word;
@@ -352,7 +387,19 @@ public class Spritzer {
     }
 
     public void pause() {
+        if (VERBOSE) {
+            Log.i(TAG, "Pausing spritzer");
+        }
         mPlayingRequested = false;
+        synchronized (mSpritzThreadStartedSync) {
+            while (mPlaying) {
+                try {
+                    mSpritzThreadStartedSync.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     public boolean isPlaying() {
@@ -362,17 +409,20 @@ public class Spritzer {
     /**
      * Begin the background timer thread
      */
-    private void startTimerThread() {
-        synchronized (mPlayingSync) {
+    private void startTimerThread(final SpritzerCallback cb) {
+        synchronized (mSpritzThreadStartedSync) {
             if (!mSpritzThreadStarted) {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
                         if (VERBOSE) {
-                            Log.i(TAG, "Starting spritzThread with queue length " + mDisplayWordList.size());
+                            Log.i(TAG, "Starting spritzThread with queue length " + mDisplayWordList.size() + " and " +
+                                    ((cb == null) ? "no " : "a ") + "callback. Playback requested: " + mPlayingRequested);
                         }
                         mPlaying = true;
-                        mSpritzThreadStarted = true;
+                        synchronized (mSpritzThreadStartedSync) {
+                            mSpritzThreadStarted = true;
+                        }
                         while (mPlayingRequested) {
                             try {
                                 processNextWord();
@@ -384,13 +434,21 @@ public class Spritzer {
                                     if (mBus != null) {
                                         mBus.post(new SpritzFinishedEvent());
                                     }
+                                    if (cb != null) {
+                                        cb.onSpritzerFinished();
+                                    }
                                 }
+                                mCurWordIdx++;
                             } catch (InterruptedException e) {
+                                Log.e(TAG, "Exception spritzing");
                                 e.printStackTrace();
                             }
                         }
                         if (VERBOSE) Log.i(TAG, "Stopping spritzThread");
                         mPlaying = false;
+                        synchronized (mSpritzThreadStartedSync) {
+                            mSpritzThreadStartedSync.notify();
+                        }
                         mSpritzThreadStarted = false;
 
                     }
@@ -408,7 +466,7 @@ public class Spritzer {
     }
 
     protected boolean isWordListComplete() {
-        return mCurWordIdx >= mDisplayWordList.size();
+        return mCurWordIdx >= mDisplayWordList.size() - 1;
     }
 
     /**

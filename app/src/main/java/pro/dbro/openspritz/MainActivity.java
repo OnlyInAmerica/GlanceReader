@@ -66,23 +66,33 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
     public void onResume() {
         super.onResume();
         dimSystemUi(true);
+
         boolean intentIncludesMediaUri = false;
         String action = getIntent().getAction();
         Uri intentUri = null;
-        if (action.equals(Intent.ACTION_VIEW)) {
-            intentIncludesMediaUri = true;
-            intentUri = getIntent().getData();
+        if(!isIntentMarkedAsHandled(getIntent())) {
+            if (action.equals(Intent.ACTION_VIEW)) {
+                intentIncludesMediaUri = true;
+                intentUri = getIntent().getData();
+            } else if (action.equals(Intent.ACTION_SEND)) {
+                intentIncludesMediaUri = true;
+                intentUri = Uri.parse(getIntent().getStringExtra(Intent.EXTRA_TEXT));
+            }
 
-        } else if (action.equals(Intent.ACTION_SEND)) {
-            intentIncludesMediaUri = true;
-            intentUri = Uri.parse(getIntent().getStringExtra(Intent.EXTRA_TEXT));
+            if (intentIncludesMediaUri && intentUri != null) {
+                SpritzFragment frag = getSpritzFragment();
+                frag.feedMediaUriToSpritzer(intentUri);
+            }
+            markIntentAsHandled(getIntent());
         }
+    }
 
-        if (intentIncludesMediaUri && intentUri != null) {
-            SpritzFragment frag = getSpritzFragment();
-            frag.feedMediaUriToSpritzer(intentUri);
-        }
+    private void markIntentAsHandled(Intent intent) {
+        intent.putExtra("handled", true);
+    }
 
+    private boolean isIntentMarkedAsHandled(Intent intent) {
+        return intent.getBooleanExtra("handled", false);
     }
 
     @Override

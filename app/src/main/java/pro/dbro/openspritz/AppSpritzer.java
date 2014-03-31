@@ -42,6 +42,7 @@ public class AppSpritzer extends Spritzer {
     private int mChapter;
     private SpritzerMedia mMedia;
     private Uri mMediaUri;
+    private boolean mSpritzingSpecialMessage;
 
     public AppSpritzer(Bus bus, TextView target) {
         super(target);
@@ -53,13 +54,11 @@ public class AppSpritzer extends Spritzer {
         super(target);
         setEventBus(bus);
         openMedia(mediaUri);
-        mTarget.setText(mTarget.getContext().getString(R.string.touch_to_start));
     }
 
     public void setMediaUri(Uri uri) {
         pause();
         openMedia(uri);
-        mTarget.setText(mTarget.getContext().getString(R.string.touch_to_start));
     }
 
     private void openMedia(Uri uri) {
@@ -99,6 +98,10 @@ public class AppSpritzer extends Spritzer {
         }
     }
 
+    public boolean isSpritzingSpecialMessage() {
+        return mSpritzingSpecialMessage;
+    }
+
     public SpritzerMedia getMedia() {
         return mMedia;
     }
@@ -124,7 +127,12 @@ public class AppSpritzer extends Spritzer {
     protected void processNextWord() throws InterruptedException {
         super.processNextWord();
         if (mPlaying && mPlayingRequested && isWordListComplete() && mChapter < getMaxChapter()) {
-            while (isWordListComplete()) {
+            // If we are Spritzing a special message, don't automatically proceed to the next chapter
+            if(mSpritzingSpecialMessage) {
+                mSpritzingSpecialMessage = false;
+                return;
+            }
+            while (isWordListComplete() && mChapter < getMaxChapter()) {
                 printNextChapter();
                 if (mBus != null) {
                     mBus.post(new NextChapterEvent(mChapter));
@@ -160,6 +168,7 @@ public class AppSpritzer extends Spritzer {
     @SuppressLint("NewApi")
     private void restoreState(boolean openLastMediaUri) {
         SharedPreferences prefs = mTarget.getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        String content = "";
         if (openLastMediaUri) {
             if (prefs.contains(PREF_URI)) {
                 Uri mediaUri = Uri.parse(prefs.getString(PREF_URI, ""));
@@ -168,7 +177,6 @@ public class AppSpritzer extends Spritzer {
                      List<UriPermission> uriPermissions = mTarget.getContext().getContentResolver().getPersistedUriPermissions();
                     for (UriPermission permission : uriPermissions) {
                         if (permission.getUri().equals(mediaUri)) {
-                            Log.i(TAG, "Found persisted url");
                             uriPermissionPersisted = true;
                             openMedia(mediaUri);
                             break;
@@ -186,15 +194,27 @@ public class AppSpritzer extends Spritzer {
         } else if (prefs.contains(PREF_TITLE) && mMedia.getTitle().compareTo(prefs.getString(PREF_TITLE, "")) == 0) {
             mChapter = prefs.getInt(PREF_CHAPTER, 0);
             if (VERBOSE) Log.i(TAG, "Resuming " + mMedia.getTitle() + " from chapter " + mChapter);
-            setText(loadCleanStringFromChapter(mChapter));
+            content = loadCleanStringFromChapter(mChapter);
             setWpm(prefs.getInt(PREF_WPM, 500));
             mCurWordIdx = prefs.getInt(PREF_WORD, 0);
         } else {
             mChapter = 0;
-            setText(loadCleanStringFromChapter(mChapter));
+            content = loadCleanStringFromChapter(mChapter);
         }
-        if (!mPlaying) {
-            mTarget.setText(mTarget.getContext().getString(R.string.touch_to_start));
+        final String finalContent = content;
+        if (!mPlaying && finalContent.length() > 0) {
+            final int initialWpm = getWpm();
+            setWpm(100);
+            // Set mSpritzingSpecialMessage to true, so processNextWord doesn't
+            // automatically proceed to the next chapter
+            mSpritzingSpecialMessage = true;
+            setTextAndStart(mTarget.getContext().getString(R.string.touch_to_start), new SpritzerCallback() {
+                @Override
+                public void onSpritzerFinished() {
+                    setText(finalContent);
+                    setWpm(initialWpm);
+                }
+            });
         }
     }
 
