@@ -40,7 +40,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         int theme = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-                .getInt("THEME", 1);
+                .getInt("THEME", 0);
         switch (theme) {
             case THEME_LIGHT:
                 setTheme(R.style.Light);
@@ -67,6 +67,29 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
     @Override
     public void onResume() {
         super.onResume();
+        dimSystemUi(true);
+        boolean intentIncludesMediaUri = false;
+        String action = Intent.ACTION_VOICE_COMMAND;
+        if (getIntent().getAction() != null) { action = getIntent().getAction();}
+        Uri intentUri = null;
+        if (action.equals(Intent.ACTION_VOICE_COMMAND)) {
+            intentIncludesMediaUri = false;
+            intentUri = null;
+
+        } else if (action.equals(Intent.ACTION_VIEW)) {
+            intentIncludesMediaUri = true;
+            intentUri = getIntent().getData();
+
+        } else if (action.equals(Intent.ACTION_SEND)) {
+            intentIncludesMediaUri = true;
+            intentUri = Uri.parse(getIntent().getStringExtra(Intent.EXTRA_TEXT));
+        }
+
+        if (intentIncludesMediaUri && intentUri != null) {
+            SpritzFragment frag = getSpritzFragment();
+            frag.feedMediaUriToSpritzer(intentUri);
+        }
+
 
         View decorView = getWindow().getDecorView();
         // Hide the status bar.
@@ -78,6 +101,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
         actionBar.hide();
 
         SpritzFragment frag = ((SpritzFragment) getSupportFragmentManager().findFragmentByTag(SPRITZ_FRAG_TAG));
+
     }
 
 
