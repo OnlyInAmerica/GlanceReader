@@ -100,8 +100,6 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
         ActionBar actionBar = getActionBar();
         actionBar.hide();
 
-        SpritzFragment frag = ((SpritzFragment) getSupportFragmentManager().findFragmentByTag(SPRITZ_FRAG_TAG));
-
     }
 
 
