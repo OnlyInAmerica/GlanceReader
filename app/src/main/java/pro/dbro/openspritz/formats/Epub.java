@@ -133,7 +133,7 @@ public class Epub implements SpritzerMedia {
             if (bookStr.contains("<body")) {
                 bookStr = bookStr.substring(bookStr.indexOf("<body"));
             }
-            return Html.fromHtml(bookStr).toString().replace("\n", "").replaceAll("(?s)<!--.*?-->", "");
+            return Html.fromHtml(bookStr).toString().replaceAll("\\n+", " ").replaceAll("(?s)<!--.*?-->", "");
         } catch (IOException e) {
             e.printStackTrace();
             Log.e(TAG, "Parsing failed " + e.getMessage());
