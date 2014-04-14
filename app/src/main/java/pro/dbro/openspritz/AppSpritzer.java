@@ -30,7 +30,7 @@ import pro.dbro.openspritz.lib.Spritzer;
  */
 // TODO: Save State for multiple books
 public class AppSpritzer extends Spritzer {
-    public static final boolean VERBOSE = false;
+    public static final boolean VERBOSE = true;
 
     private static final String PREFS = "espritz";
     private static final String PREF_URI = "uri";
@@ -71,7 +71,6 @@ public class AppSpritzer extends Spritzer {
 
     private void openEpub(Uri epubUri) {
         try {
-            mChapter = 0;
             mMediaUri = epubUri;
             mMedia = Epub.fromUri(mTarget.getContext(), mMediaUri);
             restoreState(false);
@@ -82,7 +81,6 @@ public class AppSpritzer extends Spritzer {
 
     private void openHtmlPage(Uri htmlUri) {
         try {
-            mChapter = 0;
             mMediaUri = htmlUri;
             mMedia = HtmlPage.fromUri(htmlUri.toString(), new HtmlPage.HtmlPageParsedCallback() {
                 @Override
@@ -117,7 +115,7 @@ public class AppSpritzer extends Spritzer {
     }
 
     public int getMaxChapter() {
-        return mMedia.countChapters() - 1;
+        return (mMedia == null) ? 0 : mMedia.countChapters() - 1;
     }
 
     public boolean isMediaSelected() {
@@ -170,6 +168,7 @@ public class AppSpritzer extends Spritzer {
         SharedPreferences prefs = mTarget.getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         String content = "";
         if (openLastMediaUri) {
+            // Open the last selected media
             if (prefs.contains(PREF_URI)) {
                 Uri mediaUri = Uri.parse(prefs.getString(PREF_URI, ""));
                 if (Build.VERSION.SDK_INT >= 19 && !isHttpUri(mediaUri)) {
@@ -192,13 +191,16 @@ public class AppSpritzer extends Spritzer {
                 }
             }
         } else if (prefs.contains(PREF_TITLE) && mMedia.getTitle().compareTo(prefs.getString(PREF_TITLE, "")) == 0) {
+            // Resume media at previous point
             mChapter = prefs.getInt(PREF_CHAPTER, 0);
             if (VERBOSE) Log.i(TAG, "Resuming " + mMedia.getTitle() + " from chapter " + mChapter);
             content = loadCleanStringFromChapter(mChapter);
             setWpm(prefs.getInt(PREF_WPM, 500));
             mCurWordIdx = prefs.getInt(PREF_WORD, 0);
         } else {
+            // Begin content anew
             mChapter = 0;
+            mCurWordIdx = 0;
             content = loadCleanStringFromChapter(mChapter);
         }
         final String finalContent = content;

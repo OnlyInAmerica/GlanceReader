@@ -5,6 +5,9 @@ import android.app.Application;
 import com.squareup.otto.Bus;
 import com.squareup.otto.ThreadEnforcer;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 /**
  * A custom application that sets up common functionality.
  *
@@ -16,6 +19,7 @@ public class OpenSpritzApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Logger.getRootLogger().setLevel(Level.OFF);
         this.mBus = new Bus(ThreadEnforcer.ANY);
     }
 

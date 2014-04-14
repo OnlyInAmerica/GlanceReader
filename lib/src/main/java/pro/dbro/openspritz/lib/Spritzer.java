@@ -151,7 +151,7 @@ public class Spritzer {
         if (mDisplayWordList.size() == 0) {
             return 0;
         }
-        return mDisplayWordList.size() / mWPM;
+        return (mDisplayWordList.size() - (mCurWordIdx + 1)) / mWPM;
     }
 
     /**
@@ -161,7 +161,7 @@ public class Spritzer {
      * @return a float between 0 (not started) and 1 (complete)
      */
     public float getQueueCompleteness() {
-        return (mWordArray == null) ? 0 : ((float) mCurWordIdx) / mWordArray.length;
+        return (mWordArray == null) ? 0 : ((float) mCurWordIdx) / mDisplayWordList.size();
     }
 
     /**
@@ -216,9 +216,6 @@ public class Spritzer {
             return;
         }
         if (VERBOSE) Log.i(TAG, "Start called " + ((cb == null) ? "without" : "with") + " callback." );
-        if (isWordListComplete()) {
-            refillWordDisplayList();
-        }
 
         mPlayingRequested = true;
         startTimerThread(cb);
@@ -229,6 +226,7 @@ public class Spritzer {
     }
 
     private void refillWordDisplayList() {
+        Log.i("DEBUG", "refilling displayWordList with # elems: " + mWordArray.length);
         mCurWordIdx = 0;
         mDisplayWordList.clear();
         mDisplayWordList.addAll(Arrays.asList(mWordArray));
@@ -250,9 +248,6 @@ public class Spritzer {
     protected void processNextWord() throws InterruptedException {
         if (mCurWordIdx < mDisplayWordList.size()) {
             String word = mDisplayWordList.get(mCurWordIdx);
-            if(word.equals("HudsonCopyright")) {
-                Log.i(TAG, "Breakpoint");
-            }
             word = splitLongWord(word);
 
             if (mBus != null) {

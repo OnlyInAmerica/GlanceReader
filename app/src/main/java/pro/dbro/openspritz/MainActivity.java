@@ -35,6 +35,7 @@ import pro.dbro.openspritz.formats.SpritzerMedia;
 
 public class MainActivity extends ActionBarActivity implements View.OnSystemUiVisibilityChangeListener {
     private static final String TAG = "MainActivity";
+    public static final boolean VERBOSE = false;
     public static final String SPRITZ_FRAG_TAG = "spritzfrag";
     private static final String PREFS = "ui_prefs";
     private static final int THEME_LIGHT = 0;
@@ -46,7 +47,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
     // Listener that's called when we finish querying the items and subscriptions we own
     IabHelper.QueryInventoryFinishedListener mGotInventoryListener = new IabHelper.QueryInventoryFinishedListener() {
         public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
-            Log.d(TAG, "Query inventory finished.");
+            if (VERBOSE) Log.d(TAG, "Query inventory finished.");
 
             // Have we been disposed of in the meantime? If so, quit.
             if (mBillingHelper == null) return;
@@ -57,7 +58,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
                 return;
             }
 
-            Log.d(TAG, "Query inventory was successful.");
+            if (VERBOSE) Log.d(TAG, "Query inventory was successful.");
 
             /*
              * Check for items we own. Notice that for each purchase, we check
@@ -68,8 +69,8 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
             // Do we have the premium upgrade?
             Purchase premiumPurchase = inventory.getPurchase(Catalog.SKU_PREMIUM);
             boolean isPremiumUser = (premiumPurchase != null && verifyDeveloperPayload(premiumPurchase));
-            Log.d(TAG, "User is " + (isPremiumUser ? "PREMIUM" : "NOT PREMIUM"));
-            Log.d(TAG, "Initial inventory query finished; enabling main UI.");
+            if (VERBOSE) Log.d(TAG, "User is " + (isPremiumUser ? "PREMIUM" : "NOT PREMIUM"));
+            if (VERBOSE) Log.d(TAG, "Initial inventory query finished; enabling main UI.");
             mIsPremium = isPremiumUser;
             invalidateOptionsMenu();
         }
@@ -77,7 +78,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
 
     IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener() {
         public void onIabPurchaseFinished(IabResult result, Purchase purchase) {
-            Log.d(TAG, "Purchase finished: " + result + ", purchase: " + purchase);
+            if (VERBOSE) Log.d(TAG, "Purchase finished: " + result + ", purchase: " + purchase);
 
             // if we were disposed of in the meantime, quit.
             if (mBillingHelper == null) return;
@@ -95,7 +96,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
 
             if (purchase.getSku().equals(Catalog.SKU_PREMIUM)) {
                 // bought the premium upgrade!
-                Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
+                if (VERBOSE) Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
                 showDonateCompleteDialog();
                 mIsPremium = true;
                 invalidateOptionsMenu();
@@ -271,7 +272,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
     @Subscribe
     public void onChapterSelectRequested(ChapterSelectRequested ignored) {
         SpritzFragment frag = getSpritzFragment();
-        if (frag != null && frag.getSpritzer() != null) {
+        if (frag != null && frag.isResumed() && frag.getSpritzer() != null) {
             SpritzerMedia book = frag.getSpritzer().getMedia();
             FragmentTransaction ft = getFragmentManager().beginTransaction();
             DialogFragment newFragment = TocDialogFragment.newInstance(book);
