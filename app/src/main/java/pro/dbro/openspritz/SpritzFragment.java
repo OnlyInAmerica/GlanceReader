@@ -64,10 +64,10 @@ public class SpritzFragment extends Fragment {
             mSpritzer.setMediaUri(mediaUri);
         }
 
-        if (AppSpritzer.isHttpUri(mediaUri)) {
-            mSpritzer.setTextAndStart(getString(R.string.loading));
-            showIndeterminateProgress(true);
-        }
+//        if (AppSpritzer.isHttpUri(mediaUri)) {
+//            mSpritzer.setTextAndStart(getString(R.string.loading));
+//            showIndeterminateProgress(true);
+//        }
     }
 
     public void showIndeterminateProgress(boolean show) {

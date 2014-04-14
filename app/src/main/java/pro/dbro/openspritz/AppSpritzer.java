@@ -161,7 +161,7 @@ public class AppSpritzer extends Spritzer {
     private String loadCleanStringFromNextNonEmptyChapter(int chapter) {
         int chapterToTry = chapter;
         String result = "";
-        while(result.length() == 0 && chapterToTry < getMaxChapter()) {
+        while(result.length() == 0 && chapterToTry <= getMaxChapter()) {
             result = loadCleanStringFromChapter(chapterToTry);
             chapterToTry++;
         }
@@ -265,7 +265,7 @@ public class AppSpritzer extends Spritzer {
      * @return The maxChars number of most recently spritzed characters during this segment
      */
     public String getHistoryString(int maxChars) {
-        if (mCurWordIdx < 2) return "";
+        if (mCurWordIdx < 2 || mDisplayWordList.size() < 2) return "";
         StringBuilder builder = new StringBuilder();
         int numWords = 0;
         while (builder.length() + mDisplayWordList.get(mCurWordIdx - (numWords + 2)).length() < maxChars) {

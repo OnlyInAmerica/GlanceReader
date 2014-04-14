@@ -226,7 +226,6 @@ public class Spritzer {
     }
 
     private void refillWordDisplayList() {
-        Log.i("DEBUG", "refilling displayWordList with # elems: " + mWordArray.length);
         mCurWordIdx = 0;
         mDisplayWordList.clear();
         mDisplayWordList.addAll(Arrays.asList(mWordArray));

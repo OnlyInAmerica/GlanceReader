@@ -2,19 +2,27 @@
 
 ![OpenSpritz](http://i.imgur.com/3ACFJ5s.gif)
 
-OpenSpritz-Android is a Spritz-like .epub reader for Android 3.0+ (API 11). Inspired by Miserlou's [OpenSpritz](https://github.com/Miserlou/OpenSpritz).
+OpenSpritz-Android is a Spritz-like .epub and website reader for Android 3.0+ (API 11). Inspired by Miserlou's [OpenSpritz](https://github.com/Miserlou/OpenSpritz).
+
+You can share URLS to OpenSpritz-Android from your favorite web browser, or open .epubs on your device's external storage directly.
+
+Available on Google Play under the name **Glance**
+
+[![OpenSpritz](https://developer.android.com/images/brand/en_generic_rgb_wo_45.png)](https://play.google.com/store/apps/details?id=pro.dbro.openspritz)
 
 ## Lend a hand
 
+Some quick, incomplete thoughts on what's next.
+
 #### Enhancements
 
-+ Fortify epub parsing to whatever extent is possible with epublib
-    + CSS markup isn't currently stripped
++ Find some nice monospace fonts
 + More sophisticated pivot choosing
++ Better handle "Chapters" with epublib, or some other epub library
+    + This seems unreasonably hard.
 
 #### Features
 
-+ It'd be nice to digest `http://...` share intents, parse & spritz the resulting page.
 + Read text from clipboard
 
 ## Building
@@ -24,25 +32,28 @@ OpenSpritz-Android is a Spritz-like .epub reader for Android 3.0+ (API 11). Insp
 	+ Android SDK tools 22.3
 	+ SDK Platform 19
 	+ Android Support Repository 4
-	
+
 1. Define the `ANDROID_HOME` environmental variable as your Android SDK location.
-	
+
 	If you need help check out [this guide](http://spring.io/guides/gs/android/).
 
 3. Build!
-	
+
   	To build an .apk from this directory, make sure `./gradlew` is executable and run:
 
     	$ ./gradlew assemble
-    
+
 	The resulting .apk will be availble in `./app/build/apk`.
 
 
 ## Thanks
+In no partiular order. Thanks everybody!
 
-+ [andrewgiang](https://github.com/andrewgiang)
-+ [defer](https://github.com/defer)
-+ [epublib](https://github.com/psiegman/epublib) by psiegman (LGPL)
++ [andrewgiang](https://github.com/andrewgiang) for contributing a re-usable library based on the early project, and other contributions
++ [defer](https://github.com/defer) for refactoring that made it easier to support multiple formats
++ [epublib](https://github.com/psiegman/epublib) by [psiegman](https://github.com/psiegman) (LGPL)
++ [rcarlsen](https://github.com/rcarlsen) for work adopting for Glass
++ [mneimsky](https://github.com/mneimsky) for work adopting for Glass
 
 #### A Note About the Name
 

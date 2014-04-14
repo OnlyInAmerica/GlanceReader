@@ -18,18 +18,6 @@
         android:typeface="monospace" />
 
     <TextView
-        android:id="@+id/spritzHistory"
-        style="@style/SubduedTextStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@id/spritzText"
-        android:layout_alignRight="@id/spritzText"
-        android:layout_above="@id/spritzText"
-        android:typeface="monospace"
-        android:maxLines="@integer/spritz_history_line_count"
-        android:textSize="@dimen/spritzer_history_text_size" />
-
-    <TextView
         android:id="@+id/title"
         style="@style/SubduedTextStyle"
         android:layout_width="@dimen/spritzer_title_width"
@@ -55,6 +43,20 @@
         android:fontFamily="sans-serif-condensed"
         android:singleLine="true"
         android:textSize="@dimen/spritzer_author_text_size" />
+
+    <TextView
+        android:id="@+id/spritzHistory"
+        style="@style/SubduedTextStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="bottom|left"
+        android:layout_alignLeft="@id/spritzText"
+        android:layout_alignRight="@id/spritzText"
+        android:layout_above="@id/spritzText"
+        android:layout_below="@id/author"
+        android:typeface="monospace"
+        android:maxLines="@integer/spritz_history_line_count"
+        android:textSize="@dimen/spritzer_history_text_size" />
 
     <ProgressBar
         android:id="@+id/progress"

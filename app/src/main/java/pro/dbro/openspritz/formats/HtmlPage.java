@@ -39,7 +39,10 @@ public class HtmlPage implements SpritzerMedia {
     }
 
     /**
-     * Creates an {@link pro.dbro.openspritz.formats.HtmlPage} from a context and URI.
+     * Creates an {@link pro.dbro.openspritz.formats.HtmlPage} from a url.
+     * Returns immediately with an {@link pro.dbro.openspritz.formats.HtmlPage}
+     * that is not yet initialized. Pass a {@link pro.dbro.openspritz.formats.HtmlPage.HtmlPageParsedCallback}
+     * to be notified when page parsing is complete, and the returned HtmlPage is populated.
      *
      * @param url The http url.
      * @param cb  A callback to be invoked when the HtmlPage is parsed
