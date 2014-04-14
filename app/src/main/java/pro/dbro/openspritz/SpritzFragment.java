@@ -57,6 +57,8 @@ public class SpritzFragment extends Fragment {
         }
     }
 
+    public TextView getSpritzView() { return mSpritzView; }
+
     public void showIndeterminateProgress(boolean show) {
         mProgress.setIndeterminate(show);
     }
