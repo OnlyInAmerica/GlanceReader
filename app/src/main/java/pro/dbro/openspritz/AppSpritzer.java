@@ -31,6 +31,8 @@ import pro.dbro.openspritz.lib.Spritzer;
 // TODO: Save State for multiple books
 public class AppSpritzer extends Spritzer {
     public static final boolean VERBOSE = true;
+    public static final int SPECIAL_MESSAGE_WPM = 100;
+    public static final int DEFAULT_WPM = 500;
 
     private static final String PREFS = "espritz";
     private static final String PREF_URI = "uri";
@@ -126,7 +128,7 @@ public class AppSpritzer extends Spritzer {
         super.processNextWord();
         if (mPlaying && mPlayingRequested && isWordListComplete() && mChapter < getMaxChapter()) {
             // If we are Spritzing a special message, don't automatically proceed to the next chapter
-            if(mSpritzingSpecialMessage) {
+            if (mSpritzingSpecialMessage) {
                 mSpritzingSpecialMessage = false;
                 return;
             }
@@ -146,13 +148,39 @@ public class AppSpritzer extends Spritzer {
             Log.i(TAG, "starting next chapter: " + mChapter + " length " + mDisplayWordList.size());
     }
 
+    /**
+     * Load the given chapter as sanitized text, proceeding
+     * to the next chapter until a non-zero length result is found.
+     *
+     * This method is useful because some "Chapters" contain only HTML data
+     * that isn't useful to a Spritzer.
+     *
+     * @param chapter the first chapter to load
+     * @return the sanitized text of the first non-zero length chapter
+     */
+    private String loadCleanStringFromNextNonEmptyChapter(int chapter) {
+        int chapterToTry = chapter;
+        String result = "";
+        while(result.length() == 0 && chapterToTry < getMaxChapter()) {
+            result = loadCleanStringFromChapter(chapterToTry);
+            chapterToTry++;
+        }
+        return result;
+    }
+
+    /**
+     * Load the given chapter as sanitized text.
+     *
+     * @param chapter the target chapter.
+     * @return the sanitized chapter text.
+     */
     private String loadCleanStringFromChapter(int chapter) {
         return mMedia.loadChapter(chapter);
     }
 
     public void saveState() {
         if (mMedia != null) {
-            if (VERBOSE) Log.i(TAG, "Saving state at chapter " + mChapter);
+            if (VERBOSE) Log.i(TAG, "Saving state at chapter " + mChapter + " word: " + mCurWordIdx);
             SharedPreferences.Editor editor = mTarget.getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit();
             editor.putInt(PREF_CHAPTER, mChapter)
                     .putString(PREF_URI, mMediaUri.toString())
@@ -173,7 +201,7 @@ public class AppSpritzer extends Spritzer {
                 Uri mediaUri = Uri.parse(prefs.getString(PREF_URI, ""));
                 if (Build.VERSION.SDK_INT >= 19 && !isHttpUri(mediaUri)) {
                     boolean uriPermissionPersisted = false;
-                     List<UriPermission> uriPermissions = mTarget.getContext().getContentResolver().getPersistedUriPermissions();
+                    List<UriPermission> uriPermissions = mTarget.getContext().getContentResolver().getPersistedUriPermissions();
                     for (UriPermission permission : uriPermissions) {
                         if (permission.getUri().equals(mediaUri)) {
                             uriPermissionPersisted = true;
@@ -193,20 +221,21 @@ public class AppSpritzer extends Spritzer {
         } else if (prefs.contains(PREF_TITLE) && mMedia.getTitle().compareTo(prefs.getString(PREF_TITLE, "")) == 0) {
             // Resume media at previous point
             mChapter = prefs.getInt(PREF_CHAPTER, 0);
-            if (VERBOSE) Log.i(TAG, "Resuming " + mMedia.getTitle() + " from chapter " + mChapter);
-            content = loadCleanStringFromChapter(mChapter);
-            setWpm(prefs.getInt(PREF_WPM, 500));
+            content = loadCleanStringFromNextNonEmptyChapter(mChapter);
+            setWpm(prefs.getInt(PREF_WPM, DEFAULT_WPM));
             mCurWordIdx = prefs.getInt(PREF_WORD, 0);
+            if (VERBOSE) Log.i(TAG, "Resuming " + mMedia.getTitle() + " from chapter " + mChapter + " word " + mCurWordIdx);
         } else {
             // Begin content anew
             mChapter = 0;
             mCurWordIdx = 0;
-            content = loadCleanStringFromChapter(mChapter);
+            setWpm(prefs.getInt(PREF_WPM, DEFAULT_WPM));
+            content = loadCleanStringFromNextNonEmptyChapter(mChapter);
         }
         final String finalContent = content;
         if (!mPlaying && finalContent.length() > 0) {
             final int initialWpm = getWpm();
-            setWpm(100);
+            setWpm(SPECIAL_MESSAGE_WPM);
             // Set mSpritzingSpecialMessage to true, so processNextWord doesn't
             // automatically proceed to the next chapter
             mSpritzingSpecialMessage = true;
@@ -226,6 +255,25 @@ public class AppSpritzer extends Spritzer {
 
     public static boolean isHttpUri(Uri uri) {
         return uri.getScheme() != null && uri.getScheme().contains("http");
+    }
+
+    /**
+     * Return a String representing the maxChars most recently
+     * Spritzed characters.
+     *
+     * @param maxChars
+     * @return The maxChars number of most recently spritzed characters during this segment
+     */
+    public String getHistoryString(int maxChars) {
+        if (mCurWordIdx < 2) return "";
+        StringBuilder builder = new StringBuilder();
+        int numWords = 0;
+        while (builder.length() + mDisplayWordList.get(mCurWordIdx - (numWords + 2)).length() < maxChars) {
+            builder.insert(0, mDisplayWordList.get(mCurWordIdx - (numWords + 2)) + " ");
+            numWords++;
+            if (mCurWordIdx - (numWords + 2) < 0) break;
+        }
+        return builder.toString();
     }
 
 }

@@ -23,7 +23,6 @@ public class SpritzerTextView extends TextView implements View.OnClickListener {
     private Spritzer mSpritzer;
     private Paint mPaintGuides;
     private float mPaintWidthPx;
-    private String mTestString;
     private boolean mDefaultClickListener = false;
     private int mAdditionalPadding;
     private int mPivotX;
@@ -116,7 +115,7 @@ public class SpritzerTextView extends TextView implements View.OnClickListener {
 
         // Measurement for max chars for this TextView
         if (mShouldRefreshMaxLineChars) {
-            mSpritzer.setMaxWordLength(calculateSingleLineCharacterLimit());
+            mSpritzer.setMaxWordLength(TextUtil.calculateMonospacedCharacterLimit(this));
             mShouldRefreshMaxLineChars = false;
         }
 
@@ -143,7 +142,7 @@ public class SpritzerTextView extends TextView implements View.OnClickListener {
         canvas.drawPath(topPivotPath, mPaintGuides);
         if (bottomPivotPath == null) {
             bottomPivotPath = new Path();
-            bottomPivotPath.setFillType(Path.FillType.EVEN_ODD);
+            bottomPivotPath.setFillType(Path.FillType.WINDING);
             bottomPivotPath.moveTo(centerX - PAINT_WIDTH_DP * triSize, getMeasuredHeight() - (mPaintWidthPx ));
             bottomPivotPath.lineTo(centerX, getMeasuredHeight() - PAINT_WIDTH_DP * triSize - (mPaintWidthPx ));
             bottomPivotPath.lineTo(centerX + PAINT_WIDTH_DP * triSize, getMeasuredHeight() - (mPaintWidthPx ));
@@ -167,15 +166,6 @@ public class SpritzerTextView extends TextView implements View.OnClickListener {
         mShouldRefreshMaxLineChars = true;
     }
 
-    /**
-     * Calculate the number of characters that can fit
-     * within this TextView's single line
-     */
-    private int calculateSingleLineCharacterLimit() {
-        int maxChars = Math.round(getWidth() / calculateLengthOfPrintedCharacters(1));
-        return maxChars;
-    }
-
     private int getPivotIndicatorLength() {
         return getPaint().getFontMetricsInt().bottom;
     }
@@ -183,17 +173,7 @@ public class SpritzerTextView extends TextView implements View.OnClickListener {
     private int calculatePivotXOffset() {
         // Measure the rendered distance of CHARS_LEFT_OF_PIVOT chars
         // plus half the pivot character
-        return calculateLengthOfPrintedCharacters(Spritzer.CHARS_LEFT_OF_PIVOT + .50f);
-    }
-
-    private int calculateLengthOfPrintedCharacters(float numCharacters) {
-        // Craft a test String of precise length
-        // to reach pivot character
-        if (mTestString == null) {
-            // Spritzer currently requires monospace font so character is irrelevant
-            mTestString = "a";
-        }
-        return (int) (getPaint().measureText(mTestString, 0, 1) * numCharacters);
+        return TextUtil.calculateLengthOfPrintedMonospaceCharacters(this, Spritzer.CHARS_LEFT_OF_PIVOT + .50f);
     }
 
     /**

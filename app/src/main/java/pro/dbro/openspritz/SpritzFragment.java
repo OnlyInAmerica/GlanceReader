@@ -26,6 +26,7 @@ import pro.dbro.openspritz.events.HttpUrlParsedEvent;
 import pro.dbro.openspritz.events.NextChapterEvent;
 import pro.dbro.openspritz.formats.SpritzerMedia;
 import pro.dbro.openspritz.lib.SpritzerTextView;
+import pro.dbro.openspritz.lib.TextUtil;
 import pro.dbro.openspritz.lib.events.SpritzFinishedEvent;
 
 public class SpritzFragment extends Fragment {
@@ -39,10 +40,12 @@ public class SpritzFragment extends Fragment {
     private TextView mAuthorView;
     private TextView mTitleView;
     private TextView mChapterView;
+    private TextView mSpritzHistoryView;
     private ProgressBar mProgress;
     private SpritzerTextView mSpritzView;
     private Bus mBus;
     private SpritzFragmentHandler mHandler;
+    private boolean mUserIsChoosingEpub;
 
     public static SpritzFragment newInstance() {
         SpritzFragment fragment = new SpritzFragment();
@@ -73,7 +76,7 @@ public class SpritzFragment extends Fragment {
 
     /**
      * Update the UI related to Book Title, Author,
-     * and current progress
+     * and current progress. Everything but the {@link pro.dbro.openspritz.lib.SpritzerTextView}
      */
     public void updateMetaUi() {
         if (!mSpritzer.isMediaSelected()) {
@@ -111,6 +114,12 @@ public class SpritzFragment extends Fragment {
         mProgress.setMax((mSpritzer.getMaxChapter() + 1) * progressScale);
 
         mProgress.setProgress(progress);
+
+        if (!mSpritzer.isPlaying()) {
+            // If we're paused, show the Spritz history
+            int mSpritzHistoryViewLength = TextUtil.calculateMonospacedCharacterLimit(mSpritzHistoryView, getResources().getInteger(R.integer.spritz_history_line_count));
+            mSpritzHistoryView.setText(mSpritzer.getHistoryString(mSpritzHistoryViewLength));
+        }
     }
 
     /**
@@ -125,11 +134,14 @@ public class SpritzFragment extends Fragment {
             mTitleView.setVisibility(View.VISIBLE);
             mChapterView.setVisibility(View.VISIBLE);
             mProgress.setVisibility(View.VISIBLE);
+            mSpritzHistoryView.setVisibility(View.VISIBLE);
         } else {
             mAuthorView.setVisibility(View.INVISIBLE);
             mTitleView.setVisibility(View.INVISIBLE);
             mChapterView.setVisibility(View.INVISIBLE);
             mProgress.setVisibility(View.INVISIBLE);
+            mSpritzHistoryView.setVisibility(View.INVISIBLE);
+            //mSpritzHistoryView.setText("");
         }
     }
 
@@ -166,22 +178,24 @@ public class SpritzFragment extends Fragment {
                 }
             }
         });
+        mSpritzHistoryView = (TextView) root.findViewById(R.id.spritzHistory);
         mProgress = ((ProgressBar) root.findViewById(R.id.progress));
         mSpritzView = (SpritzerTextView) root.findViewById(R.id.spritzText);
         //mSpritzView.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "UbuntuMono-R.ttf"));
+        //mSpritzHistoryView.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "UbuntuMono-R.ttf"));
         mSpritzView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mSpritzer != null && mSpritzer.isMediaSelected()) {
                     if (mSpritzer.isPlaying()) {
+                        mSpritzer.pause();
                         updateMetaUi();
                         showMetaUi(true);
                         dimActionBar(false);
-                        mSpritzer.pause();
                     } else {
+                        mSpritzer.start();
                         showMetaUi(false);
                         dimActionBar(true);
-                        mSpritzer.start();
                     }
                 } else {
                     chooseMedia();
@@ -206,7 +220,7 @@ public class SpritzFragment extends Fragment {
         if (mSpritzer == null) {
             mSpritzer = new AppSpritzer(mBus, mSpritzView);
             mSpritzView.setSpritzer(mSpritzer);
-            if (mSpritzer.getMedia() == null) {
+            if (mSpritzer.getMedia() == null && !mUserIsChoosingEpub) {
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SPRITZ_TEXT, getString(R.string.select_epub)), 1500);
             } else {
                 // AppSpritzer loaded the last book being read
@@ -219,6 +233,12 @@ public class SpritzFragment extends Fragment {
             if (!mSpritzer.isPlaying()) {
                 updateMetaUi();
                 showMetaUi(true);
+            } else {
+                // If the spritzer is currently playing, be sure to hide the ActionBar
+                // Might the Android linter be a bit aggressive with these null checks?
+                if (getActivity() != null && getActivity().getActionBar() != null) {
+                    getActivity().getActionBar().hide();
+                }
             }
         }
     }
@@ -307,11 +327,13 @@ public class SpritzFragment extends Fragment {
         // Currently no recognized epub MIME type
         intent.setType("*/*");
 
+        mUserIsChoosingEpub = true;
         startActivityForResult(intent, SELECT_MEDIA);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == SELECT_MEDIA && data != null) {
+            mUserIsChoosingEpub = false;
             Uri uri = data.getData();
             if (Build.VERSION.SDK_INT >= 19) {
                 final int takeFlags = data.getFlags()
