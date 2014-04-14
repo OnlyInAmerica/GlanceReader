@@ -1,19 +1,18 @@
 package pro.dbro.openspritz;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.SeekBar;
 import android.widget.TextView;
-
-import com.squareup.otto.Bus;
-
-import pro.dbro.openspritz.events.WpmSelectedEvent;
-
+import android.util.Log;
 
 /**
  * Created by davidbrodsky on 3/1/14.
@@ -29,8 +28,8 @@ public class WpmDialogFragment extends DialogFragment {
     private boolean mAnimationRunning;
     private SeekBar mWpmSeek;
     private TextView mWpmLabel;
+    private OnWpmSelectListener mOnWpmSelectListener;
     private int mWpm;
-    private Bus mBus;
 
     static WpmDialogFragment newInstance(int wpm) {
         WpmDialogFragment f = new WpmDialogFragment();
@@ -44,13 +43,21 @@ public class WpmDialogFragment extends DialogFragment {
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mOnWpmSelectListener = (OnWpmSelectListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement OnWpmSelectListener");
+        }
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mWpm = Math.max(MIN_WPM, getArguments().getInt("wpm"));
         mAnimationRunning = false;
-
-        OpenSpritzApplication app = (OpenSpritzApplication) getActivity().getApplication();
-        this.mBus = app.getBus();
     }
 
     @Override
@@ -69,7 +76,7 @@ public class WpmDialogFragment extends DialogFragment {
                 mWpm = Math.max(MIN_WPM, (int) ((progress / 100.0) * MAX_WPM));
                 String wpmStr = mWpm + " WPM";
                 mWpmLabel.setText(wpmStr);
-                mBus.post(new WpmSelectedEvent(mWpm));
+                mOnWpmSelectListener.onWpmSelected(mWpm);
                 getDialog().setTitle(wpmStr);
                 if (mWpm >= WHOAH_THRESHOLD_WPM + 50 && !mAnimationRunning) {
                     setTrippin(true);
@@ -80,14 +87,31 @@ public class WpmDialogFragment extends DialogFragment {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
             }
         });
+
+        // added to handle Glass interacion (swipes)
+        mWpmSeek.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int i, KeyEvent keyEvent) {
+                if (i == KeyEvent.KEYCODE_TAB) {
+                    if (keyEvent.isShiftPressed()) {
+                        // backwards swipe
+                        mWpmSeek.incrementProgressBy(-1);
+                        return true;
+                    }
+                    // forward swipe
+                    mWpmSeek.incrementProgressBy(1);
+                    return true;
+                }
+                return false;
+            }
+        });
+        mWpmSeek.requestFocus();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(getActivity().getString(R.string.set_wpm))
@@ -95,6 +119,7 @@ public class WpmDialogFragment extends DialogFragment {
         mView = v;
         return builder.create();
     }
+
 
     private void setTrippin(boolean beTrippin){
         if(beTrippin){
@@ -109,5 +134,9 @@ public class WpmDialogFragment extends DialogFragment {
             mView.clearAnimation();
             mAnimationRunning = false;
         }
+    }
+
+    public interface OnWpmSelectListener {
+        public abstract void onWpmSelected(int wpm);
     }
 }

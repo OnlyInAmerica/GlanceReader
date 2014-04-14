@@ -12,10 +12,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.TextView;
 
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
@@ -25,7 +27,7 @@ import pro.dbro.openspritz.events.ChapterSelectedEvent;
 import pro.dbro.openspritz.events.WpmSelectedEvent;
 import pro.dbro.openspritz.formats.SpritzerMedia;
 
-public class MainActivity extends ActionBarActivity implements View.OnSystemUiVisibilityChangeListener {
+public class MainActivity extends ActionBarActivity implements View.OnSystemUiVisibilityChangeListener, WpmDialogFragment.OnWpmSelectListener {
     private static final String TAG = "MainActivity";
     public static final String SPRITZ_FRAG_TAG = "spritzfrag";
     private static final String PREFS = "ui_prefs";
@@ -38,7 +40,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         int theme = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-                .getInt("THEME", 0);
+                .getInt("THEME", 1);
         switch (theme) {
             case THEME_LIGHT:
                 setTheme(R.style.Light);
@@ -65,26 +67,63 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
     @Override
     public void onResume() {
         super.onResume();
-        dimSystemUi(true);
-        boolean intentIncludesMediaUri = false;
-        String action = getIntent().getAction();
-        Uri intentUri = null;
-        if (action.equals(Intent.ACTION_VIEW)) {
-            intentIncludesMediaUri = true;
-            intentUri = getIntent().getData();
 
-        } else if (action.equals(Intent.ACTION_SEND)) {
-            intentIncludesMediaUri = true;
-            intentUri = Uri.parse(getIntent().getStringExtra(Intent.EXTRA_TEXT));
-        }
+        View decorView = getWindow().getDecorView();
+        // Hide the status bar.
+        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
+        // Remember that you should never show the action bar if the
+        // status bar is hidden, so hide that too if necessary.
+        ActionBar actionBar = getActionBar();
+        actionBar.hide();
 
-        if (intentIncludesMediaUri && intentUri != null) {
-            SpritzFragment frag = getSpritzFragment();
-            frag.feedMediaUriToSpritzer(intentUri);
-        }
-
+        SpritzFragment frag = ((SpritzFragment) getSupportFragmentManager().findFragmentByTag(SPRITZ_FRAG_TAG));
     }
 
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        // tap
+        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+            // on Glass, this will reveal the options as cards.
+            openOptionsMenu();
+            return true;
+        }
+        // swipes
+        if (keyCode == KeyEvent.KEYCODE_TAB) {
+            if (((SpritzFragment) getSupportFragmentManager().findFragmentByTag(SPRITZ_FRAG_TAG)).getSpritzer() != null) {
+                // we get multiple taps for long swipes
+                // since the spritzer does not (yet) support fast forward / rewind
+                // let's filter the events to only send a click if changing direction.
+                boolean shouldSendClick = false;
+                SpritzFragment sf = (SpritzFragment) getSupportFragmentManager().findFragmentByTag(SPRITZ_FRAG_TAG);
+                // backwards swipe and playing, then stop
+                if (event.isShiftPressed() ) {
+                    if ( sf.getSpritzer().isPlaying() ) {
+                        shouldSendClick = true;
+                    }
+                }
+                // forwards swipe and not playing, then play
+                else if ( !sf.getSpritzer().isPlaying() ) {
+                    shouldSendClick = true;
+                }
+
+                // this is received as a toggle, so only send the event if an edge has been detected
+                // (change in swipe direction, change is playback)
+                if (shouldSendClick) {
+                    sf.getSpritzView().performClick();
+                }
+                return true;
+            }
+        }
+
+        // down - leave the activity
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            this.finish();
+            return true;
+        }
+        return false;
+    }
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -101,6 +140,14 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
         return true;
     }
 
+    @Override
+    public void onWpmSelected(int wpm) {
+        if (((SpritzFragment) getSupportFragmentManager().findFragmentByTag(SPRITZ_FRAG_TAG)).getSpritzer() != null) {
+            ((SpritzFragment) getSupportFragmentManager().findFragmentByTag(SPRITZ_FRAG_TAG)).getSpritzer()
+                    .setWpm(wpm);
+        }
+        mWpm = wpm;
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will

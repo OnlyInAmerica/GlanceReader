@@ -32,6 +32,13 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:mimeType="text/plain"/>
             </intent-filter>
+            <intent-filter>
+                <action
+                    android:name="com.google.android.glass.action.VOICE_TRIGGER" />
+            </intent-filter>
+            <meta-data android:name="com.google.android.glass.VoiceTrigger"
+                android:resource="@xml/my_voice_trigger" />
+
         </activity>
     </application>
 
