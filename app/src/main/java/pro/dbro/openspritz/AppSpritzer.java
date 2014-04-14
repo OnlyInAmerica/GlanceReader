@@ -239,11 +239,13 @@ public class AppSpritzer extends Spritzer {
             // Set mSpritzingSpecialMessage to true, so processNextWord doesn't
             // automatically proceed to the next chapter
             mSpritzingSpecialMessage = true;
+            mTarget.setEnabled(false);
             setTextAndStart(mTarget.getContext().getString(R.string.touch_to_start), new SpritzerCallback() {
                 @Override
                 public void onSpritzerFinished() {
                     setText(finalContent);
                     setWpm(initialWpm);
+                    mSpritzHandler.sendMessage(mSpritzHandler.obtainMessage(MSG_SET_ENABLED));
                 }
             });
         }

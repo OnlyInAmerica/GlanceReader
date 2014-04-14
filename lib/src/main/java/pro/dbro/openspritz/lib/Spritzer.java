@@ -27,6 +27,7 @@ public class Spritzer {
     protected static final boolean VERBOSE = false;
 
     protected static final int MSG_PRINT_WORD = 1;
+    protected static final int MSG_SET_ENABLED = 2;
 
     protected static final int CHARS_LEFT_OF_PIVOT = 3;
     protected int mMaxWordLength = 13;
@@ -489,6 +490,9 @@ public class Spritzer {
             switch (what) {
                 case MSG_PRINT_WORD:
                     spritzer.printWord((String) obj);
+                    break;
+                case MSG_SET_ENABLED:
+                    spritzer.mTarget.setEnabled(true);
                     break;
                 default:
                     throw new RuntimeException("Unexpected msg what=" + what);
