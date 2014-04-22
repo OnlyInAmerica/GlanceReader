@@ -1,4 +1,4 @@
-package pro.dbro.glance.activities;
+package pro.dbro.glance;
 
 import android.app.ActionBar;
 import android.app.AlertDialog;
