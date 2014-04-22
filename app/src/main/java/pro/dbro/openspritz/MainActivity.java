@@ -23,6 +23,9 @@ import android.view.Window;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import pro.dbro.openspritz.billing.Catalog;
 import pro.dbro.openspritz.billing.IabHelper;
 import pro.dbro.openspritz.billing.IabResult;
@@ -150,7 +153,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
                 intentUri = getIntent().getData();
             } else if (action.equals(Intent.ACTION_SEND)) {
                 intentIncludesMediaUri = true;
-                intentUri = Uri.parse(getIntent().getStringExtra(Intent.EXTRA_TEXT));
+                intentUri = Uri.parse(findURL(getIntent().getStringExtra(Intent.EXTRA_TEXT)));
             }
 
             if (intentIncludesMediaUri && intentUri != null) {
@@ -256,6 +259,17 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
                 .putInt("THEME", THEME_LIGHT)
                 .commit();
         recreate();
+    }
+
+    private String findURL (String Text)
+    {
+        Pattern patt = Pattern.compile("\\b((?:https?:\\/\\/|www\\d{0,3}[.]|[a-z0-9.\\-]+[.][a-z]{2,4}\\/)(?:[^\\s()<>]+|\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\))+(?:\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\)|[^\\s`!()\\[\\]{};:'\".,<>???“”‘’]))");
+        Matcher matcher = patt.matcher(Text);
+        if(matcher.find()){
+            return matcher.group(1);
+        }else{
+            return Text;
+        }
     }
 
     @Subscribe
