@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -263,10 +264,9 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
 
     private String findURL (String Text)
     {
-        Pattern patt = Pattern.compile("\\b((?:https?:\\/\\/|www\\d{0,3}[.]|[a-z0-9.\\-]+[.][a-z]{2,4}\\/)(?:[^\\s()<>]+|\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\))+(?:\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\)|[^\\s`!()\\[\\]{};:'\".,<>???“”‘’]))");
-        Matcher matcher = patt.matcher(Text);
+        Matcher matcher = Patterns.WEB_URL.matcher(Text);
         if(matcher.find()){
-            return matcher.group(1);
+            return matcher.group();
         }else{
             return Text;
         }
