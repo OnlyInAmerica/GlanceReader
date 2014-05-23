@@ -47,7 +47,7 @@ Some quick, incomplete thoughts on what's next.
 
 
 ## Thanks
-In no partiular order. Thanks everybody!
+In no particular order. Thanks everybody!
 
 + [andrewgiang](https://github.com/andrewgiang) for contributing a re-usable library based on the early project, and other contributions
 + [defer](https://github.com/defer) for refactoring that made it easier to support multiple formats
