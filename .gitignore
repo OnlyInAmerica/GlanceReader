@@ -1,4 +1,5 @@
 RELEASING.md
+build
 lib/build
 *.apk
 *.epub

@@ -1,14 +1,14 @@
-# OpenSpritz-Android
+# Glance-Android
 
-![OpenSpritz](http://i.imgur.com/3ACFJ5s.gif)
+![Glance](http://i.imgur.com/3ACFJ5s.gif)
 
-OpenSpritz-Android is a Spritz-like .epub and website reader for Android 3.0+ (API 11). Inspired by Miserlou's [OpenSpritz](https://github.com/Miserlou/OpenSpritz).
+Glance is a Spritz-like .epub and website reader for Android 3.0+ (API 11). Inspired by Miserlou's [OpenSpritz](https://github.com/Miserlou/OpenSpritz).
 
-You can share URLS to OpenSpritz-Android from your favorite web browser, or open .epubs on your device's external storage directly.
+You can share URLS to Glance from your favorite web browser, or open .epubs on your device's external storage directly.
 
 Available on Google Play under the name **Glance**
 
-[![OpenSpritz](https://developer.android.com/images/brand/en_generic_rgb_wo_45.png)](https://play.google.com/store/apps/details?id=pro.dbro.openspritz)
+[![Glance](https://developer.android.com/images/brand/en_generic_rgb_wo_45.png)](https://play.google.com/store/apps/details?id=pro.dbro.openspritz)
 
 ## Lend a hand
 
@@ -54,10 +54,6 @@ In no partiular order. Thanks everybody!
 + [epublib](https://github.com/psiegman/epublib) by [psiegman](https://github.com/psiegman) (LGPL)
 + [rcarlsen](https://github.com/rcarlsen) for work adopting for Glass
 + [mneimsky](https://github.com/mneimsky) for work adopting for Glass
-
-#### A Note About the Name
-
-OpenSpritz has nothing to do with [Spritz Incorporated](http://www.spritzinc.com/). This is an open source, community created project, made with love because Spritz is such an awesome technique for reading with.
 
 ## License
 

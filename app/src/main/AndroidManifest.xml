@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="pro.dbro.openspritz" >
+    package="pro.dbro.glance" >
 
     <!-- Allows opening previously opened document URI directly. Else, have to show document chooser
      on each launch-->
@@ -14,10 +14,10 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/Light"
-        android:name=".OpenSpritzApplication"
+        android:name=".GlanceApplication"
         >
         <activity
-            android:name=".MainActivity" >
+            android:name="pro.dbro.glance.MainActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
