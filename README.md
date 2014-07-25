@@ -1,6 +1,6 @@
 # Glance-Android
 
-![Glance](http://i.imgur.com/3ACFJ5s.gif)
+![Glance](http://i.imgur.com/pO9as8z.gif)
 
 Glance is a [RSVP](http://en.wikipedia.org/wiki/Rapid_serial_visual_presentation) .epub and website reader for Android 3.0+ (API 11).
 

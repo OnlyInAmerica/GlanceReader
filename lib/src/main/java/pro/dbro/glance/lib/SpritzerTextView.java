@@ -105,8 +105,8 @@ public class SpritzerTextView extends TextView implements View.OnClickListener {
         int endBottomX = getMeasuredWidth();
         int bottomY = getMeasuredHeight();
         // Paint the top guide and bottom guide bars
-        canvas.drawLine(beginTopX, topY, endTopX, topY, mPaintGuides);
-        canvas.drawLine(beginBottomX, bottomY, endBottomX, bottomY, mPaintGuides);
+        //canvas.drawLine(beginTopX, topY, endTopX, topY, mPaintGuides);
+        //canvas.drawLine(beginBottomX, bottomY, endBottomX, bottomY, mPaintGuides);
 
         // Measurements for pivot indicator
         if (mPivotX == -1) {
