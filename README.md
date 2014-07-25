@@ -2,7 +2,7 @@
 
 ![Glance](http://i.imgur.com/3ACFJ5s.gif)
 
-Glance is a Spritz-like .epub and website reader for Android 3.0+ (API 11). Inspired by Miserlou's [OpenSpritz](https://github.com/Miserlou/OpenSpritz).
+Glance is a [RSVP](http://en.wikipedia.org/wiki/Rapid_serial_visual_presentation) .epub and website reader for Android 3.0+ (API 11).
 
 You can share URLS to Glance from your favorite web browser, or open .epubs on your device's external storage directly.
 
