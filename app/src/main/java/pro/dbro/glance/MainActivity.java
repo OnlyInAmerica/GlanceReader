@@ -236,6 +236,10 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
         } else if(id == R.id.action_donate) {
             showDonateDialog();
         }
+        else if(id == R.id.action_world) {
+            Intent communityIntent = new Intent(MainActivity.this, CommunityActivity.class);
+            MainActivity.this.startActivity(communityIntent);
+        }
         return super.onOptionsItemSelected(item);
     }
 

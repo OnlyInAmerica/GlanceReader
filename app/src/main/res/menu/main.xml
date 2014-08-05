@@ -30,4 +30,12 @@
         android:title="@string/open_epub"
         android:orderInCategory="100"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_world"
+        android:icon="?attr/launcher_icon"
+        android:title="@string/community"
+        android:orderInCategory="100"
+        app:showAsAction="always" />
+
 </menu>
