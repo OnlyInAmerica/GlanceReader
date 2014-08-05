@@ -10,6 +10,7 @@
     <string name="whoa_dude">Whoaaa dude</string>
     <string name="theme">Toggle Light/Dark Theme</string>
     <string name="open_epub">Open epub</string>
+    <string name="community">Community</string>
     <string name="loading">Loading…</string>
     <string name="select_chapter">Select Chapter</string>
     <string name="dialog_donate_msg">Open Source developers turn love and money from their community into honest, quality software. Buy us a beer or contribute code to this project!</string>
@@ -18,5 +19,7 @@
     <string name="dialog_donate_neutral_btn">Contribute Code!</string>
     <string name="dialog_donate_complete_title">You Rock.</string>
     <string name="dialog_donate_complete_positive_btn">I know</string>
+    <string name="title_activity_community">CommunityActivity</string>
+    <string name="hello_world">Hello world!</string>
 
 </resources>

@@ -133,7 +133,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
 
         getWindow().getDecorView().setOnSystemUiVisibilityChangeListener(this);
 
-        setupBillingConnection(SECRETS.getBillingPubKey());
+        //setupBillingConnection(SECRETS.getBillingPubKey());
     }
 
     @Override
@@ -230,6 +230,10 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
             getSpritzFragment().chooseMedia();
         } else if(id == R.id.action_donate) {
             showDonateDialog();
+        }
+        else if(id == R.id.action_world) {
+            Intent communityIntent = new Intent(MainActivity.this, CommunityActivity.class);
+            MainActivity.this.startActivity(communityIntent);
         }
         return super.onOptionsItemSelected(item);
     }

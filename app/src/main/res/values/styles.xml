@@ -11,6 +11,7 @@
         <item name="theme_icon">@drawable/ic_theme_blk</item>
         <item name="speed_icon">@drawable/ic_gauge_blk</item>
         <item name="book_icon">@drawable/ic_book_blk</item>
+        <item name="launcher_icon">@drawable/ic_launcher</item>
         <item name="subdued_text">@color/subdued_text</item>
         <item name="ultra_subdued_text">@color/ultra_subdued_text</item>
     </style>
@@ -25,6 +26,7 @@
         <item name="speed_icon">@drawable/ic_gauge_white</item>
         <item name="book_icon">@drawable/ic_book_white</item>
         <item name="subdued_text">@color/subdued_text_dark</item>
+        <item name="launcher_icon">@drawable/ic_launcher</item>
         <item name="ultra_subdued_text">@color/ultra_subdued_text_dark</item>
     </style>
 
@@ -60,6 +62,7 @@
     <attr name="theme_icon" format="reference" />
     <attr name="speed_icon" format="reference" />
     <attr name="book_icon" format="reference" />
+    <attr name="launcher_icon" format="reference" />
 
     <attr name="subdued_text" format="reference" />
     <attr name="ultra_subdued_text" format="reference" />
