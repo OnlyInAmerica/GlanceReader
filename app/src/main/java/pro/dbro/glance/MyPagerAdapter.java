@@ -7,7 +7,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 
 public class MyPagerAdapter extends FragmentPagerAdapter {
 
-    private final String[] TITLES = { "Most Popular", "Recent", "News", "Fiction"};
+    private final String[] TITLES = { "Most Popular", "Recent", "News", "HN", "Fiction"};
 
     public MyPagerAdapter(FragmentManager fm) {
         super(fm);

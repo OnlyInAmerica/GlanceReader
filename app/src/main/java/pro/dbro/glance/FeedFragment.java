@@ -1,8 +1,10 @@
 package pro.dbro.glance;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -22,10 +24,25 @@ import com.koushikdutta.async.future.Future;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 
+import com.parse.FindCallback;
+import com.parse.GetDataCallback;
+import com.parse.Parse;
+import com.parse.ParseAnalytics;
+import com.parse.ParseException;
+import com.parse.ParseFile;
+import com.parse.ParseImageView;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+import com.parse.ParseQueryAdapter;
+
+import java.util.Arrays;
+import java.util.List;
+
 public class FeedFragment extends Fragment {
 
     // adapter that holds tweets, obviously :)
     ArrayAdapter<JsonObject> tweetAdapter;
+    ParseQueryAdapter<ParseObject> articleAdapter;
 
     // This "Future" tracks loading operations.
     // A Future is an object that manages the state of an operation
@@ -35,7 +52,6 @@ public class FeedFragment extends Fragment {
     Future<JsonObject> loading;
 
     private static final String ARG_POSITION = "position";
-
     private int position;
 
     public static FeedFragment newInstance(int position) {
@@ -43,109 +59,101 @@ public class FeedFragment extends Fragment {
         Bundle b = new Bundle();
         b.putInt(ARG_POSITION, position);
         f.setArguments(b);
+
         return f;
+    }
+
+    public void setupParse(){
+        Parse.initialize(this.getActivity(), "IKXOwtsEGwpJxjD56rloizwwsB4pijEve8nU5wkB", "8K0yHwwEevmCiuuHTjGj7HRhFTzHmycBXXspmnPU");
+        ParseObject testObject = new ParseObject("TestObject");
+        testObject.put("foo", "bar");
+        testObject.saveInBackground();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         position = getArguments().getInt(ARG_POSITION);
+        if (position == 0){
+            setupParse();
+        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-//        LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-//
-//        FrameLayout fl = new FrameLayout(getActivity());
-//        fl.setLayoutParams(params);
-//
-//        final int margin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, getResources()
-//                .getDisplayMetrics());
-//
-//        TextView v = new TextView(getActivity());
-//        params.setMargins(margin, margin, margin, margin);
-//        v.setLayoutParams(params);
-//        v.setLayoutParams(params);
-//        v.setGravity(Gravity.CENTER);
-//        v.setBackgroundResource(R.drawable.ic_launcher);
-//        v.setText("CARD " + (position + 1));
-//
-//        fl.addView(v);
-//        return fl;
-
         View myFragmentView = inflater.inflate(R.layout.fragment_list, container, false);
-        tweetAdapter = new ArrayAdapter<JsonObject>(getActivity(), 0) {
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                if (convertView == null)
-                    convertView = getActivity().getLayoutInflater().inflate(R.layout.tweet, null);
-
-                // we're near the end of the list adapter, so load more items
-                if (position >= getCount() - 3)
-                    load();
-
-                // grab the tweet (or retweet)
-                JsonObject post = getItem(position);
-
-                String twitterId = post.get("title").getAsString();
-
-                // and finally, set the name and text
-                TextView handle = (TextView)convertView.findViewById(R.id.handle);
-                handle.setText(twitterId);
-
-                TextView text = (TextView)convertView.findViewById(R.id.tweet);
-                text.setText(post.get("url").getAsString());
-
-                convertView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        TextView tv = (TextView) view.findViewById(R.id.tweet);
-                        Intent communityIntent = new Intent(getActivity(), MainActivity.class);
-                        communityIntent.setAction(Intent.ACTION_SEND);
-                        communityIntent.putExtra(Intent.EXTRA_TEXT, tv.getText());
-                        startActivity(communityIntent);
-                    }
-                });
-
-                return convertView;
-            }
-        };
-
         ListView listView = (ListView) myFragmentView.findViewById(R.id.list);
-        listView.setAdapter(tweetAdapter);
 
-        // authenticate and do the first load
-        //getCredentials();
-        load();
+        switch(position) {
+            case 0:
+//                ParseQuery<ParseObject> query = ParseQuery.getQuery("Article");
+//                query.findInBackground(new FindCallback<ParseObject>() {
+//                    public void done(List<ParseObject> articleList, ParseException e) {
+//                        if (e == null) {
+//                            Log.d("score", "Retrieved " + articleList.size() + " scores");
+//                        } else {
+//                            Log.d("score", "Error: " + e.getMessage());
+//                        }
+//                    }
+//                });
+
+                articleAdapter =  new ArticleAdapter(getActivity());
+                listView.setAdapter(articleAdapter);
+
+                break;
+            case 3:
+                tweetAdapter = new ArrayAdapter<JsonObject>(getActivity(), 0) {
+                    @Override
+                    public View getView(int position, View convertView, ViewGroup parent) {
+                        if (convertView == null)
+                            convertView = getActivity().getLayoutInflater().inflate(R.layout.tweet, null);
+
+                        // we're near the end of the list adapter, so load more items
+                        if (position >= getCount() - 3)
+                            loadHN();
+
+                        // grab the tweet (or retweet)
+                        JsonObject post = getItem(position);
+
+                        String twitterId = post.get("title").getAsString();
+
+                        // and finally, set the name and text
+                        TextView handle = (TextView) convertView.findViewById(R.id.handle);
+                        handle.setText(twitterId);
+
+                        TextView text = (TextView) convertView.findViewById(R.id.tweet);
+                        text.setText(post.get("url").getAsString());
+
+                        convertView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                TextView tv = (TextView) view.findViewById(R.id.tweet);
+                                Intent communityIntent = new Intent(getActivity(), MainActivity.class);
+                                communityIntent.setAction(Intent.ACTION_SEND);
+                                communityIntent.putExtra(Intent.EXTRA_TEXT, tv.getText());
+                                startActivity(communityIntent);
+                            }
+                        });
+
+                        return convertView;
+                    }
+                };
+
+                listView.setAdapter(tweetAdapter);
+
+                // authenticate and do the first load
+                //getCredentials();
+                loadHN();
+                break;
+            default:
+                break;
+        }
 
         return myFragmentView;
     }
 
-//    String accessToken;
-//    private void getCredentials() {
-//        Ion.with(this)
-//                .load("https://api.twitter.com/oauth2/token")
-//                        // embedding twitter api key and secret is a bad idea, but this isn't a real twitter app :)
-//                .basicAuthentication("e4LrcHB55R3WamRYHpNfA", "MIABn1DU5db3Aj0xXzhthsf4aUKMAdoWJTMxJJcY")
-//                .setBodyParameter("grant_type", "client_credentials")
-//                .asJsonObject()
-//                .setCallback(new FutureCallback<JsonObject>() {
-//                    @Override
-//                    public void onCompleted(Exception e, JsonObject result) {
-//                        Toast.makeText(getActivity(), "Loading credentials", Toast.LENGTH_LONG).show();
-//
-//                        if (e != null) {
-//                            Toast.makeText(getActivity(), "Error loading tweets", Toast.LENGTH_LONG).show();
-//                            return;
-//                        }
-//                        accessToken = result.get("access_token").getAsString();
-//                        load();
-//                    }
-//                });
-//    }
-
-    private void load() {
+    private void loadHN() {
         // don't attempt to load more if a load is already in progress
         if (loading != null && !loading.isDone() && !loading.isCancelled())
             return;
@@ -173,12 +181,9 @@ public class FeedFragment extends Fragment {
                     @Override
                     public void onCompleted(Exception e, JsonObject result) {
 
-                        Toast.makeText(getActivity(), "Loading HN", Toast.LENGTH_LONG).show();
-
                         // this is called back onto the ui thread, no Activity.runOnUiThread or Handler.post necessary.
                         if (e != null) {
                             e.printStackTrace();
-                            Toast.makeText(getActivity(), "Error loading tweets: ", Toast.LENGTH_LONG).show();
                             return;
                         }
 
