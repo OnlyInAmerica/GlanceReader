@@ -160,7 +160,6 @@ public class FeedFragment extends Fragment {
                 if (position >= getCount() - 3)
                     loadHN();
 
-
                 JsonObject post = getItem(position);
                 String title = post.get("title").getAsString();
 
@@ -250,7 +249,6 @@ public class FeedFragment extends Fragment {
                         JsonArray results = value.getAsJsonArray("items");
 
                         for (int i = 0; i < results.size(); i++) {
-                            System.out.println(results.get(i).getAsJsonObject());
                             feedItemAdapter.add(results.get(i).getAsJsonObject());
                         }
                     }

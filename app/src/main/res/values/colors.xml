@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="pivot_text">#33B5E5</color>
+    <color name="pivot_text">#fff7000e</color>
 
     <color name="subdued_text">#ff444444</color>
     <color name="subdued_text_dark">#ffb9b9b9</color>
