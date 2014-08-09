@@ -22,15 +22,15 @@ import com.parse.ParseQueryAdapter;
 
 public class FeedFragment extends Fragment {
 
-    // adapter that holds tweets, obviously :)
-    ArrayAdapter<JsonObject> tweetAdapter;
+    private static String NEWS_URL = "http://pipes.yahoo.com/pipes/pipe.run?_id=40805955111ac2e85631facfb362f067&_render=json";
+    private static String COMMENTARY_URL = "http://pipes.yahoo.com/pipes/pipe.run?_id=dc1a399c275cbc0bcf6329c8419d6f4f&_render=json";
+    private static String FICTION_URL = "http://pipes.yahoo.com/pipes/pipe.run?_id=ee8d2db2513114660b054cd82da29b69&_render=json";
+    private static String HN_URL = "http://api.ihackernews.com/page";
+
+    ArrayAdapter<JsonObject> feedItemAdapter;
     ParseQueryAdapter<ParseObject> articleAdapter;
 
     // This "Future" tracks loading operations.
-    // A Future is an object that manages the state of an operation
-    // in progress that will have a "Future" result.
-    // You can attach callbacks (setCallback) for when the result is ready,
-    // or cancel() it if you no longer need the result.
     Future<JsonObject> loading;
 
     private static final String ARG_POSITION = "position";
@@ -64,138 +64,46 @@ public class FeedFragment extends Fragment {
         View myFragmentView = inflater.inflate(R.layout.fragment_list, container, false);
         ListView listView = (ListView) myFragmentView.findViewById(R.id.list);
 
+        // Which tab are we on?
         switch(position) {
+
+            // Most Popular
             case 0:
                 articleAdapter =  new ArticleAdapter(getActivity());
                 listView.setAdapter(articleAdapter);
                 break;
+            // Most Recent
             case 1:
                 articleAdapter =  new ArticleAdapter(getActivity(), 1);
                 listView.setAdapter(articleAdapter);
                 break;
+            // News
             case 2:
-                tweetAdapter = new ArrayAdapter<JsonObject>(getActivity(), 0) {
-                    @Override
-                    public View getView(int position, View convertView, ViewGroup parent) {
-                        if (convertView == null)
-                            convertView = getActivity().getLayoutInflater().inflate(R.layout.tweet, null);
-
-                        // grab the tweet (or retweet)
-                        JsonObject post = getItem(position);
-                        try {
-
-                            String twitterId = post.get("title").getAsString();
-
-                            // and finally, set the name and text
-                            TextView handle = (TextView) convertView.findViewById(R.id.title);
-                            handle.setText(twitterId);
-
-                            TextView text = (TextView) convertView.findViewById(R.id.url);
-                            text.setText(post.get("link").getAsString());
-
-                            convertView.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    TextView tv = (TextView) view.findViewById(R.id.url);
-                                    Intent communityIntent = new Intent(getActivity(), MainActivity.class);
-                                    communityIntent.setAction(Intent.ACTION_SEND);
-                                    communityIntent.putExtra(Intent.EXTRA_TEXT, tv.getText());
-                                    startActivity(communityIntent);
-                                }
-                            });
-                        } catch(Exception e){
-
-                        }
-
-                        return convertView;
-                    }
-                };
-
-                listView.setAdapter(tweetAdapter);
-                loadPipe("http://pipes.yahoo.com/pipes/pipe.run?_id=40805955111ac2e85631facfb362f067&_render=json");
+                feedItemAdapter = createFeedAdapter();
+                listView.setAdapter(feedItemAdapter);
+                loadPipe(NEWS_URL);
                 break;
+            // Commentary
             case 3:
-                tweetAdapter = new ArrayAdapter<JsonObject>(getActivity(), 0) {
-                    @Override
-                    public View getView(int position, View convertView, ViewGroup parent) {
-                        if (convertView == null)
-                            convertView = getActivity().getLayoutInflater().inflate(R.layout.tweet, null);
+                feedItemAdapter = createFeedAdapter();
+                listView.setAdapter(feedItemAdapter);
+                loadPipe(COMMENTARY_URL);
+                break;
 
-                        // we're near the end of the list adapter, so load more items
-                        if (position >= getCount() - 3)
-                            loadHN();
+            // Fiction
+            case 4:
+                feedItemAdapter = createFeedAdapter();
+                listView.setAdapter(feedItemAdapter);
+                loadPipe(FICTION_URL);
+                break;
 
-                        // grab the tweet (or retweet)
-                        JsonObject post = getItem(position);
-
-                        String twitterId = post.get("title").getAsString();
-
-                        // and finally, set the name and text
-                        TextView handle = (TextView) convertView.findViewById(R.id.title);
-                        handle.setText(twitterId);
-
-                        TextView text = (TextView) convertView.findViewById(R.id.url);
-                        text.setText(post.get("url").getAsString());
-
-                        convertView.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                TextView tv = (TextView) view.findViewById(R.id.url);
-                                Intent communityIntent = new Intent(getActivity(), MainActivity.class);
-                                communityIntent.setAction(Intent.ACTION_SEND);
-                                communityIntent.putExtra(Intent.EXTRA_TEXT, tv.getText());
-                                startActivity(communityIntent);
-                            }
-                        });
-
-                        return convertView;
-                    }
-                };
-
-                listView.setAdapter(tweetAdapter);
+            // HN
+            case 5:
+                feedItemAdapter = createHNAdapter();
+                listView.setAdapter(feedItemAdapter);
                 loadHN();
                 break;
-            case 4:
-                tweetAdapter = new ArrayAdapter<JsonObject>(getActivity(), 0) {
-                    @Override
-                    public View getView(int position, View convertView, ViewGroup parent) {
-                        if (convertView == null)
-                            convertView = getActivity().getLayoutInflater().inflate(R.layout.tweet, null);
 
-                        // grab the tweet (or retweet)
-                        JsonObject post = getItem(position);
-                        try {
-
-                            String twitterId = post.get("title").getAsString();
-
-                            // and finally, set the name and text
-                            TextView handle = (TextView) convertView.findViewById(R.id.title);
-                            handle.setText(twitterId);
-
-                            TextView text = (TextView) convertView.findViewById(R.id.url);
-                            text.setText(post.get("link").getAsString());
-
-                            convertView.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    TextView tv = (TextView) view.findViewById(R.id.url);
-                                    Intent communityIntent = new Intent(getActivity(), MainActivity.class);
-                                    communityIntent.setAction(Intent.ACTION_SEND);
-                                    communityIntent.putExtra(Intent.EXTRA_TEXT, tv.getText());
-                                    startActivity(communityIntent);
-                                }
-                            });
-                        } catch(Exception e){
-
-                        }
-
-                        return convertView;
-                    }
-                };
-
-                listView.setAdapter(tweetAdapter);
-                loadPipe("http://pipes.yahoo.com/pipes/pipe.run?_id=ee8d2db2513114660b054cd82da29b69&_render=json");
-                break;
             default:
                 break;
         }
@@ -203,29 +111,102 @@ public class FeedFragment extends Fragment {
         return myFragmentView;
     }
 
+    // Create adapters from items coming from Pipes.
+    private ArrayAdapter createFeedAdapter(){
+        return new ArrayAdapter<JsonObject>(getActivity(), 0) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                if (convertView == null)
+                    convertView = getActivity().getLayoutInflater().inflate(R.layout.tweet, null);
+
+                JsonObject post = getItem(position);
+                try {
+
+                    String title = post.get("title").getAsString();
+                    TextView handle = (TextView) convertView.findViewById(R.id.title);
+                    handle.setText(title);
+
+                    TextView text = (TextView) convertView.findViewById(R.id.url);
+                    text.setText(post.get("link").getAsString());
+
+                    convertView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            TextView tv = (TextView) view.findViewById(R.id.url);
+                            Intent communityIntent = new Intent(getActivity(), MainActivity.class);
+                            communityIntent.setAction(Intent.ACTION_SEND);
+                            communityIntent.putExtra(Intent.EXTRA_TEXT, tv.getText());
+                            startActivity(communityIntent);
+                        }
+                    });
+                } catch(Exception e){
+                    // Parsing is fucked. NSFO.
+                }
+
+                return convertView;
+            }
+        };
+    }
+
+    // Create adapters from items coming from HN Feed.
+    private ArrayAdapter createHNAdapter(){
+        return new ArrayAdapter<JsonObject>(getActivity(), 0) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                if (convertView == null)
+                    convertView = getActivity().getLayoutInflater().inflate(R.layout.tweet, null);
+
+                // we're near the end of the list adapter, so load more items
+                if (position >= getCount() - 3)
+                    loadHN();
+
+
+                JsonObject post = getItem(position);
+                String title = post.get("title").getAsString();
+
+                // and finally, set the name and text
+                TextView handle = (TextView) convertView.findViewById(R.id.title);
+                handle.setText(title);
+
+                TextView text = (TextView) convertView.findViewById(R.id.url);
+                text.setText(post.get("url").getAsString());
+
+                convertView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        TextView tv = (TextView) view.findViewById(R.id.url);
+                        Intent communityIntent = new Intent(getActivity(), MainActivity.class);
+                        communityIntent.setAction(Intent.ACTION_SEND);
+                        communityIntent.putExtra(Intent.EXTRA_TEXT, tv.getText());
+                        startActivity(communityIntent);
+                    }
+                });
+
+                return convertView;
+            }
+        };
+
+    }
+    
     private void loadHN() {
+
         // don't attempt to load more if a load is already in progress
         if (loading != null && !loading.isDone() && !loading.isCancelled())
             return;
 
-        // load the tweets
-       // String url = "https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=BestAt&count=20";
-        String url = "http://api.ihackernews.com/page";
-//        if (tweetAdapter.getCount() > 0) {
+        String url = HN_URL;
+
+        // XXX: Fix this!
+
+//        if (feedItemAdapter.getCount() > 0) {
 //            // load from the "last" id
-//            JsonObject last = tweetAdapter.getItem(tweetAdapter.getCount() - 1);
+//            JsonObject last = feedItemAdapter.getItem(feedItemAdapter.getCount() - 1);
 //            url += "&max_id=" + last.get("id_str").getAsString();
 //        }
-
-        // Request tweets from Twitter using Ion.
-        // This is done using Ion's Fluent/Builder API.
-        // This API lets you chain calls together to build
-        // complex requests.
 
         // This request loads a URL as JsonArray and invokes
         // a callback on completion.
         loading = Ion.with(getActivity(), url)
-                //.setHeader("Authorization", "Bearer " + accessToken)
                 .asJsonObject()
                 .setCallback(new FutureCallback<JsonObject>() {
                     @Override
@@ -238,30 +219,22 @@ public class FeedFragment extends Fragment {
                         }
 
                         JsonArray results = result.getAsJsonArray("items");
-
-                        // add the tweets
                         for (int i = 0; i < results.size(); i++) {
-                            //System.out.println(results.get(i).getAsJsonObject());
-                            tweetAdapter.add(results.get(i).getAsJsonObject());
+                            feedItemAdapter.add(results.get(i).getAsJsonObject());
                         }
                     }
                 });
     }
 
     private void loadPipe(String url) {
+
         // don't attempt to load more if a load is already in progress
         if (loading != null && !loading.isDone() && !loading.isCancelled())
             return;
 
-        // Request tweets from Twitter using Ion.
-        // This is done using Ion's Fluent/Builder API.
-        // This API lets you chain calls together to build
-        // complex requests.
-
         // This request loads a URL as JsonArray and invokes
         // a callback on completion.
         loading = Ion.with(getActivity(), url)
-                //.setHeader("Authorization", "Bearer " + accessToken)
                 .asJsonObject()
                 .setCallback(new FutureCallback<JsonObject>() {
                     @Override
@@ -276,10 +249,9 @@ public class FeedFragment extends Fragment {
                         JsonObject value = result.getAsJsonObject("value");
                         JsonArray results = value.getAsJsonArray("items");
 
-                        // add the tweets
                         for (int i = 0; i < results.size(); i++) {
                             System.out.println(results.get(i).getAsJsonObject());
-                            tweetAdapter.add(results.get(i).getAsJsonObject());
+                            feedItemAdapter.add(results.get(i).getAsJsonObject());
                         }
                     }
                 });
