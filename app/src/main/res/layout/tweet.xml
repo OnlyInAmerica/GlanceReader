@@ -16,13 +16,13 @@
 
         <TextView
             style="@android:style/TextAppearance.Medium"
-            android:id="@+id/handle"
+            android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"/>
 
         <TextView
-            android:id="@+id/tweet"
+            android:id="@+id/url"
             style="@android:style/TextAppearance.Small"
             android:layout_width="match_parent"
             android:layout_height="0dp"

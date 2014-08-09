@@ -19,7 +19,7 @@
     <string name="dialog_donate_neutral_btn">Contribute Code!</string>
     <string name="dialog_donate_complete_title">You Rock.</string>
     <string name="dialog_donate_complete_positive_btn">I know</string>
-    <string name="title_activity_community">CommunityActivity</string>
+    <string name="title_activity_community">Glance</string>
     <string name="hello_world">Hello world!</string>
 
 </resources>
