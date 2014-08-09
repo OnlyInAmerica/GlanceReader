@@ -168,7 +168,7 @@ public class SpritzFragment extends Fragment {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_spritz, container, false);
         mAuthorView = ((TextView) root.findViewById(R.id.author));
-        mTitleView = ((TextView) root.findViewById(R.id.title));
+        mTitleView = ((TextView) root.findViewById(R.id.url));
         mChapterView = ((TextView) root.findViewById(R.id.chapter));
         mChapterView.setOnClickListener(new View.OnClickListener() {
             @Override

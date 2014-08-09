@@ -33,7 +33,7 @@ public class TocReferenceAdapter extends BaseAdapter {
         }
 
         String chapterTitle = mBook.getChapterTitle(position);
-        ((TextView) convertView.findViewById(R.id.title)).setText(chapterTitle);
+        ((TextView) convertView.findViewById(R.id.url)).setText(chapterTitle);
 
         return convertView;
     }

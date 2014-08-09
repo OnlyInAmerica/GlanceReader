@@ -18,7 +18,7 @@
         android:typeface="monospace" />
 
     <TextView
-        android:id="@+id/title"
+        android:id="@+id/url"
         style="@style/SubduedTextStyle"
         android:layout_width="@dimen/spritzer_title_width"
         android:layout_height="wrap_content"
@@ -37,8 +37,8 @@
         style="@style/SubduedTextStyle"
         android:layout_width="@dimen/spritzer_author_width"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@id/title"
-        android:layout_below="@id/title"
+        android:layout_alignLeft="@id/url"
+        android:layout_below="@id/url"
         android:ellipsize="marquee"
         android:fontFamily="sans-serif-condensed"
         android:singleLine="true"

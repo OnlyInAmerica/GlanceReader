@@ -1,22 +1,14 @@
 package pro.dbro.glance;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
-import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
-import android.widget.FrameLayout.LayoutParams;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -24,19 +16,9 @@ import com.koushikdutta.async.future.Future;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 
-import com.parse.FindCallback;
-import com.parse.GetDataCallback;
 import com.parse.Parse;
-import com.parse.ParseAnalytics;
-import com.parse.ParseException;
-import com.parse.ParseFile;
-import com.parse.ParseImageView;
 import com.parse.ParseObject;
-import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class FeedFragment extends Fragment {
 
@@ -65,9 +47,6 @@ public class FeedFragment extends Fragment {
 
     public void setupParse(){
         Parse.initialize(this.getActivity(), "IKXOwtsEGwpJxjD56rloizwwsB4pijEve8nU5wkB", "8K0yHwwEevmCiuuHTjGj7HRhFTzHmycBXXspmnPU");
-        ParseObject testObject = new ParseObject("TestObject");
-        testObject.put("foo", "bar");
-        testObject.saveInBackground();
     }
 
     @Override
@@ -87,20 +66,53 @@ public class FeedFragment extends Fragment {
 
         switch(position) {
             case 0:
-//                ParseQuery<ParseObject> query = ParseQuery.getQuery("Article");
-//                query.findInBackground(new FindCallback<ParseObject>() {
-//                    public void done(List<ParseObject> articleList, ParseException e) {
-//                        if (e == null) {
-//                            Log.d("score", "Retrieved " + articleList.size() + " scores");
-//                        } else {
-//                            Log.d("score", "Error: " + e.getMessage());
-//                        }
-//                    }
-//                });
-
                 articleAdapter =  new ArticleAdapter(getActivity());
                 listView.setAdapter(articleAdapter);
+                break;
+            case 1:
+                articleAdapter =  new ArticleAdapter(getActivity(), 1);
+                listView.setAdapter(articleAdapter);
+                break;
+            case 2:
+                tweetAdapter = new ArrayAdapter<JsonObject>(getActivity(), 0) {
+                    @Override
+                    public View getView(int position, View convertView, ViewGroup parent) {
+                        if (convertView == null)
+                            convertView = getActivity().getLayoutInflater().inflate(R.layout.tweet, null);
 
+                        // grab the tweet (or retweet)
+                        JsonObject post = getItem(position);
+                        try {
+
+                            String twitterId = post.get("title").getAsString();
+
+                            // and finally, set the name and text
+                            TextView handle = (TextView) convertView.findViewById(R.id.title);
+                            handle.setText(twitterId);
+
+                            TextView text = (TextView) convertView.findViewById(R.id.url);
+                            text.setText(post.get("link").getAsString());
+
+                            convertView.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    TextView tv = (TextView) view.findViewById(R.id.url);
+                                    Intent communityIntent = new Intent(getActivity(), MainActivity.class);
+                                    communityIntent.setAction(Intent.ACTION_SEND);
+                                    communityIntent.putExtra(Intent.EXTRA_TEXT, tv.getText());
+                                    startActivity(communityIntent);
+                                }
+                            });
+                        } catch(Exception e){
+
+                        }
+
+                        return convertView;
+                    }
+                };
+
+                listView.setAdapter(tweetAdapter);
+                loadPipe("http://pipes.yahoo.com/pipes/pipe.run?_id=40805955111ac2e85631facfb362f067&_render=json");
                 break;
             case 3:
                 tweetAdapter = new ArrayAdapter<JsonObject>(getActivity(), 0) {
@@ -119,16 +131,16 @@ public class FeedFragment extends Fragment {
                         String twitterId = post.get("title").getAsString();
 
                         // and finally, set the name and text
-                        TextView handle = (TextView) convertView.findViewById(R.id.handle);
+                        TextView handle = (TextView) convertView.findViewById(R.id.title);
                         handle.setText(twitterId);
 
-                        TextView text = (TextView) convertView.findViewById(R.id.tweet);
+                        TextView text = (TextView) convertView.findViewById(R.id.url);
                         text.setText(post.get("url").getAsString());
 
                         convertView.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                TextView tv = (TextView) view.findViewById(R.id.tweet);
+                                TextView tv = (TextView) view.findViewById(R.id.url);
                                 Intent communityIntent = new Intent(getActivity(), MainActivity.class);
                                 communityIntent.setAction(Intent.ACTION_SEND);
                                 communityIntent.putExtra(Intent.EXTRA_TEXT, tv.getText());
@@ -141,10 +153,48 @@ public class FeedFragment extends Fragment {
                 };
 
                 listView.setAdapter(tweetAdapter);
-
-                // authenticate and do the first load
-                //getCredentials();
                 loadHN();
+                break;
+            case 4:
+                tweetAdapter = new ArrayAdapter<JsonObject>(getActivity(), 0) {
+                    @Override
+                    public View getView(int position, View convertView, ViewGroup parent) {
+                        if (convertView == null)
+                            convertView = getActivity().getLayoutInflater().inflate(R.layout.tweet, null);
+
+                        // grab the tweet (or retweet)
+                        JsonObject post = getItem(position);
+                        try {
+
+                            String twitterId = post.get("title").getAsString();
+
+                            // and finally, set the name and text
+                            TextView handle = (TextView) convertView.findViewById(R.id.title);
+                            handle.setText(twitterId);
+
+                            TextView text = (TextView) convertView.findViewById(R.id.url);
+                            text.setText(post.get("link").getAsString());
+
+                            convertView.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    TextView tv = (TextView) view.findViewById(R.id.url);
+                                    Intent communityIntent = new Intent(getActivity(), MainActivity.class);
+                                    communityIntent.setAction(Intent.ACTION_SEND);
+                                    communityIntent.putExtra(Intent.EXTRA_TEXT, tv.getText());
+                                    startActivity(communityIntent);
+                                }
+                            });
+                        } catch(Exception e){
+
+                        }
+
+                        return convertView;
+                    }
+                };
+
+                listView.setAdapter(tweetAdapter);
+                loadPipe("http://pipes.yahoo.com/pipes/pipe.run?_id=ee8d2db2513114660b054cd82da29b69&_render=json");
                 break;
             default:
                 break;
@@ -188,6 +238,43 @@ public class FeedFragment extends Fragment {
                         }
 
                         JsonArray results = result.getAsJsonArray("items");
+
+                        // add the tweets
+                        for (int i = 0; i < results.size(); i++) {
+                            //System.out.println(results.get(i).getAsJsonObject());
+                            tweetAdapter.add(results.get(i).getAsJsonObject());
+                        }
+                    }
+                });
+    }
+
+    private void loadPipe(String url) {
+        // don't attempt to load more if a load is already in progress
+        if (loading != null && !loading.isDone() && !loading.isCancelled())
+            return;
+
+        // Request tweets from Twitter using Ion.
+        // This is done using Ion's Fluent/Builder API.
+        // This API lets you chain calls together to build
+        // complex requests.
+
+        // This request loads a URL as JsonArray and invokes
+        // a callback on completion.
+        loading = Ion.with(getActivity(), url)
+                //.setHeader("Authorization", "Bearer " + accessToken)
+                .asJsonObject()
+                .setCallback(new FutureCallback<JsonObject>() {
+                    @Override
+                    public void onCompleted(Exception e, JsonObject result) {
+
+                        // this is called back onto the ui thread, no Activity.runOnUiThread or Handler.post necessary.
+                        if (e != null) {
+                            e.printStackTrace();
+                            return;
+                        }
+
+                        JsonObject value = result.getAsJsonObject("value");
+                        JsonArray results = value.getAsJsonArray("items");
 
                         // add the tweets
                         for (int i = 0; i < results.size(); i++) {
