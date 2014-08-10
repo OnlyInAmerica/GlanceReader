@@ -69,7 +69,7 @@ public class FeedFragment extends Fragment {
 
             // Most Popular
             case 0:
-                articleAdapter =  new ArticleAdapter(getActivity());
+                articleAdapter =  new ArticleAdapter(getActivity(), 0);
                 listView.setAdapter(articleAdapter);
                 break;
             // Most Recent

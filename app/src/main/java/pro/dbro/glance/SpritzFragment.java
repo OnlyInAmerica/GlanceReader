@@ -64,6 +64,7 @@ public class SpritzFragment extends Fragment {
             mSpritzer.setMediaUri(mediaUri);
         }
 
+//        Why is this commented out?
 //        if (AppSpritzer.isHttpUri(mediaUri)) {
 //            mSpritzer.setTextAndStart(getString(R.string.loading));
 //            showIndeterminateProgress(true);

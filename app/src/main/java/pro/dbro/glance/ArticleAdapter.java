@@ -10,6 +10,9 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
 
+import java.util.Calendar;
+import java.util.Date;
+
 public class ArticleAdapter extends ParseQueryAdapter<ParseObject> {
 
     public ArticleAdapter(Context context) {
@@ -27,15 +30,19 @@ public class ArticleAdapter extends ParseQueryAdapter<ParseObject> {
 
                         ParseQuery query = null;
                         switch(filterType) {
-                            case 0:
-                                query = new ParseQuery("Article");
-                                return query;
                             case 1:
                                 query = new ParseQuery("Article");
                                 query.orderByDescending("createdAt");
                                 return query;
                             default:
                                 query = new ParseQuery("Article");
+                                Date now = new Date();
+                                Calendar cal = Calendar.getInstance();
+                                cal.setTime(now);
+                                cal.add(Calendar.DAY_OF_MONTH, -2);
+                                Date oneDayAgo = cal.getTime();
+                                query.whereGreaterThan("createdAt", oneDayAgo);
+                                query.orderByDescending("reads");
                                 return query;
                         }
                     }
@@ -53,6 +60,10 @@ public class ArticleAdapter extends ParseQueryAdapter<ParseObject> {
 
         TextView text = (TextView) convertView.findViewById(R.id.url);
         text.setText(object.getString("url"));
+
+        TextView reads = (TextView) convertView.findViewById(R.id.reads);
+        reads.setText(new Integer(object.getInt("reads")).toString() + " reads");
+        reads.setLines(1);
 
         convertView.setOnClickListener(new View.OnClickListener() {
             @Override

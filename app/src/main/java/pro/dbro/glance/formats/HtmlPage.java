@@ -3,6 +3,13 @@ package pro.dbro.glance.formats;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+
+import java.util.List;
+
 import de.jetwick.snacktory.HtmlFetcher;
 import de.jetwick.snacktory.JResult;
 
@@ -53,6 +60,44 @@ public class HtmlPage implements SpritzerMedia {
         final HtmlPage page = new HtmlPage(null);
         new AsyncTask<String, Void, JResult>() {
 
+            public void recordRead(final String url, final String title){
+
+                // Okay, so this is really shitty.
+                // I know.
+                // Here's the thing: I didn't know Parse can't do DISTINCT or GROUP BY.
+                // Now I do.
+                // Anyway, instead we're just incrementing a counter.
+
+                ParseQuery<ParseObject> query = ParseQuery.getQuery("Article");
+                query.whereEqualTo("url", url);
+                query.whereEqualTo("title", title);
+                query.findInBackground(new FindCallback<ParseObject>() {
+                    public void done(List<ParseObject> scoreList, ParseException e) {
+                        if (e == null) {
+                            Log.d("score", "Retrieved " + scoreList.size() + " scores");
+
+                           if(scoreList.isEmpty()){
+                               // Don't have the object, create it.
+                               ParseObject article = new ParseObject("Article");
+                               article.put("url", url);
+                               article.put("title", title);
+                               article.put("reads", 1);
+                               article.saveInBackground();
+                               return;
+                            } else {
+                               // Update object if we already have it.
+                               ParseObject article = scoreList.get(0);
+                               article.increment("reads");
+                               article.saveInBackground();
+                           }
+                        } else {
+                            Log.d("score", "Error: " + e.getMessage());
+                        }
+                    }
+                });
+
+            }
+
             @Override
             protected JResult doInBackground(String... url) {
                 try {
@@ -69,6 +114,8 @@ public class HtmlPage implements SpritzerMedia {
                         throw new UnsupportedFormatException("Failed to parse text from " + url);
                     }
                     page.setResult(result);
+
+                    recordRead(result.getUrl(), result.getTitle());
                     return result;
 
                 } catch (Exception e) {
@@ -81,12 +128,12 @@ public class HtmlPage implements SpritzerMedia {
             protected void onPostExecute(JResult result) {
                 if (cb != null) {
                     cb.onPageParsed(result);
+
                 }
             }
         }.execute(url);
         return page;
     }
-
 
     @Override
     public String getTitle() {
