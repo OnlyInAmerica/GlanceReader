@@ -62,7 +62,7 @@ public class ArticleAdapter extends ParseQueryAdapter<ParseObject> {
         text.setText(object.getString("url"));
 
         TextView reads = (TextView) convertView.findViewById(R.id.reads);
-        reads.setText(new Integer(object.getInt("reads")).toString() + " reads");
+        reads.setText(new Integer(object.getInt("reads")).toString() + " glances");
         reads.setLines(1);
 
         convertView.setOnClickListener(new View.OnClickListener() {

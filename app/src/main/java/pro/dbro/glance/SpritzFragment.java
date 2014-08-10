@@ -65,10 +65,10 @@ public class SpritzFragment extends Fragment {
         }
 
 //        Why is this commented out?
-//        if (AppSpritzer.isHttpUri(mediaUri)) {
-//            mSpritzer.setTextAndStart(getString(R.string.loading));
-//            showIndeterminateProgress(true);
-//        }
+        if (AppSpritzer.isHttpUri(mediaUri)) {
+            mSpritzer.setTextAndStart(getString(R.string.loading));
+            showIndeterminateProgress(true);
+        }
     }
 
     public void showIndeterminateProgress(boolean show) {
