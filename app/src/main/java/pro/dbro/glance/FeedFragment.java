@@ -25,7 +25,7 @@ public class FeedFragment extends Fragment {
     private static String NEWS_URL = "http://pipes.yahoo.com/pipes/pipe.run?_id=40805955111ac2e85631facfb362f067&_render=json";
     private static String COMMENTARY_URL = "http://pipes.yahoo.com/pipes/pipe.run?_id=dc1a399c275cbc0bcf6329c8419d6f4f&_render=json";
     private static String FICTION_URL = "http://pipes.yahoo.com/pipes/pipe.run?_id=ee8d2db2513114660b054cd82da29b69&_render=json";
-    private static String HN_URL = "http://api.ihackernews.com/page";
+    private static String HN_URL = "http://pipes.yahoo.com/pipes/pipe.run?_id=af38f38c0a21785ef8409d48ab4c1246&_render=json";
 
     ArrayAdapter<JsonObject> feedItemAdapter;
     ParseQueryAdapter<ParseObject> articleAdapter;
@@ -99,9 +99,9 @@ public class FeedFragment extends Fragment {
 
             // HN
             case 5:
-                feedItemAdapter = createHNAdapter();
+                feedItemAdapter = createFeedAdapter();
                 listView.setAdapter(feedItemAdapter);
-                loadHN();
+                loadPipe(HN_URL);
                 break;
 
             default:
@@ -146,83 +146,6 @@ public class FeedFragment extends Fragment {
                 return convertView;
             }
         };
-    }
-
-    // Create adapters from items coming from HN Feed.
-    private ArrayAdapter createHNAdapter(){
-        return new ArrayAdapter<JsonObject>(getActivity(), 0) {
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                if (convertView == null)
-                    convertView = getActivity().getLayoutInflater().inflate(R.layout.tweet, null);
-
-                // we're near the end of the list adapter, so load more items
-                if (position >= getCount() - 3)
-                    loadHN();
-
-                JsonObject post = getItem(position);
-                String title = post.get("title").getAsString();
-
-                // and finally, set the name and text
-                TextView handle = (TextView) convertView.findViewById(R.id.title);
-                handle.setText(title);
-
-                TextView text = (TextView) convertView.findViewById(R.id.url);
-                text.setText(post.get("url").getAsString());
-
-                convertView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        TextView tv = (TextView) view.findViewById(R.id.url);
-                        Intent communityIntent = new Intent(getActivity(), MainActivity.class);
-                        communityIntent.setAction(Intent.ACTION_SEND);
-                        communityIntent.putExtra(Intent.EXTRA_TEXT, tv.getText());
-                        startActivity(communityIntent);
-                    }
-                });
-
-                return convertView;
-            }
-        };
-
-    }
-    
-    private void loadHN() {
-
-        // don't attempt to load more if a load is already in progress
-        if (loading != null && !loading.isDone() && !loading.isCancelled())
-            return;
-
-        String url = HN_URL;
-
-        // XXX: Fix this!
-
-//        if (feedItemAdapter.getCount() > 0) {
-//            // load from the "last" id
-//            JsonObject last = feedItemAdapter.getItem(feedItemAdapter.getCount() - 1);
-//            url += "&max_id=" + last.get("id_str").getAsString();
-//        }
-
-        // This request loads a URL as JsonArray and invokes
-        // a callback on completion.
-        loading = Ion.with(getActivity(), url)
-                .asJsonObject()
-                .setCallback(new FutureCallback<JsonObject>() {
-                    @Override
-                    public void onCompleted(Exception e, JsonObject result) {
-
-                        // this is called back onto the ui thread, no Activity.runOnUiThread or Handler.post necessary.
-                        if (e != null) {
-                            e.printStackTrace();
-                            return;
-                        }
-
-                        JsonArray results = result.getAsJsonArray("items");
-                        for (int i = 0; i < results.size(); i++) {
-                            feedItemAdapter.add(results.get(i).getAsJsonObject());
-                        }
-                    }
-                });
     }
 
     private void loadPipe(String url) {
