@@ -1,4 +1,4 @@
-package pro.dbro.glance;
+package pro.dbro.glance.fragments;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -10,20 +10,25 @@ import android.widget.ListView;
 
 import com.squareup.otto.Bus;
 
+import pro.dbro.glance.GlanceApplication;
+import pro.dbro.glance.R;
+import pro.dbro.glance.TocReferenceAdapter;
 import pro.dbro.glance.events.ChapterSelectedEvent;
 import pro.dbro.glance.formats.SpritzerMedia;
 
 /**
+ * Fragment showing a list of available chapters for a
+ * {@link pro.dbro.glance.formats.SpritzerMedia}
  * Created by davidbrodsky on 3/1/14.
  */
 public class TocDialogFragment extends DialogFragment implements ListView.OnItemClickListener {
 
     private SpritzerMedia mBook;
-    private TocReferenceAdapter mAdapter;
+    private pro.dbro.glance.TocReferenceAdapter mAdapter;
     private ListView mList;
     private Bus mBus;
 
-    static TocDialogFragment newInstance(SpritzerMedia book) {
+    public static TocDialogFragment newInstance(SpritzerMedia book) {
         TocDialogFragment f = new TocDialogFragment();
 
         Bundle args = new Bundle();
@@ -48,7 +53,6 @@ public class TocDialogFragment extends DialogFragment implements ListView.OnItem
         mList.setAdapter(mAdapter);
         mList.setOnItemClickListener(this);
 
-        GlanceApplication app = (GlanceApplication) getActivity().getApplication();
         this.mBus = ((GlanceApplication)getActivity().getApplication()).getBus();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

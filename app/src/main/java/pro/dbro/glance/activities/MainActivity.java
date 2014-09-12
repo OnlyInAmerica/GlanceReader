@@ -1,4 +1,4 @@
-package pro.dbro.glance;
+package pro.dbro.glance.activities;
 
 import android.app.ActionBar;
 import android.app.AlertDialog;
@@ -23,6 +23,10 @@ import android.view.Window;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
+import pro.dbro.glance.GlanceApplication;
+import pro.dbro.glance.R;
+import pro.dbro.glance.SECRETS;
+import pro.dbro.glance.SpritzFragment;
 import pro.dbro.glance.billing.Catalog;
 import pro.dbro.glance.billing.IabHelper;
 import pro.dbro.glance.billing.IabResult;
@@ -32,6 +36,8 @@ import pro.dbro.glance.events.ChapterSelectRequested;
 import pro.dbro.glance.events.ChapterSelectedEvent;
 import pro.dbro.glance.events.WpmSelectedEvent;
 import pro.dbro.glance.formats.SpritzerMedia;
+import pro.dbro.glance.fragments.TocDialogFragment;
+import pro.dbro.glance.fragments.WpmDialogFragment;
 
 public class MainActivity extends ActionBarActivity implements View.OnSystemUiVisibilityChangeListener {
     private static final String TAG = "MainActivity";
@@ -133,7 +139,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
 
         getWindow().getDecorView().setOnSystemUiVisibilityChangeListener(this);
 
-        //setupBillingConnection(SECRETS.getBillingPubKey());
+        setupBillingConnection(SECRETS.getBillingPubKey());
     }
 
     @Override

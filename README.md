@@ -2,9 +2,9 @@
 
 ![Glance](http://i.imgur.com/pO9as8z.gif)
 
-Glance is a [RSVP](http://en.wikipedia.org/wiki/Rapid_serial_visual_presentation) .epub and website reader for Android 3.0+ (API 11).
+Glance is a [RSVP](http://en.wikipedia.org/wiki/Rapid_serial_visual_presentation) reader for Android 3.0+ (API 11). Glance also includes a curated collection of feeds for your reading pleasure thanks to work by [Rich Jones](https://github.com/miserlou). The Glance reading collection is also available at [glance.wtf](http://glance.wtf), because silly TLDs are great.
 
-You can share URLS to Glance from your favorite web browser, or open .epubs on your device's external storage directly.
+You can share URLs to Glance from your favorite web browser, or open .epubs on your device's external storage directly.
 
 Available on Google Play under the name **Glance**
 
@@ -49,6 +49,7 @@ Some quick, incomplete thoughts on what's next.
 ## Thanks
 In no partiular order. Thanks everybody!
 
++ [Rich Jones](https://github.com/miserlou) for adding the curated feeds & community features.
 + [andrewgiang](https://github.com/andrewgiang) for contributing a re-usable library based on the early project, and other contributions
 + [defer](https://github.com/defer) for refactoring that made it easier to support multiple formats
 + [epublib](https://github.com/psiegman/epublib) by [psiegman](https://github.com/psiegman) (LGPL)

@@ -10,9 +10,6 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.parse.GetCallback;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
 import com.squareup.otto.Bus;
 
 import java.util.List;
@@ -27,9 +24,9 @@ import pro.dbro.glance.formats.UnsupportedFormatException;
 import pro.dbro.glance.lib.Spritzer;
 
 /**
- * Parse a SpritzerMedia instance into a Queue of words
- * and display them on a TextView at
- * a given WPM
+ * A higher-level {@link pro.dbro.glance.lib.Spritzer} that operates
+ * on Uris pointing to .epubs on disk or http urls, instead
+ * of a plain String
  */
 // TODO: Save State for multiple books
 public class AppSpritzer extends Spritzer {
