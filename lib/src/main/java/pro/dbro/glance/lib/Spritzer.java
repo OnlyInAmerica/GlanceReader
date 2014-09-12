@@ -36,7 +36,7 @@ public class Spritzer {
     protected TextView mTarget;
     protected int mWPM;
     protected Handler mSpritzHandler;
-    protected Object mSpritzThreadStartedSync = new Object();
+    protected final Object mSpritzThreadStartedSync = new Object();
     protected boolean mPlaying;
     protected boolean mPlayingRequested;
     protected boolean mSpritzThreadStarted;

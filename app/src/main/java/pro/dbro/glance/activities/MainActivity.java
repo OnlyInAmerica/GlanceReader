@@ -1,4 +1,4 @@
-package pro.dbro.glance;
+package pro.dbro.glance.activities;
 
 import android.app.ActionBar;
 import android.app.AlertDialog;
@@ -15,7 +15,6 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.util.Log;
-import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,9 +23,9 @@ import android.view.Window;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
-import java.util.regex.Matcher;
-
 import pro.dbro.glance.GlanceApplication;
+import pro.dbro.glance.R;
+import pro.dbro.glance.SECRETS;
 import pro.dbro.glance.SpritzFragment;
 import pro.dbro.glance.billing.Catalog;
 import pro.dbro.glance.billing.IabHelper;
@@ -37,6 +36,8 @@ import pro.dbro.glance.events.ChapterSelectRequested;
 import pro.dbro.glance.events.ChapterSelectedEvent;
 import pro.dbro.glance.events.WpmSelectedEvent;
 import pro.dbro.glance.formats.SpritzerMedia;
+import pro.dbro.glance.fragments.TocDialogFragment;
+import pro.dbro.glance.fragments.WpmDialogFragment;
 
 public class MainActivity extends ActionBarActivity implements View.OnSystemUiVisibilityChangeListener {
     private static final String TAG = "MainActivity";
@@ -138,7 +139,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
 
         getWindow().getDecorView().setOnSystemUiVisibilityChangeListener(this);
 
-        //setupBillingConnection(SECRETS.getBillingPubKey());
+        setupBillingConnection(SECRETS.getBillingPubKey());
     }
 
     @Override
@@ -155,7 +156,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
                 intentUri = getIntent().getData();
             } else if (action.equals(Intent.ACTION_SEND)) {
                 intentIncludesMediaUri = true;
-                intentUri = Uri.parse(findURL(getIntent().getStringExtra(Intent.EXTRA_TEXT)));
+                intentUri = Uri.parse(getIntent().getStringExtra(Intent.EXTRA_TEXT));
             }
 
             if (intentIncludesMediaUri && intentUri != null) {
@@ -265,16 +266,6 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
                 .putInt("THEME", THEME_LIGHT)
                 .commit();
         recreate();
-    }
-
-    private String findURL (String Text)
-    {
-        Matcher matcher = Patterns.WEB_URL.matcher(Text);
-        if(matcher.find()){
-            return matcher.group();
-        }else{
-            return Text;
-        }
     }
 
     @Subscribe

@@ -1,22 +1,16 @@
-package pro.dbro.glance;
+package pro.dbro.glance.activities;
 
-import android.app.ListFragment;
 import android.content.Context;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentManager;
+import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 import com.astuetz.PagerSlidingTabStrip;
 
 import pro.dbro.glance.R;
+import pro.dbro.glance.adapters.ReaderSectionAdapter;
 
 public class CommunityActivity extends ActionBarActivity {
 
@@ -41,7 +35,7 @@ public class CommunityActivity extends ActionBarActivity {
 
         // Initialize the ViewPager and set an adapter
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
-        pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
+        pager.setAdapter(new ReaderSectionAdapter(getSupportFragmentManager()));
 
         // Bind the tabs to the ViewPager
         PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);

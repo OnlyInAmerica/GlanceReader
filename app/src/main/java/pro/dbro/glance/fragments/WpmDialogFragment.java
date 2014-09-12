@@ -1,4 +1,4 @@
-package pro.dbro.glance;
+package pro.dbro.glance.fragments;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -12,6 +12,8 @@ import android.widget.TextView;
 
 import com.squareup.otto.Bus;
 
+import pro.dbro.glance.GlanceApplication;
+import pro.dbro.glance.R;
 import pro.dbro.glance.events.WpmSelectedEvent;
 
 
@@ -32,7 +34,7 @@ public class WpmDialogFragment extends DialogFragment {
     private int mWpm;
     private Bus mBus;
 
-    static WpmDialogFragment newInstance(int wpm) {
+    public static WpmDialogFragment newInstance(int wpm) {
         WpmDialogFragment f = new WpmDialogFragment();
 
         // Supply num input as an argument.

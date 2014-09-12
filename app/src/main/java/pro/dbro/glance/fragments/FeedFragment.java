@@ -1,4 +1,4 @@
-package pro.dbro.glance;
+package pro.dbro.glance.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,18 +15,17 @@ import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.Future;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
-
 import com.parse.Parse;
 import com.parse.ParseObject;
 import com.parse.ParseQueryAdapter;
 
-public class FeedFragment extends Fragment {
+import pro.dbro.glance.R;
+import pro.dbro.glance.SECRETS;
+import pro.dbro.glance.activities.MainActivity;
+import pro.dbro.glance.adapters.ArticleAdapter;
+import pro.dbro.glance.adapters.ReaderSectionAdapter;
 
-    private static String NEWS_URL = "http://pipes.yahoo.com/pipes/pipe.run?_id=40805955111ac2e85631facfb362f067&_render=json";
-    private static String COMMENTARY_URL = "http://pipes.yahoo.com/pipes/pipe.run?_id=dc1a399c275cbc0bcf6329c8419d6f4f&_render=json";
-    private static String FICTION_URL = "http://pipes.yahoo.com/pipes/pipe.run?_id=ee8d2db2513114660b054cd82da29b69&_render=json";
-    private static String HN_URL = "http://pipes.yahoo.com/pipes/pipe.run?_id=af38f38c0a21785ef8409d48ab4c1246&_render=json";
-    private static String TRUEREDDIT_URL = "http://pipes.yahoo.com/pipes/pipe.run?_id=792a6a5fc2c23eafe6a80855263ac259&_render=json";
+public class FeedFragment extends Fragment {
 
     ArrayAdapter<JsonObject> feedItemAdapter;
     ParseQueryAdapter<ParseObject> articleAdapter;
@@ -34,27 +33,29 @@ public class FeedFragment extends Fragment {
     // This "Future" tracks loading operations.
     Future<JsonObject> loading;
 
-    private static final String ARG_POSITION = "position";
-    private int position;
+    private static final String ARG_FEED = "feed";
+    private ReaderSectionAdapter.Feed mFeed;
+    private static boolean sParseSetup = false;
 
-    public static FeedFragment newInstance(int position) {
+    public static FeedFragment newInstance(ReaderSectionAdapter.Feed feed) {
         FeedFragment f = new FeedFragment();
         Bundle b = new Bundle();
-        b.putInt(ARG_POSITION, position);
+        b.putSerializable(ARG_FEED, feed);
         f.setArguments(b);
 
         return f;
     }
 
     public void setupParse(){
-        Parse.initialize(this.getActivity(), "IKXOwtsEGwpJxjD56rloizwwsB4pijEve8nU5wkB", "8K0yHwwEevmCiuuHTjGj7HRhFTzHmycBXXspmnPU");
+        Parse.initialize(this.getActivity(), SECRETS.getParseId(), SECRETS.getParseSecret());
+        sParseSetup = true;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        position = getArguments().getInt(ARG_POSITION);
-        if (position == 0){
+        mFeed = (ReaderSectionAdapter.Feed) getArguments().getSerializable(ARG_FEED);
+        if (!sParseSetup){
             setupParse();
         }
     }
@@ -65,53 +66,25 @@ public class FeedFragment extends Fragment {
         View myFragmentView = inflater.inflate(R.layout.fragment_list, container, false);
         ListView listView = (ListView) myFragmentView.findViewById(R.id.list);
 
-        // Which tab are we on?
-        switch(position) {
+        switch(mFeed) {
 
-            // Most Popular
-            case 0:
-                articleAdapter =  new ArticleAdapter(getActivity(), 0);
+            case POPULAR:
+                articleAdapter =  new ArticleAdapter(getActivity(), ArticleAdapter.ArticleFilter.RECENT);
                 listView.setAdapter(articleAdapter);
                 break;
-            // Most Recent
-            case 1:
-                articleAdapter =  new ArticleAdapter(getActivity(), 1);
+            case RECENT:
+                articleAdapter =  new ArticleAdapter(getActivity(), ArticleAdapter.ArticleFilter.ALL);
                 listView.setAdapter(articleAdapter);
                 break;
-            // News
-            case 2:
+            case NEWS:
+            case COMMENTARY:
+            case FICTION:
+            case HN:
+            //case TRUE_REDDIT:
                 feedItemAdapter = createFeedAdapter();
                 listView.setAdapter(feedItemAdapter);
-                loadPipe(NEWS_URL);
+                loadPipe(mFeed.getFeedUrl());
                 break;
-            // Commentary
-            case 3:
-                feedItemAdapter = createFeedAdapter();
-                listView.setAdapter(feedItemAdapter);
-                loadPipe(COMMENTARY_URL);
-                break;
-
-            // Fiction
-            case 4:
-                feedItemAdapter = createFeedAdapter();
-                listView.setAdapter(feedItemAdapter);
-                loadPipe(FICTION_URL);
-                break;
-
-            // HN
-            case 5:
-                feedItemAdapter = createFeedAdapter();
-                listView.setAdapter(feedItemAdapter);
-                loadPipe(HN_URL);
-                break;
-
-            // TrueReddit
-            case 6:
-                feedItemAdapter = createFeedAdapter();
-                listView.setAdapter(feedItemAdapter);
-                loadPipe(TRUEREDDIT_URL);
-                break;
-
             default:
                 break;
         }
@@ -120,7 +93,7 @@ public class FeedFragment extends Fragment {
     }
 
     // Create adapters from items coming from Pipes.
-    private ArrayAdapter createFeedAdapter(){
+    private ArrayAdapter<JsonObject> createFeedAdapter(){
         return new ArrayAdapter<JsonObject>(getActivity(), 0) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {

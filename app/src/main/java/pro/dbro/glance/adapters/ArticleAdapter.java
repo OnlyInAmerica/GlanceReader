@@ -1,4 +1,4 @@
-package pro.dbro.glance;
+package pro.dbro.glance.adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,7 +13,15 @@ import com.parse.ParseQueryAdapter;
 import java.util.Calendar;
 import java.util.Date;
 
+import pro.dbro.glance.R;
+import pro.dbro.glance.activities.MainActivity;
+
 public class ArticleAdapter extends ParseQueryAdapter<ParseObject> {
+
+    public static enum ArticleFilter {
+        RECENT,
+        ALL
+    }
 
     public ArticleAdapter(Context context) {
         super(context, new ParseQueryAdapter.QueryFactory<ParseObject>() {
@@ -24,16 +32,17 @@ public class ArticleAdapter extends ParseQueryAdapter<ParseObject> {
         });
     }
 
-    public ArticleAdapter(final Context context, final int filterType) {
+    public ArticleAdapter(final Context context, final ArticleFilter filterType) {
         super(context, new ParseQueryAdapter.QueryFactory<ParseObject>() {
                     public ParseQuery<ParseObject> create() {
 
                         ParseQuery query = null;
                         switch(filterType) {
-                            case 1:
+                            case ALL:
                                 query = new ParseQuery("Article");
                                 query.orderByDescending("createdAt");
                                 return query;
+                            case RECENT:
                             default:
                                 query = new ParseQuery("Article");
                                 Date now = new Date();
