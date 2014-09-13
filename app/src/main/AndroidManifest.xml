@@ -36,7 +36,8 @@
         </activity>
         <activity
             android:name=".activities.CommunityActivity"
-            android:label="@string/title_activity_community" >
+            android:label="@string/title_activity_community"
+            android:theme="@style/Dark.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

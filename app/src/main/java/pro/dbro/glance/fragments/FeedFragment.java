@@ -98,7 +98,7 @@ public class FeedFragment extends Fragment {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 if (convertView == null)
-                    convertView = getActivity().getLayoutInflater().inflate(R.layout.tweet, null);
+                    convertView = getActivity().getLayoutInflater().inflate(R.layout.article_list_item, null);
 
                 JsonObject post = getItem(position);
                 try {

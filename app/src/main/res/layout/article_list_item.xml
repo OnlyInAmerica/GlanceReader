@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
     android:orientation="vertical"
-    android:padding="4dp"
-    android:weightSum="3">
+    android:padding="4dp">
 
     <TextView
         style="@android:style/TextAppearance.Large"
         android:ellipsize="none"
         android:id="@+id/title"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:fontFamily="sans-serif-condensed"
+        android:layout_alignParentTop="true"
+        android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:textStyle="bold" />
 
@@ -21,8 +21,9 @@
         style="@android:style/TextAppearance.Small"
         android:ellipsize="end"
         android:id="@+id/url"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_below="@id/title"
+        android:fontFamily="sans-serif-condensed"
+        android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:lines="1" />
 
@@ -30,9 +31,10 @@
         style="@android:style/TextAppearance.Small"
         android:ellipsize="end"
         android:id="@+id/reads"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_below="@id/url"
+        android:fontFamily="sans-serif-condensed"
+        android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:lines="0" />
+        android:lines="1" />
 
-</LinearLayout>
+</RelativeLayout>
