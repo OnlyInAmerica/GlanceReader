@@ -26,7 +26,6 @@ import com.squareup.otto.Subscribe;
 import pro.dbro.glance.GlanceApplication;
 import pro.dbro.glance.R;
 import pro.dbro.glance.SECRETS;
-import pro.dbro.glance.SpritzFragment;
 import pro.dbro.glance.billing.Catalog;
 import pro.dbro.glance.billing.IabHelper;
 import pro.dbro.glance.billing.IabResult;
@@ -36,6 +35,7 @@ import pro.dbro.glance.events.ChapterSelectRequested;
 import pro.dbro.glance.events.ChapterSelectedEvent;
 import pro.dbro.glance.events.WpmSelectedEvent;
 import pro.dbro.glance.formats.SpritzerMedia;
+import pro.dbro.glance.fragments.SpritzFragment;
 import pro.dbro.glance.fragments.TocDialogFragment;
 import pro.dbro.glance.fragments.WpmDialogFragment;
 
@@ -232,14 +232,14 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
             } else {
                 applyLightTheme();
             }
-        } else if (id == R.id.action_open) {
-            getSpritzFragment().chooseMedia();
-        } else if(id == R.id.action_donate) {
-            showDonateDialog();
         }
-        else if(id == R.id.action_world) {
-            Intent communityIntent = new Intent(MainActivity.this, CommunityActivity.class);
-            MainActivity.this.startActivity(communityIntent);
+        /*
+        else if (id == R.id.action_open) {
+            getSpritzFragment().chooseMedia();
+        }
+        */
+        else if(id == R.id.action_donate) {
+            showDonateDialog();
         }
         return super.onOptionsItemSelected(item);
     }

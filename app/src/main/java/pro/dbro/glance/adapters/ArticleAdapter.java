@@ -61,7 +61,7 @@ public class ArticleAdapter extends ParseQueryAdapter<ParseObject> {
     @Override
     public View getItemView(ParseObject object, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            convertView = View.inflate(getContext(), R.layout.tweet, null);
+            convertView = View.inflate(getContext(), R.layout.article_list_item, null);
         }
 
         TextView handle = (TextView) convertView.findViewById(R.id.title);
