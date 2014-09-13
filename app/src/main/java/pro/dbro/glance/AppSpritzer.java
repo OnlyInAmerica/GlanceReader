@@ -247,7 +247,7 @@ public class AppSpritzer extends Spritzer {
                     setWpm(initialWpm);
                     mSpritzHandler.sendMessage(mSpritzHandler.obtainMessage(MSG_SET_ENABLED));
                 }
-            });
+            }, false);
         }
     }
 

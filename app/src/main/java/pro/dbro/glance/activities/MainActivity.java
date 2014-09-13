@@ -26,6 +26,7 @@ import com.squareup.otto.Subscribe;
 import pro.dbro.glance.GlanceApplication;
 import pro.dbro.glance.R;
 import pro.dbro.glance.SECRETS;
+import pro.dbro.glance.Utils;
 import pro.dbro.glance.billing.Catalog;
 import pro.dbro.glance.billing.IabHelper;
 import pro.dbro.glance.billing.IabResult;
@@ -38,6 +39,7 @@ import pro.dbro.glance.formats.SpritzerMedia;
 import pro.dbro.glance.fragments.SpritzFragment;
 import pro.dbro.glance.fragments.TocDialogFragment;
 import pro.dbro.glance.fragments.WpmDialogFragment;
+import pro.dbro.glance.lib.events.SpritzFinishedEvent;
 
 public class MainActivity extends ActionBarActivity implements View.OnSystemUiVisibilityChangeListener {
     private static final String TAG = "MainActivity";
@@ -49,6 +51,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
     private IabHelper mBillingHelper;
     private boolean mIsPremium;
     private Menu mMenu;
+    private boolean mFinishAfterSpritz = false;
 
     // Listener that's called when we finish querying the items and subscriptions we own
     IabHelper.QueryInventoryFinishedListener mGotInventoryListener = new IabHelper.QueryInventoryFinishedListener() {
@@ -160,6 +163,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
             }
 
             if (intentIncludesMediaUri && intentUri != null) {
+                if (getIntent().hasExtra(Utils.INTENT_FINISH_AFTER)) mFinishAfterSpritz = true;
                 SpritzFragment frag = getSpritzFragment();
                 frag.feedMediaUriToSpritzer(intentUri);
             }
@@ -266,6 +270,11 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
                 .putInt("THEME", THEME_LIGHT)
                 .commit();
         recreate();
+    }
+
+    @Subscribe
+    public void onSpritzFinished(SpritzFinishedEvent event) {
+        if (mFinishAfterSpritz) this.finish();
     }
 
     @Subscribe

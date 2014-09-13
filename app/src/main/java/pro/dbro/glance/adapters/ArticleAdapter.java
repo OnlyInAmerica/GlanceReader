@@ -14,6 +14,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import pro.dbro.glance.R;
+import pro.dbro.glance.Utils;
 import pro.dbro.glance.activities.MainActivity;
 
 public class ArticleAdapter extends ParseQueryAdapter<ParseObject> {
@@ -71,19 +72,10 @@ public class ArticleAdapter extends ParseQueryAdapter<ParseObject> {
         text.setText(object.getString("url"));
 
         TextView reads = (TextView) convertView.findViewById(R.id.reads);
-        reads.setText(new Integer(object.getInt("reads")).toString() + " glances");
+        reads.setText(object.getInt("reads") + " glances");
         reads.setLines(1);
 
-        convertView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                TextView tv = (TextView) view.findViewById(R.id.url);
-                Intent communityIntent = new Intent(getContext(), MainActivity.class);
-                communityIntent.setAction(Intent.ACTION_SEND);
-                communityIntent.putExtra(Intent.EXTRA_TEXT, tv.getText());
-                getContext().startActivity(communityIntent);
-            }
-        });
+        convertView.setOnClickListener(Utils.getArticleClickListener(convertView.getContext()));
 
         return convertView;
     }
