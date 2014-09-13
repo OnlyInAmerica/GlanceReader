@@ -209,7 +209,7 @@ public class SpritzerTextView extends TextView implements View.OnClickListener {
      * Will play the spritz text that was set in setSpritzText
      */
     public void play() {
-        mSpritzer.start();
+        mSpritzer.start(true);
     }
 
     public void pause() {

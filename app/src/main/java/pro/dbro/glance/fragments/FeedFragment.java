@@ -21,6 +21,7 @@ import com.parse.ParseQueryAdapter;
 
 import pro.dbro.glance.R;
 import pro.dbro.glance.SECRETS;
+import pro.dbro.glance.Utils;
 import pro.dbro.glance.activities.MainActivity;
 import pro.dbro.glance.adapters.ArticleAdapter;
 import pro.dbro.glance.adapters.ReaderSectionAdapter;
@@ -110,16 +111,7 @@ public class FeedFragment extends Fragment {
                     TextView text = (TextView) convertView.findViewById(R.id.url);
                     text.setText(post.get("link").getAsString());
 
-                    convertView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            TextView tv = (TextView) view.findViewById(R.id.url);
-                            Intent communityIntent = new Intent(getActivity(), MainActivity.class);
-                            communityIntent.setAction(Intent.ACTION_SEND);
-                            communityIntent.putExtra(Intent.EXTRA_TEXT, tv.getText());
-                            startActivity(communityIntent);
-                        }
-                    });
+                    convertView.setOnClickListener(Utils.getArticleClickListener(convertView.getContext()));
                 } catch(Exception e){
                     // Parsing is fucked. NSFO.
                 }

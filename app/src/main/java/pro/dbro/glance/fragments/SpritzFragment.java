@@ -69,7 +69,7 @@ public class SpritzFragment extends Fragment {
 
 //        Why is this commented out?
         if (AppSpritzer.isHttpUri(mediaUri)) {
-            mSpritzer.setTextAndStart(getString(R.string.loading));
+            mSpritzer.setTextAndStart(getString(R.string.loading), false);
             showIndeterminateProgress(true);
         }
     }
@@ -197,7 +197,7 @@ public class SpritzFragment extends Fragment {
                         showMetaUi(true);
                         dimActionBar(false);
                     } else {
-                        mSpritzer.start();
+                        mSpritzer.start(true);
                         showMetaUi(false);
                         dimActionBar(true);
                     }
@@ -381,7 +381,7 @@ public class SpritzFragment extends Fragment {
                     break;
                 case MSG_SPRITZ_TEXT:
                     if (mSpritzer != null) {
-                        mSpritzer.setTextAndStart((String) obj);
+                        mSpritzer.setTextAndStart((String) obj, false);
                     }
                     break;
             }
