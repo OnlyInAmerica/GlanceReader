@@ -1,4 +1,4 @@
-package pro.dbro.glance;
+package pro.dbro.glance.fragments;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -21,6 +21,9 @@ import com.squareup.otto.Subscribe;
 
 import java.lang.ref.WeakReference;
 
+import pro.dbro.glance.AppSpritzer;
+import pro.dbro.glance.GlanceApplication;
+import pro.dbro.glance.R;
 import pro.dbro.glance.events.ChapterSelectRequested;
 import pro.dbro.glance.events.HttpUrlParsedEvent;
 import pro.dbro.glance.events.NextChapterEvent;
