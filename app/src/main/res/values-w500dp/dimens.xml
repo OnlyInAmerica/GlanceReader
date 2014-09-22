@@ -5,5 +5,5 @@
     <dimen name="spritzer_text_view_text_size">50sp</dimen>
     <dimen name="spritzer_title_width">350dp</dimen>
     <dimen name="spritzer_author_width">250dp</dimen>
-    <dimen name="spritzer_author_text_size">22sp</dimen>
+    <dimen name="spritzer_author_text_size">18sp</dimen>
 </resources>
