@@ -11,7 +11,6 @@ import android.support.v4.app.Fragment;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.TextAppearanceSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -224,12 +223,17 @@ public class SpritzFragment extends Fragment {
             private float peakHeight;
             private float lastTouchY;
             private float firstTouchY;
-            private float fullOpacityHeight = 300;
-            private float moveThreshold = 20;
+            private final float fullOpacityHeight = 300;
+            /** The distance between ACTION_DOWN and ACTION_UP, above which should
+             * be interpreted as a drag, below which a click.
+             */
+            private final float movementForDragThreshold = 20;
+            /** The time between ACTION_DOWN and ACTION_MOVE, above which should
+             * be interpreted as a drag, and the spritzer paused
+             */
+            private final int timeForPauseThreshold = 50;
 
             private boolean mSetText = false;
-            private AlertDialog mDialog;
-
             private boolean mAnimatingBack = false;
 
             @Override
@@ -246,7 +250,7 @@ public class SpritzFragment extends Fragment {
                     lastTouchY = firstTouchY = event.getRawY();
                 }
                 if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                    if (mSpritzer.isPlaying()) mSpritzer.pause();
+                    if (mSpritzer.isPlaying() && (event.getEventTime() - event.getDownTime() > timeForPauseThreshold)) mSpritzer.pause();
                     if (!mSetText) {
                         mSpritzHistoryView.setText(mSpritzer.getHistoryString(400));
                         mSetText = true;
@@ -268,7 +272,7 @@ public class SpritzFragment extends Fragment {
                     lastTouchY = event.getRawY();
                 }
                 if (event.getAction() == MotionEvent.ACTION_UP && !mAnimatingBack) {
-                    if (event.getRawY() - firstTouchY < moveThreshold) {
+                    if (event.getRawY() - firstTouchY < movementForDragThreshold) {
                         // This is a click, not a drag
                         // show/hide meta ui on release
                         if (!mSpritzer.isPlaying()) pauseSpritzer();
