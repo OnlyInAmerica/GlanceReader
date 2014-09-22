@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.TextAppearanceSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -146,7 +147,7 @@ public class SpritzFragment extends Fragment {
         }
     }
 
-    public void dimActionBar(boolean dim) {
+    public void hideActionBar(boolean dim) {
         if (getActivity().getActionBar() == null) return;
         if (dim) {
             getActivity().getActionBar().hide();
@@ -193,13 +194,13 @@ public class SpritzFragment extends Fragment {
         mSpritzer.pause();
         updateMetaUi();
         showMetaUi(true);
-        dimActionBar(false);
+        hideActionBar(false);
     }
 
     private void startSpritzer() {
         mSpritzer.start(true);
         showMetaUi(false);
-        dimActionBar(true);
+        hideActionBar(true);
     }
 
     static float initHeight;
@@ -364,7 +365,7 @@ public class SpritzFragment extends Fragment {
                 // If the spritzer is currently playing, be sure to hide the ActionBar
                 // Might the Android linter be a bit aggressive with these null checks?
                 if (getActivity() != null && getActivity().getActionBar() != null) {
-                    getActivity().getActionBar().hide();
+                    hideActionBar(true);
                 }
             }
         }
@@ -398,7 +399,7 @@ public class SpritzFragment extends Fragment {
             public void run() {
                 updateMetaUi();
                 showMetaUi(true);
-                dimActionBar(false);
+                hideActionBar(false);
             }
         });
     }
