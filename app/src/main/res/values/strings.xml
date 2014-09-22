@@ -21,5 +21,6 @@
     <string name="dialog_donate_complete_positive_btn">I know</string>
     <string name="title_activity_community">Glance</string>
     <string name="hello_world">Hello world!</string>
+    <string name="pull_for_history">Pull down for history</string>
 
 </resources>

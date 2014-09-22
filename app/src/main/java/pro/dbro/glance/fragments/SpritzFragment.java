@@ -1,5 +1,7 @@
 package pro.dbro.glance.fragments;
 
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -10,12 +12,20 @@ import android.support.v4.app.Fragment;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.TextAppearanceSpan;
+import android.transition.Scene;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.facebook.rebound.SimpleSpringListener;
+import com.facebook.rebound.Spring;
+import com.facebook.rebound.SpringSystem;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
@@ -29,7 +39,6 @@ import pro.dbro.glance.events.HttpUrlParsedEvent;
 import pro.dbro.glance.events.NextChapterEvent;
 import pro.dbro.glance.formats.SpritzerMedia;
 import pro.dbro.glance.lib.SpritzerTextView;
-import pro.dbro.glance.lib.TextUtil;
 import pro.dbro.glance.lib.events.SpritzFinishedEvent;
 
 public class SpritzFragment extends Fragment {
@@ -118,12 +127,6 @@ public class SpritzFragment extends Fragment {
         mProgress.setMax((mSpritzer.getMaxChapter() + 1) * progressScale);
 
         mProgress.setProgress(progress);
-
-        if (!mSpritzer.isPlaying()) {
-            // If we're paused, show the Spritz history
-            int mSpritzHistoryViewLength = TextUtil.calculateMonospacedCharacterLimit(mSpritzHistoryView, getResources().getInteger(R.integer.spritz_history_line_count));
-            mSpritzHistoryView.setText(mSpritzer.getHistoryString(mSpritzHistoryViewLength));
-        }
     }
 
     /**
@@ -138,18 +141,17 @@ public class SpritzFragment extends Fragment {
             mTitleView.setVisibility(View.VISIBLE);
             mChapterView.setVisibility(View.VISIBLE);
             mProgress.setVisibility(View.VISIBLE);
-            mSpritzHistoryView.setVisibility(View.VISIBLE);
         } else {
             mAuthorView.setVisibility(View.INVISIBLE);
             mTitleView.setVisibility(View.INVISIBLE);
             mChapterView.setVisibility(View.INVISIBLE);
             mProgress.setVisibility(View.INVISIBLE);
-            mSpritzHistoryView.setVisibility(View.INVISIBLE);
             //mSpritzHistoryView.setText("");
         }
     }
 
     public void dimActionBar(boolean dim) {
+        if (getActivity().getActionBar() == null) return;
         if (dim) {
             getActivity().getActionBar().hide();
         } else {
@@ -187,26 +189,151 @@ public class SpritzFragment extends Fragment {
         mSpritzView = (SpritzerTextView) root.findViewById(R.id.spritzText);
         //mSpritzView.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "UbuntuMono-R.ttf"));
         //mSpritzHistoryView.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "UbuntuMono-R.ttf"));
-        mSpritzView.setOnClickListener(new View.OnClickListener() {
+        setupViews(mSpritzView, mSpritzHistoryView);
+        return root;
+    }
+
+    private void pauseSpritzer() {
+        mSpritzer.pause();
+        updateMetaUi();
+        showMetaUi(true);
+        dimActionBar(false);
+    }
+
+    private void startSpritzer() {
+        mSpritzer.start(true);
+        showMetaUi(false);
+        dimActionBar(true);
+    }
+
+    static float initHeight;
+
+    /**
+     * Adjust the target View's height in proportion to
+     * drag events. On drag release, snap the view back into
+     * it's original place.
+     */
+    private void setupViews(final View touchTarget, final View transformTarget) {
+        touchTarget.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
-            public void onClick(View v) {
-                if (mSpritzer != null && mSpritzer.isMediaSelected()) {
-                    if (mSpritzer.isPlaying()) {
-                        mSpritzer.pause();
-                        updateMetaUi();
-                        showMetaUi(true);
-                        dimActionBar(false);
-                    } else {
-                        mSpritzer.start(true);
-                        showMetaUi(false);
-                        dimActionBar(true);
-                    }
-                } else {
-                    chooseMedia();
-                }
+            public void onGlobalLayout() {
+                if (initHeight == 0)
+                    initHeight = transformTarget.getHeight();
             }
         });
-        return root;
+        touchTarget.setOnTouchListener(new View.OnTouchListener() {
+
+            private ViewGroup.LayoutParams params;
+            private float peakHeight;
+            private float lastTouchY;
+            private float firstTouchY;
+            private float fullOpacityHeight = 300;
+            private float moveThreshold = 20;
+
+            private boolean mSetText = false;
+            private AlertDialog mDialog;
+
+            private boolean mAnimatingBack = false;
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (params == null) params = transformTarget.getLayoutParams();
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    if (mSpritzer.isPlaying())
+                        mSpritzer.pause();
+                    else
+                        mSpritzer.start(true);
+//                    Log.i("TOUCH", "Down");
+                    int coords[] = new int[2];
+                    transformTarget.getLocationOnScreen(coords);
+                    lastTouchY = firstTouchY = event.getRawY();
+                }
+                if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                    if (mSpritzer.isPlaying()) mSpritzer.pause();
+                    if (!mSetText) {
+                        mSpritzHistoryView.setText(mSpritzer.getHistoryString(400));
+                        mSetText = true;
+                    }
+                    float newHeight = event.getRawY() - lastTouchY + transformTarget.getHeight();
+//                    Log.i("MOVE", "touch-y: " + event.getRawY() + " lastTouch: " + lastTouchY + " height: " + transformTarget.getHeight());
+                    if (newHeight > initHeight) {
+//                        Log.i("TOUCH", "setting height " + params.height);
+                        params.height = (int) newHeight;
+                        if (newHeight >= fullOpacityHeight) {
+                            transformTarget.setAlpha(1f);
+//                            Log.i("TOUCH", "alpha 1");
+                        } else {
+                            transformTarget.setAlpha((newHeight / fullOpacityHeight) * .8f);
+//                            Log.i("TOUCH", "alpha " + newHeight / fullOpacityHeight);
+                        }
+                        transformTarget.requestLayout();
+                    }
+                    lastTouchY = event.getRawY();
+                }
+                if (event.getAction() == MotionEvent.ACTION_UP && !mAnimatingBack) {
+                    if (event.getRawY() - firstTouchY < moveThreshold) {
+                        // This is a click, not a drag
+                        // show/hide meta ui on release
+                        if (!mSpritzer.isPlaying()) pauseSpritzer();
+                        else startSpritzer();
+                        return false;
+                    }
+                    peakHeight = event.getRawY() - lastTouchY + transformTarget.getHeight();
+                    mAnimatingBack = true;
+//                    Log.i("TOUCH", "animating back up " + initHeight + " " + transformTarget.getHeight());
+                    invokeSpring(transformTarget);
+
+                }
+                return true;
+            }
+
+            private void invokeSpring(final View targetView) {
+                mAnimatingBack = true;
+                // Create a system to run the physics loop for a set of springs.
+                SpringSystem springSystem = SpringSystem.create();
+
+                // Add a spring to the system.
+                Spring spring = springSystem.createSpring();
+
+                // Add a listener to observe the motion of the spring.
+                spring.addListener(new SimpleSpringListener() {
+
+                    @Override
+                    public void onSpringUpdate(Spring spring) {
+                        // You can observe the updates in the spring
+                        // state by asking its current value in onSpringUpdate.
+                        float value = (float) spring.getCurrentValue();
+                        float scale = 1f - (value);
+                        //Log.i("SPRING", String.valueOf(value));
+                        // 0 - initHeight
+                        // 1 - peakHeight
+                        if (scale < 0.05) {
+                            //Log.i("SPRING", "finished");
+                            mSpritzHistoryView.setText("");
+                            mSetText = false;
+                            params.height = (int) initHeight;
+                            transformTarget.setAlpha(0);
+                            mAnimatingBack = false;
+                            startSpritzer();
+                        } else if (mAnimatingBack) {
+                            params.height = (int) ((scale * (peakHeight - initHeight)) + initHeight);
+                            if (transformTarget.getHeight() >= fullOpacityHeight * 2) {
+                                transformTarget.setAlpha(1f);
+                            } else {
+                                //fullOpacityHeight*2 = full
+                                //fullOpacityHeight = empty
+                                transformTarget.setAlpha(Math.max(0, fullOpacityHeight - transformTarget.getHeight() * 1.1f));
+                                //Log.i("TOUCH", "alpha " + touchTarget.getHeight() / fullOpacityHeight);
+                            }
+                        }
+                        transformTarget.requestLayout();
+                    }
+                });
+
+                // Set the spring in motion; moving from 0 to 1
+                spring.setEndValue(1);
+            }
+        });
     }
 
     @Override

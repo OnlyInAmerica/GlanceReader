@@ -48,6 +48,7 @@ if (project.hasProperty('keyPassword')) {
 }
 
 dependencies {
+    compile 'com.facebook.rebound:rebound:0.3.6'
     compile group: 'com.google.guava', name: 'guava', version: '12.0'
 
     compile project(":lib")

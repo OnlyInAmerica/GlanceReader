@@ -263,10 +263,11 @@ public class AppSpritzer extends Spritzer {
      * Return a String representing the maxChars most recently
      * Spritzed characters.
      *
-     * @param maxChars
+     * @param maxChars The max number of characters to return. Pass a value less than 1 for no limit.
      * @return The maxChars number of most recently spritzed characters during this segment
      */
     public String getHistoryString(int maxChars) {
+        if (maxChars <= 0) maxChars = Integer.MAX_VALUE;
         if (mCurWordIdx < 2 || mDisplayWordList.size() < 2) return "";
         StringBuilder builder = new StringBuilder();
         int numWords = 0;
