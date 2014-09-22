@@ -14,6 +14,7 @@
         <item name="subdued_text">@color/subdued_text</item>
         <item name="ultra_subdued_text">@color/ultra_subdued_text</item>
         <item name="list_bg">@color/light_list_bg</item>
+        <item name="spritz_history_curtain">@drawable/white_transparent_bg</item>
     </style>
 
     <style name="Dark" parent="Theme.AppCompat">
@@ -28,6 +29,8 @@
         <item name="subdued_text">@color/subdued_text_dark</item>
         <item name="ultra_subdued_text">@color/ultra_subdued_text_dark</item>
         <item name="list_bg">@color/dark_list_bg</item>
+        <item name="spritz_history_curtain">@drawable/black_transparent_bg</item>
+
     </style>
 
     <style name="Dark.NoActionBar" parent="Dark">
@@ -71,4 +74,6 @@
     <attr name="subdued_text" format="reference" />
     <attr name="ultra_subdued_text" format="reference" />
     <attr name="list_bg" format="reference" />
+    <attr name="spritz_history_curtain" format="reference" />
+
 </resources>

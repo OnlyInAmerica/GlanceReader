@@ -52,11 +52,10 @@
         android:layout_alignTop="@id/spritzHistory"
         android:layout_alignLeft="@id/spritzHistory"
         android:layout_alignRight="@id/spritzHistory"
-        android:text="@string/pull_for_history"
         android:gravity="center_horizontal"
         android:textColor="?attr/ultra_subdued_text"
         android:fontFamily="sans-serif-condensed"
-        android:background="@drawable/black_transparent_bg" />
+        android:background="?attr/spritz_history_curtain" />
 
     <pro.dbro.glance.lib.SpritzerTextView
         android:id="@+id/spritzText"
