@@ -8,6 +8,8 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 import de.jetwick.snacktory.HtmlFetcher;
@@ -142,7 +144,11 @@ public class HtmlPage implements SpritzerMedia {
 
     @Override
     public String getAuthor() {
-        return (mResult == null || mResult.getUrl() == null) ? "" : mResult.getUrl();
+        try {
+            return (mResult == null || mResult.getUrl() == null) ? "" : new URL(mResult.getUrl()).getHost();
+        } catch (MalformedURLException e) {
+            return "";
+        }
     }
 
     @Override
