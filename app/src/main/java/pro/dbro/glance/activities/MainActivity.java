@@ -113,7 +113,6 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
         }
     };
 
-    private int mWpm;
     private Bus mBus;
 
     @Override
@@ -216,15 +215,8 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_speed) {
-            if (mWpm == 0) {
-                if (getSpritzFragment().getSpritzer() != null) {
-                    mWpm = getSpritzFragment().getSpritzer().getWpm();
-                } else {
-                    mWpm = 500;
-                }
-            }
             FragmentTransaction ft = getFragmentManager().beginTransaction();
-            DialogFragment newFragment = WpmDialogFragment.newInstance(mWpm);
+            DialogFragment newFragment = WpmDialogFragment.newInstance();
             newFragment.show(ft, "dialog");
             return true;
         } else if (id == R.id.action_theme) {
@@ -252,7 +244,6 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
             getSpritzFragment().getSpritzer()
                     .setWpm(event.getWpm());
         }
-        mWpm = event.getWpm();
     }
 
     private void applyDarkTheme() {

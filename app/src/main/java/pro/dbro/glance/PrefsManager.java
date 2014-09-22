@@ -62,6 +62,17 @@ public class PrefsManager {
         context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE).edit().clear().apply();
     }
 
+    public static void setWpm(Context context, int wpm) {
+        SharedPreferences.Editor editor = context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE).edit();
+        editor.putInt(APP_WPM, wpm)
+                .apply();
+    }
+
+    public static int getWpm(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE);
+        return prefs.getInt(APP_WPM, DEFAULT_APP_WPM);
+    }
+
     public static class SpritzState {
 
         private int mChapter;

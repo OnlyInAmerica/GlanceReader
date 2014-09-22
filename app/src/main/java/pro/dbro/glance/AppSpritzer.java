@@ -185,7 +185,7 @@ public class AppSpritzer extends Spritzer {
 
     @SuppressLint("NewApi")
     private void restoreState(boolean openLastMediaUri) {
-        PrefsManager.SpritzState state = PrefsManager.getState(mTarget.getContext());
+        final PrefsManager.SpritzState state = PrefsManager.getState(mTarget.getContext());
         String content = "";
         if (openLastMediaUri) {
             // Open the last selected media
@@ -226,7 +226,6 @@ public class AppSpritzer extends Spritzer {
         }
         final String finalContent = content;
         if (!mPlaying && finalContent.length() > 0) {
-            final int initialWpm = getWpm();
             setWpm(SPECIAL_MESSAGE_WPM);
             // Set mSpritzingSpecialMessage to true, so processNextWord doesn't
             // automatically proceed to the next chapter
@@ -236,7 +235,7 @@ public class AppSpritzer extends Spritzer {
                 @Override
                 public void onSpritzerFinished() {
                     setText(finalContent);
-                    setWpm(initialWpm);
+                    setWpm(state.getWpm());
                     mSpritzHandler.sendMessage(mSpritzHandler.obtainMessage(MSG_SET_ENABLED));
                 }
             }, false);
