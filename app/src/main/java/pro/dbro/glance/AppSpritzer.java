@@ -32,14 +32,6 @@ import pro.dbro.glance.lib.Spritzer;
 public class AppSpritzer extends Spritzer {
     public static final boolean VERBOSE = true;
     public static final int SPECIAL_MESSAGE_WPM = 100;
-    public static final int DEFAULT_WPM = 500;
-
-    private static final String PREFS = "espritz";
-    private static final String PREF_URI = "uri";
-    private static final String PREF_TITLE = "title";
-    private static final String PREF_CHAPTER = "chapter";
-    private static final String PREF_WORD = "word";
-    private static final String PREF_WPM = "wpm";
 
     private int mChapter;
     private SpritzerMedia mMedia;
@@ -181,24 +173,24 @@ public class AppSpritzer extends Spritzer {
     public void saveState() {
         if (mMedia != null) {
             if (VERBOSE) Log.i(TAG, "Saving state at chapter " + mChapter + " word: " + mCurWordIdx);
-            SharedPreferences.Editor editor = mTarget.getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit();
-            editor.putInt(PREF_CHAPTER, mChapter)
-                    .putString(PREF_URI, mMediaUri.toString())
-                    .putInt(PREF_WORD, mCurWordIdx)
-                    .putString(PREF_TITLE, mMedia.getTitle())
-                    .putInt(PREF_WPM, mWPM)
-                    .apply();
+            PrefsManager.saveState(
+                    mTarget.getContext(),
+                    mChapter,
+                    mMediaUri.toString(),
+                    mCurWordIdx,
+                    mMedia.getTitle(),
+                    mWPM);
         }
     }
 
     @SuppressLint("NewApi")
     private void restoreState(boolean openLastMediaUri) {
-        SharedPreferences prefs = mTarget.getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        PrefsManager.SpritzState state = PrefsManager.getState(mTarget.getContext());
         String content = "";
         if (openLastMediaUri) {
             // Open the last selected media
-            if (prefs.contains(PREF_URI)) {
-                Uri mediaUri = Uri.parse(prefs.getString(PREF_URI, ""));
+            if (state.hasUri()) {
+                Uri mediaUri = state.getUri();
                 if (Build.VERSION.SDK_INT >= 19 && !isHttpUri(mediaUri)) {
                     boolean uriPermissionPersisted = false;
                     List<UriPermission> uriPermissions = mTarget.getContext().getContentResolver().getPersistedUriPermissions();
@@ -211,25 +203,25 @@ public class AppSpritzer extends Spritzer {
                     }
                     if (!uriPermissionPersisted) {
                         Log.w(TAG, String.format("Permission not persisted for uri: %s. Clearing SharedPreferences ", mediaUri.toString()));
-                        prefs.edit().clear().apply();
+                        PrefsManager.clearState(mTarget.getContext());
                         return;
                     }
                 } else {
                     openMedia(mediaUri);
                 }
             }
-        } else if (prefs.contains(PREF_TITLE) && mMedia.getTitle().compareTo(prefs.getString(PREF_TITLE, "")) == 0) {
+        } else if (state.hasTitle() && mMedia.getTitle().compareTo(state.getTitle()) == 0) {
             // Resume media at previous point
-            mChapter = prefs.getInt(PREF_CHAPTER, 0);
+            mChapter = state.getChapter();
             content = loadCleanStringFromNextNonEmptyChapter(mChapter);
-            setWpm(prefs.getInt(PREF_WPM, DEFAULT_WPM));
-            mCurWordIdx = prefs.getInt(PREF_WORD, 0);
+            setWpm(state.getWpm());
+            mCurWordIdx = state.getWordIdx();
             if (VERBOSE) Log.i(TAG, "Resuming " + mMedia.getTitle() + " from chapter " + mChapter + " word " + mCurWordIdx);
         } else {
             // Begin content anew
             mChapter = 0;
             mCurWordIdx = 0;
-            setWpm(prefs.getInt(PREF_WPM, DEFAULT_WPM));
+            setWpm(state.getWpm());
             content = loadCleanStringFromNextNonEmptyChapter(mChapter);
         }
         final String finalContent = content;

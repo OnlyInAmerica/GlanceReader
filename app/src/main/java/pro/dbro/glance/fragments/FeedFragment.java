@@ -1,6 +1,5 @@
 package pro.dbro.glance.fragments;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -22,7 +21,6 @@ import com.parse.ParseQueryAdapter;
 import pro.dbro.glance.R;
 import pro.dbro.glance.SECRETS;
 import pro.dbro.glance.Utils;
-import pro.dbro.glance.activities.MainActivity;
 import pro.dbro.glance.adapters.ArticleAdapter;
 import pro.dbro.glance.adapters.ReaderSectionAdapter;
 

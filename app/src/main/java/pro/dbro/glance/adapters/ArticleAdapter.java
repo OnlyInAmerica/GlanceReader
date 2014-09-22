@@ -1,7 +1,6 @@
 package pro.dbro.glance.adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -15,7 +14,6 @@ import java.util.Date;
 
 import pro.dbro.glance.R;
 import pro.dbro.glance.Utils;
-import pro.dbro.glance.activities.MainActivity;
 
 public class ArticleAdapter extends ParseQueryAdapter<ParseObject> {
 

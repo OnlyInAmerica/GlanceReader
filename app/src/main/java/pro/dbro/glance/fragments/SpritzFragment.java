@@ -1,6 +1,5 @@
 package pro.dbro.glance.fragments;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
@@ -12,8 +11,6 @@ import android.support.v4.app.Fragment;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.TextAppearanceSpan;
-import android.transition.Scene;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -21,7 +18,6 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.facebook.rebound.SimpleSpringListener;
 import com.facebook.rebound.Spring;

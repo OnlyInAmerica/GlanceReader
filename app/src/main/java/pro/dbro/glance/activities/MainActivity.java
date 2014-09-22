@@ -24,6 +24,7 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import pro.dbro.glance.GlanceApplication;
+import pro.dbro.glance.PrefsManager;
 import pro.dbro.glance.R;
 import pro.dbro.glance.SECRETS;
 import pro.dbro.glance.Utils;
@@ -45,7 +46,6 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
     private static final String TAG = "MainActivity";
     public static final boolean VERBOSE = false;
     public static final String SPRITZ_FRAG_TAG = "spritzfrag";
-    private static final String PREFS = "ui_prefs";
     private static final int THEME_LIGHT = 0;
     private static final int THEME_DARK = 1;
     private IabHelper mBillingHelper;
@@ -118,8 +118,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        int theme = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-                .getInt("THEME", 0);
+        int theme = PrefsManager.getTheme(this);
         switch (theme) {
             case THEME_LIGHT:
                 setTheme(R.style.Light);
@@ -229,8 +228,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
             newFragment.show(ft, "dialog");
             return true;
         } else if (id == R.id.action_theme) {
-            int theme = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-                    .getInt("THEME", THEME_LIGHT);
+            int theme = PrefsManager.getTheme(this);
             if (theme == THEME_LIGHT) {
                 applyDarkTheme();
             } else {
@@ -258,17 +256,13 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
     }
 
     private void applyDarkTheme() {
-        getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-                .putInt("THEME", THEME_DARK)
-                .commit();
+        PrefsManager.setTheme(this, THEME_DARK);
         recreate();
 
     }
 
     private void applyLightTheme() {
-        getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-                .putInt("THEME", THEME_LIGHT)
-                .commit();
+        PrefsManager.setTheme(this, THEME_LIGHT);
         recreate();
     }
 
