@@ -28,7 +28,7 @@ public class PrefsManager {
 
     public static final int getTheme(Context context) {
         return context.getSharedPreferences(UI_PREFS, Context.MODE_PRIVATE)
-                .getInt(UI_THEME, 0);
+                .getInt(UI_THEME, 1);
     }
 
     public static void setTheme(Context context, int theme) {
