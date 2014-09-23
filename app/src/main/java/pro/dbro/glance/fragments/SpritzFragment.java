@@ -437,47 +437,6 @@ public class SpritzFragment extends Fragment {
         return mSpritzer;
     }
 
-    private static final int SELECT_MEDIA = 42;
-
-    /**
-     * Fires an intent to spin up the "file chooser" UI and select an image.
-     */
-    public void chooseMedia() {
-
-        // ACTION_OPEN_DOCUMENT is the new API 19 action for the Android file manager
-        Intent intent;
-        if (Build.VERSION.SDK_INT >= 19) {
-            intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        } else {
-            intent = new Intent(Intent.ACTION_GET_CONTENT);
-        }
-
-        // Filter to only show results that can be "opened", such as a
-        // file (as opposed to a list of contacts or timezones)
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-
-        // Currently no recognized epub MIME type
-        intent.setType("*/*");
-
-        mUserIsChoosingEpub = true;
-        startActivityForResult(intent, SELECT_MEDIA);
-    }
-
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == SELECT_MEDIA && data != null) {
-            mUserIsChoosingEpub = false;
-            Uri uri = data.getData();
-            if (Build.VERSION.SDK_INT >= 19) {
-                final int takeFlags = data.getFlags()
-                        & (Intent.FLAG_GRANT_READ_URI_PERMISSION
-                        | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                getActivity().getContentResolver().takePersistableUriPermission(uri, takeFlags);
-            }
-            feedMediaUriToSpritzer(uri);
-            updateMetaUi();
-        }
-    }
-
     /**
      * A Handler bound to the UI thread. Used to conveniently
      * handle actions that should occur after some delay.

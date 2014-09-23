@@ -1,9 +1,16 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="pro.dbro.glance.CommunityActivity" >
+
+    <item
+        android:id="@+id/action_open"
+        android:icon="?attr/book_icon"
+        android:title="@string/open_epub"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom" />
+    <!--
     <item android:id="@+id/action_settings"
         android:title="@string/action_settings"
         android:orderInCategory="100"
-        app:showAsAction="never" />
+        app:showAsAction="never" /> -->
 </menu>
