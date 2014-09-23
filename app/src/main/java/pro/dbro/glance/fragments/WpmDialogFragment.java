@@ -112,5 +112,6 @@ public class WpmDialogFragment extends DialogFragment {
     public void onDismiss(DialogInterface dialog) {
         mBus.post(new WpmSelectedEvent(mWpm));
         PrefsManager.setWpm(getActivity(), mWpm);
+        getActivity().getFragmentManager().beginTransaction().remove(this).commit();
     }
 }
