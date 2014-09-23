@@ -53,7 +53,7 @@ public class ReaderSectionAdapter extends FragmentPagerAdapter {
 
     @Override
     public CharSequence getPageTitle(int position) {
-        return Feed.values()[position].toString();
+        return Feed.values()[position].getTitle();
     }
 
     @Override
