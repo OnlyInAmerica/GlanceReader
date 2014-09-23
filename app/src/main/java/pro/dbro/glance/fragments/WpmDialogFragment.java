@@ -24,9 +24,9 @@ import pro.dbro.glance.events.WpmSelectedEvent;
  */
 public class WpmDialogFragment extends DialogFragment {
 
-    public static final int MAX_WPM = 1800;
-    public static final int WHOAH_THRESHOLD_WPM = 1200;
-    public static final int MIN_WPM = 60;
+    public static final int MAX_WPM = 950;
+    public static final int WHOAH_THRESHOLD_WPM = 800;
+    public static final int MIN_WPM = 300;
 
     private View mView;
     private Animation mCurrentAnimation;
