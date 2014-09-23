@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Spritzer / History view Top Margin -->
-    <dimen name="spritzer_top_margin">80dp</dimen>
+    <dimen name="spritzer_top_margin">60dp</dimen>
 </resources>
