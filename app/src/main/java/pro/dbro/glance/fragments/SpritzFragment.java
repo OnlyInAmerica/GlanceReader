@@ -1,10 +1,7 @@
 package pro.dbro.glance.fragments;
 
-import android.app.AlertDialog;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -12,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.TextAppearanceSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -23,6 +21,11 @@ import android.widget.TextView;
 import com.facebook.rebound.SimpleSpringListener;
 import com.facebook.rebound.Spring;
 import com.facebook.rebound.SpringSystem;
+import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.ActionViewTarget;
+import com.github.amlcurran.showcaseview.targets.PointTarget;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
@@ -30,6 +33,7 @@ import java.lang.ref.WeakReference;
 
 import pro.dbro.glance.AppSpritzer;
 import pro.dbro.glance.GlanceApplication;
+import pro.dbro.glance.PrefsManager;
 import pro.dbro.glance.R;
 import pro.dbro.glance.events.ChapterSelectRequested;
 import pro.dbro.glance.events.HttpUrlParsedEvent;
@@ -54,7 +58,7 @@ public class SpritzFragment extends Fragment {
     private SpritzerTextView mSpritzView;
     private Bus mBus;
     private SpritzFragmentHandler mHandler;
-    private boolean mUserIsChoosingEpub;
+    private boolean mShowingTips;
 
     public static SpritzFragment newInstance() {
         SpritzFragment fragment = new SpritzFragment();
@@ -193,6 +197,45 @@ public class SpritzFragment extends Fragment {
         //mSpritzHistoryView.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "UbuntuMono-R.ttf"));
         setupViews(mSpritzView, mSpritzHistoryView);
         return root;
+    }
+
+    private void showTips() {
+        mShowingTips = true;
+        int[] viewLocation = new int[2];
+        mSpritzView.getLocationOnScreen(viewLocation);
+        PointTarget target = new PointTarget(viewLocation[0] + mSpritzView.getWidth() / 3, viewLocation[1] + mSpritzView.getHeight() / 2);
+        final long SHOWCASE_SINGLESHOT_ID = 3141519;
+        new ShowcaseView.Builder(getActivity())
+                .setShowcaseEventListener(new OnShowcaseEventListener() {
+                    @Override
+                    public void onShowcaseViewHide(ShowcaseView showcaseView) {
+                        showMetaUi(true);
+                    }
+
+                    @Override
+                    public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+
+                    }
+
+                    @Override
+                    public void onShowcaseViewShow(ShowcaseView showcaseView) {
+                        showcaseView.postDelayed(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                Log.i(TAG, "hiding meta uti");
+                                showMetaUi(false);
+                            }
+
+                        }, 500);
+                    }
+                })
+                .singleShot(SHOWCASE_SINGLESHOT_ID)
+                .setTarget(target)
+                .setContentTitle("Welcome to Glance")
+                .setContentText("Touch the glance view to pause or resume. If you miss something, pull down to view a brief history")
+                .hideOnTouchOutside()
+                .build();
     }
 
     private void pauseSpritzer() {
@@ -358,7 +401,7 @@ public class SpritzFragment extends Fragment {
         if (mSpritzer == null) {
             mSpritzer = new AppSpritzer(mBus, mSpritzView);
             mSpritzView.setSpritzer(mSpritzer);
-            if (mSpritzer.getMedia() == null && !mUserIsChoosingEpub) {
+            if (mSpritzer.getMedia() == null) {
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SPRITZ_TEXT, getString(R.string.select_epub)), 1500);
             } else {
                 // AppSpritzer loaded the last book being read
@@ -379,7 +422,19 @@ public class SpritzFragment extends Fragment {
                 }
             }
         }
+        mSpritzView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                if (!sShownTips) {
+                    showTips();
+                    sShownTips = true;
+                }
+            }
+        });
+
     }
+
+    private static boolean sShownTips = false;
 
     @Override
     public void onStop() {
@@ -436,7 +491,8 @@ public class SpritzFragment extends Fragment {
         showIndeterminateProgress(false);
         //mSpritzer.pause();
         updateMetaUi();
-        showMetaUi(true);
+        if (!mShowingTips)
+            showMetaUi(true);
     }
 
     public AppSpritzer getSpritzer() {
