@@ -1,11 +1,12 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="Light" parent="Theme.AppCompat.Light">
+    <style name="Light" parent="@android:style/Theme.Holo.Light">
         <!-- Customize your theme here. -->
         <item name="android:textColor">@android:color/black</item>
         <item name="android:windowBackground">@android:color/white</item>
         <item name="android:windowContentOverlay">@null</item>
+        <item name="android:actionBarStyle">@style/ActionBar</item>
 
         <item name="love_icon">@drawable/ic_love_blk</item>
         <item name="theme_icon">@drawable/ic_theme_blk</item>
@@ -17,10 +18,11 @@
         <item name="spritz_history_curtain">@drawable/white_transparent_bg</item>
     </style>
 
-    <style name="Dark" parent="Theme.AppCompat">
+    <style name="Dark" parent="@android:style/Theme.Holo">
         <!-- Customize your theme here. -->
         <item name="android:textColor">@android:color/white</item>
         <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:actionBarStyle">@style/ActionBar</item>
 
         <item name="love_icon">@drawable/ic_love_white</item>
         <item name="theme_icon">@drawable/ic_theme_white</item>
@@ -33,9 +35,9 @@
 
     </style>
 
-    <style name="Dark.NoActionBar" parent="Dark">
-        <item name="android:windowActionBar">false</item>
-        <item name="android:windowTitleSize">0dp</item>
+    <!-- ActionBar -->
+    <style name="ActionBar" parent="@android:style/Widget.Holo.ActionBar.Solid">
+        <item name="android:background">@color/highlight</item>
     </style>
 
     <style name="PivotLetter">

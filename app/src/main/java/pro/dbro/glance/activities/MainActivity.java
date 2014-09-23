@@ -4,7 +4,6 @@ import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.app.FragmentTransaction;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -12,7 +11,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
@@ -42,7 +41,7 @@ import pro.dbro.glance.fragments.TocDialogFragment;
 import pro.dbro.glance.fragments.WpmDialogFragment;
 import pro.dbro.glance.lib.events.SpritzFinishedEvent;
 
-public class MainActivity extends ActionBarActivity implements View.OnSystemUiVisibilityChangeListener {
+public class MainActivity extends FragmentActivity implements View.OnSystemUiVisibilityChangeListener {
     private static final String TAG = "MainActivity";
     public static final boolean VERBOSE = false;
     public static final String SPRITZ_FRAG_TAG = "spritzfrag";
@@ -296,7 +295,6 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
         actionBar.setTitle("");
         actionBar.setDisplayShowHomeEnabled(false);
         actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
     }
 
     private void dimSystemUi(boolean doDim) {
