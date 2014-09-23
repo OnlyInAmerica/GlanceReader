@@ -3,6 +3,7 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingTop="?android:attr/actionBarSize"
     android:animateLayoutChanges="true"
     tools:context="pro.dbro.glance.SpritzFragment">
 
@@ -14,7 +15,6 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginLeft="@dimen/spritzer_title_margin_left"
-        android:layout_marginTop="@dimen/spritzer_title_margin_top"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
         android:ellipsize="marquee"
