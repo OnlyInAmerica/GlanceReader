@@ -75,16 +75,10 @@ public class FeedFragment extends Fragment {
                 articleAdapter =  new ArticleAdapter(getActivity(), ArticleAdapter.ArticleFilter.ALL);
                 listView.setAdapter(articleAdapter);
                 break;
-            case NEWS:
-            case COMMENTARY:
-            case FICTION:
-            case HN:
-            //case TRUE_REDDIT:
+            default:
                 feedItemAdapter = createFeedAdapter();
                 listView.setAdapter(feedItemAdapter);
                 loadPipe(mFeed.getFeedUrl());
-                break;
-            default:
                 break;
         }
 

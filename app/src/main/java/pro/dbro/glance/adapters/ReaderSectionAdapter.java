@@ -21,8 +21,9 @@ public class ReaderSectionAdapter extends FragmentPagerAdapter {
         NEWS        ("News",       "http://pipes.yahoo.com/pipes/pipe.run?_id=40805955111ac2e85631facfb362f067&_render=json"),
         COMMENTARY  ("Commentary", "http://pipes.yahoo.com/pipes/pipe.run?_id=dc1a399c275cbc0bcf6329c8419d6f4f&_render=json"),
         FICTION     ("Fiction",    "http://pipes.yahoo.com/pipes/pipe.run?_id=ee8d2db2513114660b054cd82da29b69&_render=json"),
-        HN          ("HN",         "http://pipes.yahoo.com/pipes/pipe.run?_id=af38f38c0a21785ef8409d48ab4c1246&_render=json");
-        //TRUE_REDDIT ("True Reddit","http://pipes.yahoo.com/pipes/pipe.run?_id=792a6a5fc2c23eafe6a80855263ac259&_render=json");
+        HN          ("HN",         "http://pipes.yahoo.com/pipes/pipe.run?_id=af38f38c0a21785ef8409d48ab4c1246&_render=json"),
+        TRUE_REDDIT ("True Reddit","http://pipes.yahoo.com/pipes/pipe.run?_id=792a6a5fc2c23eafe6a80855263ac259&_render=json"),
+        DIGG        ("Digg",       "http://pipes.yahoo.com/pipes/pipe.run?_id=8ef995083e5fe68ae3fe2d3d95f71844&_render=json");
 
         private final String mTitle;
         private final String mFeedUrl;
