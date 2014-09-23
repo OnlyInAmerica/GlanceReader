@@ -1,38 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="wrap_content"
     android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="4dp">
 
     <TextView
-        android:textAppearance="@android:style/TextAppearance.Large"
-        android:ellipsize="none"
         android:id="@+id/title"
-        android:fontFamily="sans-serif-condensed"
-        android:layout_alignParentTop="true"
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:ellipsize="none"
+        android:fontFamily="sans-serif-condensed"
+        android:textAppearance="@android:style/TextAppearance.Large"
         android:textStyle="bold" />
 
     <TextView
-        android:textAppearance="@android:style/TextAppearance.Small"
-        android:ellipsize="end"
         android:id="@+id/url"
-        android:layout_below="@id/title"
-        android:fontFamily="sans-serif-condensed"
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:lines="1" />
+        android:layout_height="wrap_content"
+        android:layout_below="@id/title"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif-condensed"
+        android:lines="1"
+        android:textAppearance="@android:style/TextAppearance.Small"
+        android:textColor="?attr/subdued_text" />
 
     <TextView
-        android:textAppearance="@android:style/TextAppearance.Small"
-        android:ellipsize="end"
         android:id="@+id/reads"
-        android:layout_below="@id/url"
-        android:fontFamily="sans-serif-condensed"
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:lines="1" />
+        android:layout_height="wrap_content"
+        android:layout_below="@id/url"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif-condensed"
+        android:lines="1"
+        android:textAppearance="@android:style/TextAppearance.Small"
+        android:textColor="?attr/subdued_text" />
 
 </RelativeLayout>
