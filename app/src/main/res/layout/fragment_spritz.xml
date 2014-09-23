@@ -29,7 +29,7 @@
         android:layout_height="wrap_content"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
-        android:paddingTop="8dp"
+        android:paddingTop="16dp"
         android:layout_alignLeft="@id/url"
         android:layout_below="@id/url"
         android:ellipsize="marquee"
@@ -40,17 +40,17 @@
     <TextView
         android:id="@+id/spritzHistory"
         style="@style/SubduedTextStyle"
-        android:layout_marginTop="@dimen/spritzer_top_margin"
         android:layout_width="@dimen/spritzer_text_view_width"
         android:layout_height="10dp"
         android:gravity="bottom|start"
-        android:layout_centerHorizontal="true"
         android:alpha="0"
-        android:layout_below="@id/author"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/spritzer_top_margin"
         android:typeface="monospace"
         android:textSize="@dimen/spritzer_history_text_size" />
 
     <TextView
+        android:id="@+id/spritzHistoryCurtain"
         android:layout_width="wrap_content"
         android:layout_height="18dip"
         android:layout_alignTop="@id/spritzHistory"

@@ -18,6 +18,6 @@
     <dimen name="chapter_text_size">22sp</dimen>
 
     <!-- Spritzer / History view Top Margin -->
-    <dimen name="spritzer_top_margin">90dp</dimen>
+    <dimen name="spritzer_top_margin">180dp</dimen>
 
 </resources>

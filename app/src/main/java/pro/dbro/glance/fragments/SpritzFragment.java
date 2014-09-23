@@ -2,6 +2,7 @@ package pro.dbro.glance.fragments;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -133,7 +134,9 @@ public class SpritzFragment extends Fragment {
      */
     public void showMetaUi(boolean show) {
         if (show) {
-            mAuthorView.setVisibility(View.VISIBLE);
+            if (getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE) {
+                mAuthorView.setVisibility(View.VISIBLE);
+            }
             mTitleView.setVisibility(View.VISIBLE);
             mChapterView.setVisibility(View.VISIBLE);
             mProgress.setVisibility(View.VISIBLE);
@@ -170,6 +173,9 @@ public class SpritzFragment extends Fragment {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_spritz, container, false);
         mAuthorView = ((TextView) root.findViewById(R.id.author));
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            mAuthorView.setVisibility(View.GONE);
+        }
         mTitleView = ((TextView) root.findViewById(R.id.url));
         mChapterView = ((TextView) root.findViewById(R.id.chapter));
         mChapterView.setOnClickListener(new View.OnClickListener() {
