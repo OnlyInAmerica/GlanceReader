@@ -19,7 +19,6 @@
         android:paddingRight="8dp"
         android:ellipsize="marquee"
         android:fontFamily="sans-serif-condensed"
-        android:text="This is a test title"
         android:singleLine="false"
         android:textSize="@dimen/spritzer_title_text_size" />
 
