@@ -8,6 +8,7 @@
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:actionBarStyle">@style/ActionBar</item>
 
+        <item name="chrome_bg">@color/spritz_bg</item>
         <item name="love_icon">@drawable/ic_love_blk</item>
         <item name="theme_icon">@drawable/ic_theme_blk</item>
         <item name="speed_icon">@drawable/ic_gauge_blk</item>
@@ -24,6 +25,7 @@
         <item name="android:windowBackground">@android:color/black</item>
         <item name="android:actionBarStyle">@style/ActionBar</item>
 
+        <item name="chrome_bg">@color/spritz_bg_dark</item>
         <item name="love_icon">@drawable/ic_love_white</item>
         <item name="theme_icon">@drawable/ic_theme_white</item>
         <item name="speed_icon">@drawable/ic_gauge_white</item>
@@ -37,7 +39,7 @@
 
     <!-- ActionBar -->
     <style name="ActionBar" parent="@android:style/Widget.Holo.ActionBar.Solid">
-        <item name="android:background">@color/highlight</item>
+        <item name="android:background">?attr/chrome_bg</item>
     </style>
 
     <style name="PivotLetter">
@@ -76,6 +78,7 @@
     <attr name="subdued_text" format="reference" />
     <attr name="ultra_subdued_text" format="reference" />
     <attr name="list_bg" format="reference" />
+    <attr name="chrome_bg" format="reference" />
     <attr name="spritz_history_curtain" format="reference" />
 
 </resources>

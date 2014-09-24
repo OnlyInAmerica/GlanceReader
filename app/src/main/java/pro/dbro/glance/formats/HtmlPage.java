@@ -57,6 +57,10 @@ public class HtmlPage implements SpritzerMedia {
     private void initFromJson(JsonObject json) {
         // Diffbot json format
         // see http://www.diffbot.com/products/automatic/
+        if (json == null) {
+            Log.e(TAG, "Error parsing page");
+            return;
+        }
         mTitle   =  json.get("title").getAsString();
         mUrl     =  json.get("url").getAsString();
         mContent =  json.get("text").getAsString();
