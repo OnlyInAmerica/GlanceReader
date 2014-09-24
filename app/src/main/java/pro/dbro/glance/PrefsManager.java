@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 
+import pro.dbro.glance.fragments.WpmDialogFragment;
+
 /**
  * Created by davidbrodsky on 9/21/14.
  */
@@ -64,7 +66,7 @@ public class PrefsManager {
 
     public static void setWpm(Context context, int wpm) {
         SharedPreferences.Editor editor = context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE).edit();
-        editor.putInt(APP_WPM, wpm)
+        editor.putInt(APP_WPM, Math.max(wpm, WpmDialogFragment.MIN_WPM))
                 .apply();
     }
 
