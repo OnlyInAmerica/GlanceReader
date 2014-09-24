@@ -28,7 +28,6 @@
         android:layout_height="wrap_content"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
-        android:paddingTop="16dp"
         android:layout_alignLeft="@id/url"
         android:layout_below="@id/url"
         android:ellipsize="marquee"
