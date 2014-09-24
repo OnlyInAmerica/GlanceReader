@@ -18,7 +18,6 @@
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
         android:ellipsize="marquee"
-        android:fontFamily="sans-serif-condensed"
         android:singleLine="false"
         android:textSize="@dimen/spritzer_title_text_size" />
 
@@ -33,7 +32,6 @@
         android:layout_alignLeft="@id/url"
         android:layout_below="@id/url"
         android:ellipsize="marquee"
-        android:fontFamily="sans-serif-condensed"
         android:singleLine="true"
         android:textSize="@dimen/spritzer_author_text_size" />
 
@@ -58,7 +56,6 @@
         android:layout_alignRight="@id/spritzHistory"
         android:gravity="center_horizontal"
         android:textColor="?attr/ultra_subdued_text"
-        android:fontFamily="sans-serif-condensed"
         android:background="?attr/spritz_history_curtain" />
 
     <pro.dbro.glance.lib.SpritzerTextView
@@ -95,7 +92,6 @@
         android:layout_marginBottom="@dimen/chapter_margin"
         android:layout_marginLeft="@dimen/chapter_margin"
         android:clickable="true"
-        android:fontFamily="sans-serif-condensed"
         android:textColor="@color/chapter_text_color"
         android:textSize="@dimen/chapter_text_size" />
 </RelativeLayout>
