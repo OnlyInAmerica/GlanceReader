@@ -2,6 +2,7 @@ package pro.dbro.glance.formats;
 
 import android.content.Context;
 import android.net.Uri;
+import android.text.Html;
 import android.util.Log;
 
 import com.google.gson.JsonObject;
@@ -64,6 +65,9 @@ public class HtmlPage implements SpritzerMedia {
         mTitle   =  json.get("title").getAsString();
         mUrl     =  json.get("url").getAsString();
         mContent =  json.get("text").getAsString();
+
+        // Sanitize content
+        mContent = Html.fromHtml(mContent).toString().replaceAll("\\n+", " ").replaceAll("(?s)<!--.*?-->", "");
     }
 
     /**
