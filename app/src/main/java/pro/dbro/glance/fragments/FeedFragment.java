@@ -18,6 +18,9 @@ import com.parse.Parse;
 import com.parse.ParseObject;
 import com.parse.ParseQueryAdapter;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import pro.dbro.glance.R;
 import pro.dbro.glance.SECRETS;
 import pro.dbro.glance.Utils;
@@ -90,8 +93,9 @@ public class FeedFragment extends Fragment {
         return new ArrayAdapter<JsonObject>(getActivity(), 0) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
-                if (convertView == null)
+                if (convertView == null) {
                     convertView = getActivity().getLayoutInflater().inflate(R.layout.article_list_item, null);
+                }
 
                 JsonObject post = getItem(position);
                 try {
@@ -101,7 +105,12 @@ public class FeedFragment extends Fragment {
                     handle.setText(title);
 
                     TextView text = (TextView) convertView.findViewById(R.id.url);
-                    text.setText(post.get("link").getAsString());
+                    convertView.setTag((post.get("link").getAsString()));
+                    try {
+                        text.setText(new URL(post.get("link").getAsString()).getHost());
+                    } catch (MalformedURLException e) {
+                        text.setText(post.get("link").getAsString());
+                    }
 
                     convertView.setOnClickListener(Utils.getArticleClickListener(convertView.getContext()));
                 } catch(Exception e){

@@ -23,10 +23,9 @@ public class Utils {
         return new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                TextView tv = (TextView) view.findViewById(R.id.url);
                 Intent communityIntent = new Intent(c, MainActivity.class);
                 communityIntent.setAction(Intent.ACTION_SEND);
-                communityIntent.putExtra(Intent.EXTRA_TEXT, tv.getText());
+                communityIntent.putExtra(Intent.EXTRA_TEXT, (String) view.getTag());
                 communityIntent.putExtra(INTENT_FINISH_AFTER, true);
                 c.startActivity(communityIntent);
             }

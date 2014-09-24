@@ -9,6 +9,8 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -60,17 +62,22 @@ public class ArticleAdapter extends ParseQueryAdapter<ParseObject> {
     @Override
     public View getItemView(ParseObject object, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            convertView = View.inflate(getContext(), R.layout.article_list_item, null);
+            convertView = View.inflate(getContext(), R.layout.tracked_article_list_item, null);
         }
 
         TextView handle = (TextView) convertView.findViewById(R.id.title);
         handle.setText(object.getString("title"));
 
         TextView text = (TextView) convertView.findViewById(R.id.url);
-        text.setText(object.getString("url"));
+        convertView.setTag(object.getString("url"));
+        try {
+            text.setText(new URL(object.getString("url")).getHost());
+        } catch (MalformedURLException e) {
+            text.setText(object.getString("url"));
+        }
 
         TextView reads = (TextView) convertView.findViewById(R.id.reads);
-        reads.setText(object.getInt("reads") + " glances");
+        reads.setText(String.valueOf(object.getInt("reads")));
         reads.setLines(1);
 
         convertView.setOnClickListener(Utils.getArticleClickListener(convertView.getContext()));
