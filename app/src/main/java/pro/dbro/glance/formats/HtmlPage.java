@@ -115,7 +115,7 @@ public class HtmlPage implements SpritzerMedia {
                             Log.e(TAG, "Unable to parse page");
                             return;
                         }
-                        Log.i(TAG, "Got diffbot result " + result.toString());
+                        //Log.i(TAG, "Got diffbot result " + result.toString());
                         page.setResult(result);
                         recordRead(page);
 

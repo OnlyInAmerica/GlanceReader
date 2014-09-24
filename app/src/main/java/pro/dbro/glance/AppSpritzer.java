@@ -73,7 +73,7 @@ public class AppSpritzer extends Spritzer {
     private void openHtmlPage(Uri htmlUri) {
         try {
             mMediaUri = htmlUri;
-            mMedia = HtmlPage.fromUri(mTarget.getContext(), htmlUri.toString(), new HtmlPage.HtmlPageParsedCallback() {
+            mMedia = HtmlPage.fromUri(mTarget.getContext().getApplicationContext(), htmlUri.toString(), new HtmlPage.HtmlPageParsedCallback() {
                 @Override
                 public void onPageParsed(HtmlPage result) {
                     restoreState(false);
