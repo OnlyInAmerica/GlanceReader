@@ -1,8 +1,6 @@
 package pro.dbro.glance;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.UriPermission;
 import android.net.Uri;
 import android.os.Build;
@@ -14,7 +12,6 @@ import com.squareup.otto.Bus;
 
 import java.util.List;
 
-import de.jetwick.snacktory.JResult;
 import pro.dbro.glance.events.HttpUrlParsedEvent;
 import pro.dbro.glance.events.NextChapterEvent;
 import pro.dbro.glance.formats.Epub;
@@ -76,9 +73,9 @@ public class AppSpritzer extends Spritzer {
     private void openHtmlPage(Uri htmlUri) {
         try {
             mMediaUri = htmlUri;
-            mMedia = HtmlPage.fromUri(htmlUri.toString(), new HtmlPage.HtmlPageParsedCallback() {
+            mMedia = HtmlPage.fromUri(mTarget.getContext(), htmlUri.toString(), new HtmlPage.HtmlPageParsedCallback() {
                 @Override
-                public void onPageParsed(JResult result) {
+                public void onPageParsed(HtmlPage result) {
                     restoreState(false);
                     if (mBus != null) {
                         mBus.post(new HttpUrlParsedEvent(result));
