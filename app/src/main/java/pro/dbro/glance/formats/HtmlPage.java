@@ -89,43 +89,42 @@ public class HtmlPage implements SpritzerMedia {
 //        }
         final HtmlPage page = new HtmlPage(null);
         String encodedUrlToParse = Uri.encode(url);
-        String requestUrl = String.format("https://api.diffbot.com/v2/article?url=%s&token=%s", encodedUrlToParse, SECRETS.getDiffbotKey());
+        String requestUrl = String.format("http://api.diffbot.com/v2/article?url=%s&token=%s", encodedUrlToParse, SECRETS.getDiffbotKey());
         Log.i(TAG, "Loading url: " + requestUrl);
-        TrustManager.makeTrustRequest(context, requestUrl, new TrustManager.TrustRequestCallback() {
-            @Override
-            public void onSuccess(JsonObject result) {
-//                Log.i(TAG, "Got diffbot result " + result.toString());
-                page.setResult(result);
-                recordRead(page);
-
-                if (cb != null) {
-                    cb.onPageParsed(page);
-
-                }
-            }
-        });
-//        Ion.getInstance(context, TrustManager.sIonInstanceName)
-//                .build(context)
-//                .load(requestUrl)
-//                .asJsonObject()
-//                .setCallback(new FutureCallback<JsonObject>() {
-//                    @Override
-//                    public void onCompleted(Exception e, JsonObject result) {
-//                        if (e != null) {
-//                            e.printStackTrace();
-//                            Log.e(TAG, "Unable to parse page");
-//                            return;
-//                        }
-//                        Log.i(TAG, "Got diffbot result " + result.toString());
-//                        page.setResult(result);
-//                        recordRead(page);
+//        TrustManager.makeTrustRequest(context, requestUrl, new TrustManager.TrustRequestCallback() {
+//            @Override
+//            public void onSuccess(JsonObject result) {
+//                page.setResult(result);
+//                recordRead(page);
 //
-//                        if (cb != null) {
-//                            cb.onPageParsed(page);
+//                if (cb != null) {
+//                    cb.onPageParsed(page);
 //
-//                        }
-//                    }
-//                });
+//                }
+//            }
+//        });
+        Ion.getInstance(context, TrustManager.sIonInstanceName)
+                .build(context)
+                .load(requestUrl)
+                .asJsonObject()
+                .setCallback(new FutureCallback<JsonObject>() {
+                    @Override
+                    public void onCompleted(Exception e, JsonObject result) {
+                        if (e != null) {
+                            e.printStackTrace();
+                            Log.e(TAG, "Unable to parse page");
+                            return;
+                        }
+                        Log.i(TAG, "Got diffbot result " + result.toString());
+                        page.setResult(result);
+                        recordRead(page);
+
+                        if (cb != null) {
+                            cb.onPageParsed(page);
+
+                        }
+                    }
+                });
 
         return page;
     }
