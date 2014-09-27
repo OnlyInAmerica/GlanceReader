@@ -12,8 +12,12 @@ import android.view.MenuItem;
 
 import com.astuetz.PagerSlidingTabStrip;
 
+import net.hockeyapp.android.CrashManager;
+import net.hockeyapp.android.UpdateManager;
+
 import pro.dbro.glance.PrefsManager;
 import pro.dbro.glance.R;
+import pro.dbro.glance.SECRETS;
 import pro.dbro.glance.adapters.ReaderSectionAdapter;
 
 public class CommunityActivity extends FragmentActivity {
@@ -49,6 +53,13 @@ public class CommunityActivity extends FragmentActivity {
         PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
         tabs.setViewPager(pager);
 
+        checkForUpdates();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        checkForCrashes();
     }
 
     private void setupActionBar() {
@@ -108,6 +119,15 @@ public class CommunityActivity extends FragmentActivity {
             spritzIntent.setData(uri);
             startActivity(spritzIntent);
         }
+    }
+
+    private void checkForCrashes() {
+        CrashManager.register(this, SECRETS.getHockeyAppId());
+    }
+
+    private void checkForUpdates() {
+        // Remove this for store builds!
+        UpdateManager.register(this, SECRETS.getHockeyAppId());
     }
 }
 

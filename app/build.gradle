@@ -48,6 +48,7 @@ if (project.hasProperty('keyPassword')) {
 }
 
 dependencies {
+    compile 'net.hockeyapp.android:HockeySDK:3.5.0-b.4'
     compile 'com.github.amlcurran.showcaseview:library:5.0.0'
     compile 'com.facebook.rebound:rebound:0.3.6'
     compile group: 'com.google.guava', name: 'guava', version: '12.0'
