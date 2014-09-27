@@ -18,9 +18,8 @@
         android:layout_centerVertical="true"
         android:ellipsize="end"
         android:lines="1"
-        android:text="200"
         android:textAppearance="@android:style/TextAppearance.Large"
-        android:textColor="@color/highlight_alt" />
+        android:textColor="@color/highlight" />
 
     <TextView
         android:id="@+id/title"
