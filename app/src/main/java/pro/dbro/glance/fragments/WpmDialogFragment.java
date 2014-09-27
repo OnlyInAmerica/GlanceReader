@@ -14,7 +14,7 @@ import android.widget.TextView;
 import com.squareup.otto.Bus;
 
 import pro.dbro.glance.GlanceApplication;
-import pro.dbro.glance.PrefsManager;
+import pro.dbro.glance.GlancePrefsManager;
 import pro.dbro.glance.R;
 import pro.dbro.glance.events.WpmSelectedEvent;
 
@@ -44,7 +44,7 @@ public class WpmDialogFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mWpm = PrefsManager.getWpm(getActivity());
+        mWpm = GlancePrefsManager.getWpm(getActivity());
         mAnimationRunning = false;
 
         GlanceApplication app = (GlanceApplication) getActivity().getApplication();
@@ -111,7 +111,7 @@ public class WpmDialogFragment extends DialogFragment {
     @Override
     public void onDismiss(DialogInterface dialog) {
         mBus.post(new WpmSelectedEvent(mWpm));
-        PrefsManager.setWpm(getActivity(), mWpm);
+        GlancePrefsManager.setWpm(getActivity(), mWpm);
         getActivity().getFragmentManager().beginTransaction().remove(this).commit();
     }
 }

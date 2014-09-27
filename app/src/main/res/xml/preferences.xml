@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="Privacy">
+    <ListPreference
+        android:key="@string/pref_key_share_mode"
+        android:title="@string/pref_title_sharing"
+        android:summary="@string/pref_summary_sharing"
+        android:dialogTitle="@string/pref_dialog_title_sharing"
+        android:entries="@array/pref_share_mode_human"
+        android:entryValues="@array/pref_share_mode_machine"
+        android:defaultValue="@string/pref_share_mode_default" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

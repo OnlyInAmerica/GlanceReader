@@ -15,7 +15,7 @@ import com.astuetz.PagerSlidingTabStrip;
 import net.hockeyapp.android.CrashManager;
 import net.hockeyapp.android.UpdateManager;
 
-import pro.dbro.glance.PrefsManager;
+import pro.dbro.glance.GlancePrefsManager;
 import pro.dbro.glance.R;
 import pro.dbro.glance.SECRETS;
 import pro.dbro.glance.adapters.ReaderSectionAdapter;
@@ -32,7 +32,7 @@ public class CommunityActivity extends FragmentActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        int theme = PrefsManager.getTheme(this);
+        int theme = GlancePrefsManager.getTheme(this);
         switch (theme) {
             case THEME_LIGHT:
                 setTheme(R.style.Light);
@@ -70,10 +70,20 @@ public class CommunityActivity extends FragmentActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_open) {
-            chooseMedia();
+        switch(id) {
+            case R.id.action_open:
+                chooseMedia();
+                break;
+            case R.id.action_settings:
+                showPreferencesActivity();
+                break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showPreferencesActivity() {
+        Intent prefIntent = new Intent(this, PreferencesActivity.class);
+        startActivity(prefIntent);
     }
 
     /**

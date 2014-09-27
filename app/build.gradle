@@ -31,6 +31,11 @@ android {
     packagingOptions {
         exclude 'log4j.properties'
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
 }
 
 // Read Signing key from gradle.properties located in project root

@@ -117,7 +117,6 @@ public class HtmlPage implements SpritzerMedia {
                         }
                         //Log.i(TAG, "Got diffbot result " + result.toString());
                         page.setResult(result);
-                        recordRead(page);
 
                         if (cb != null) {
                             cb.onPageParsed(page);
@@ -129,43 +128,6 @@ public class HtmlPage implements SpritzerMedia {
         return page;
     }
 
-    private static void recordRead(final HtmlPage page){
-
-        // Okay, so this is really shitty.
-        // I know.
-        // Here's the thing: I didn't know Parse can't do DISTINCT or GROUP BY.
-        // Now I do.
-        // Anyway, instead we're just incrementing a counter.
-
-        ParseQuery<ParseObject> query = ParseQuery.getQuery("Article");
-        query.whereEqualTo("url", page.getUrl());
-        query.whereEqualTo("title", page.getTitle());
-        query.findInBackground(new FindCallback<ParseObject>() {
-            public void done(List<ParseObject> scoreList, ParseException e) {
-                if (e == null) {
-                    Log.d("score", "Retrieved " + scoreList.size() + " scores");
-
-                    if(scoreList.isEmpty()){
-                        // Don't have the object, create it.
-                        ParseObject article = new ParseObject("Article");
-                        article.put("url", page.getUrl());
-                        article.put("title", page.getTitle());
-                        article.put("reads", 1);
-                        article.saveInBackground();
-                        return;
-                    } else {
-                        // Update object if we already have it.
-                        ParseObject article = scoreList.get(0);
-                        article.increment("reads");
-                        article.saveInBackground();
-                    }
-                } else {
-                    Log.d("score", "Error: " + e.getMessage());
-                }
-            }
-        });
-
-    }
 
     public String getUrl() {
         return mUrl;

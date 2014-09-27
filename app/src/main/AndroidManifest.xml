@@ -37,15 +37,19 @@
         </activity>
         <activity
             android:name=".activities.CommunityActivity"
-            android:label="@string/title_activity_community">
+            android:label="@string/title_activity_community" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!-- Hockey SDK : Upgrade Activity-->
+        <!-- Hockey SDK : Upgrade Activity -->
         <activity android:name="net.hockeyapp.android.UpdateActivity" />
+        <activity
+            android:name=".activities.PreferencesActivity"
+            android:label="@string/title_activity_preferences" >
+        </activity>
     </application>
 
 </manifest>

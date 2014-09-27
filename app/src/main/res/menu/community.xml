@@ -8,9 +8,10 @@
         android:title="@string/open_epub"
         android:orderInCategory="100"
         android:showAsAction="ifRoom" />
-    <!--
+
     <item android:id="@+id/action_settings"
         android:title="@string/action_settings"
+        android:icon="?attr/settings_icon"
         android:orderInCategory="100"
-        app:showAsAction="never" /> -->
+        android:showAsAction="ifRoom" />
 </menu>

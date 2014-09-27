@@ -3,13 +3,15 @@ package pro.dbro.glance;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 
+import pro.dbro.glance.fragments.PreferencesFragment;
 import pro.dbro.glance.fragments.WpmDialogFragment;
 
 /**
  * Created by davidbrodsky on 9/21/14.
  */
-public class PrefsManager {
+public class GlancePrefsManager {
     /** SharedPreferences store names */
     private static final String UI_PREFS = "ui_prefs";
     private static final String APP_PREFS = "espritz";
@@ -73,6 +75,29 @@ public class PrefsManager {
     public static int getWpm(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE);
         return prefs.getInt(APP_WPM, DEFAULT_APP_WPM);
+    }
+
+    public static SharePref getShareMode(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String sharePref = prefs.getString(context.getString(R.string.pref_key_share_mode),
+                                                   context.getString(R.string.pref_share_mode_default));
+
+        // Possible to avoid hardcoded relation to order of R.array.pref_share_mode_machine?
+        // Note we can't even use index values of that array, as switch statement requires constant
+        // invariants
+        switch (sharePref) {
+            case "never":
+                return SharePref.NEVER;
+            case "ask":
+                return SharePref.ASK;
+            case "always":
+                return SharePref.ALWAYS;
+        }
+        throw new RuntimeException("Illegal sharing preference! Got preference: " + sharePref);
+    }
+
+    public static enum SharePref {
+        ALWAYS, ASK, NEVER
     }
 
     public static class SpritzState {

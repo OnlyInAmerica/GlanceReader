@@ -1,13 +1,20 @@
 package pro.dbro.glance;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.UriPermission;
 import android.net.Uri;
 import android.os.Build;
+import android.text.Html;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.squareup.otto.Bus;
 
 import java.util.List;
@@ -170,7 +177,7 @@ public class AppSpritzer extends Spritzer {
     public void saveState() {
         if (mMedia != null) {
             if (VERBOSE) Log.i(TAG, "Saving state at chapter " + mChapter + " word: " + mCurWordIdx);
-            PrefsManager.saveState(
+            GlancePrefsManager.saveState(
                     mTarget.getContext(),
                     mChapter,
                     mMediaUri.toString(),
@@ -182,7 +189,7 @@ public class AppSpritzer extends Spritzer {
 
     @SuppressLint("NewApi")
     private void restoreState(boolean openLastMediaUri) {
-        final PrefsManager.SpritzState state = PrefsManager.getState(mTarget.getContext());
+        final GlancePrefsManager.SpritzState state = GlancePrefsManager.getState(mTarget.getContext());
         String content = "";
         if (openLastMediaUri) {
             // Open the last selected media
@@ -200,7 +207,7 @@ public class AppSpritzer extends Spritzer {
                     }
                     if (!uriPermissionPersisted) {
                         Log.w(TAG, String.format("Permission not persisted for uri: %s. Clearing SharedPreferences ", mediaUri.toString()));
-                        PrefsManager.clearState(mTarget.getContext());
+                        GlancePrefsManager.clearState(mTarget.getContext());
                         return;
                     }
                 } else {

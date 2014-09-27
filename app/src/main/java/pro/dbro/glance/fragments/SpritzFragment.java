@@ -31,6 +31,7 @@ import java.lang.ref.WeakReference;
 
 import pro.dbro.glance.AppSpritzer;
 import pro.dbro.glance.GlanceApplication;
+import pro.dbro.glance.GlancePrefsManager;
 import pro.dbro.glance.R;
 import pro.dbro.glance.events.ChapterSelectRequested;
 import pro.dbro.glance.events.HttpUrlParsedEvent;
