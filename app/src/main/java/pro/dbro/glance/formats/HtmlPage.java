@@ -62,9 +62,12 @@ public class HtmlPage implements SpritzerMedia {
             Log.e(TAG, "Error parsing page");
             return;
         }
-        mTitle   =  json.get("title").getAsString();
-        mUrl     =  json.get("url").getAsString();
-        mContent =  json.get("text").getAsString();
+        if (json.has("title"))
+            mTitle   =  json.get("title").getAsString();
+        if (json.has("url"))
+            mUrl     =  json.get("url").getAsString();
+        if (json.has("text"))
+            mContent =  json.get("text").getAsString();
 
         // Sanitize content
         mContent = Html.fromHtml(mContent).toString().replaceAll("\\n+", " ").replaceAll("(?s)<!--.*?-->", "");
