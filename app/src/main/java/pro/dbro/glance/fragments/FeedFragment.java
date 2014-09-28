@@ -1,7 +1,7 @@
 package pro.dbro.glance.fragments;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,29 +26,32 @@ import pro.dbro.glance.SECRETS;
 import pro.dbro.glance.Utils;
 import pro.dbro.glance.adapters.ArticleAdapter;
 import pro.dbro.glance.adapters.ReaderSectionAdapter;
+import pro.dbro.glance.lib.SpritzerTextView;
 
-public class FeedFragment extends Fragment {
+public class FeedFragment extends ListFragment {
 
-    ArrayAdapter<JsonObject> feedItemAdapter;
-    ParseQueryAdapter<ParseObject> articleAdapter;
+    ArrayAdapter<JsonObject> mFeedItemAdapter;
+    ParseQueryAdapter<ParseObject> mArticleAdapter;
+    //    ProgressBar mLoadingView;
+    SpritzerTextView mLoadingView;
 
     // This "Future" tracks loading operations.
-    Future<JsonObject> loading;
+    Future<JsonObject> mFuture;
 
     private static final String ARG_FEED = "feed";
     private ReaderSectionAdapter.Feed mFeed;
     private static boolean sParseSetup = false;
+    private boolean mLoading = false;
 
     public static FeedFragment newInstance(ReaderSectionAdapter.Feed feed) {
         FeedFragment f = new FeedFragment();
         Bundle b = new Bundle();
         b.putSerializable(ARG_FEED, feed);
         f.setArguments(b);
-
         return f;
     }
 
-    public void setupParse(){
+    public void setupParse() {
         Parse.initialize(this.getActivity(), SECRETS.getParseId(), SECRETS.getParseSecret());
         sParseSetup = true;
     }
@@ -57,30 +60,37 @@ public class FeedFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mFeed = (ReaderSectionAdapter.Feed) getArguments().getSerializable(ARG_FEED);
-        if (!sParseSetup){
+        if (!sParseSetup) {
             setupParse();
         }
+    }
+
+    public void onResume() {
+        super.onResume();
+        if (mLoading) showLoading();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View myFragmentView = inflater.inflate(R.layout.fragment_list, container, false);
-        ListView listView = (ListView) myFragmentView.findViewById(R.id.list);
+        ListView listView = (ListView) myFragmentView.findViewById(android.R.id.list);
+//        mLoadingView = (ProgressBar) myFragmentView.findViewById(android.R.id.empty);
+        mLoadingView = (SpritzerTextView) myFragmentView.findViewById(android.R.id.empty);
 
-        switch(mFeed) {
+        switch (mFeed) {
 
             case POPULAR:
-                articleAdapter =  new ArticleAdapter(getActivity(), ArticleAdapter.ArticleFilter.RECENT);
-                listView.setAdapter(articleAdapter);
+                mArticleAdapter = new ArticleAdapter(getActivity(), ArticleAdapter.ArticleFilter.RECENT);
+                listView.setAdapter(mArticleAdapter);
                 break;
             case RECENT:
-                articleAdapter =  new ArticleAdapter(getActivity(), ArticleAdapter.ArticleFilter.ALL);
-                listView.setAdapter(articleAdapter);
+                mArticleAdapter = new ArticleAdapter(getActivity(), ArticleAdapter.ArticleFilter.ALL);
+                listView.setAdapter(mArticleAdapter);
                 break;
             default:
-                feedItemAdapter = createFeedAdapter();
-                listView.setAdapter(feedItemAdapter);
+                mFeedItemAdapter = createFeedAdapter();
+                listView.setAdapter(mFeedItemAdapter);
                 loadPipe(mFeed.getFeedUrl());
                 break;
         }
@@ -89,7 +99,7 @@ public class FeedFragment extends Fragment {
     }
 
     // Create adapters from items coming from Pipes.
-    private ArrayAdapter<JsonObject> createFeedAdapter(){
+    private ArrayAdapter<JsonObject> createFeedAdapter() {
         return new ArrayAdapter<JsonObject>(getActivity(), 0) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
@@ -113,7 +123,7 @@ public class FeedFragment extends Fragment {
                     }
 
                     convertView.setOnClickListener(Utils.getArticleClickListener(convertView.getContext()));
-                } catch(Exception e){
+                } catch (Exception e) {
                     // Parsing is fucked. NSFO.
                 }
 
@@ -123,21 +133,24 @@ public class FeedFragment extends Fragment {
     }
 
     private void loadPipe(String url) {
-
         // don't attempt to load more if a load is already in progress
-        if (loading != null && !loading.isDone() && !loading.isCancelled())
+        if (mFuture != null && !mFuture.isDone() && !mFuture.isCancelled())
             return;
+
+        mLoading = true;
 
         // This request loads a URL as JsonArray and invokes
         // a callback on completion.
-        loading = Ion.with(getActivity(), url)
+        mFuture = Ion.with(getActivity(), url)
                 .asJsonObject()
                 .setCallback(new FutureCallback<JsonObject>() {
                     @Override
                     public void onCompleted(Exception e, JsonObject result) {
+                        mLoading = false;
 
                         // this is called back onto the ui thread, no Activity.runOnUiThread or Handler.post necessary.
                         if (e != null) {
+                            showError();
                             e.printStackTrace();
                             return;
                         }
@@ -145,11 +158,38 @@ public class FeedFragment extends Fragment {
                         JsonObject value = result.getAsJsonObject("value");
                         JsonArray results = value.getAsJsonArray("items");
 
+                        if (results.size() == 0) {
+                            showError();
+                            return;
+                        }
+
                         for (int i = 0; i < results.size(); i++) {
-                            feedItemAdapter.add(results.get(i).getAsJsonObject());
+                            mFeedItemAdapter.add(results.get(i).getAsJsonObject());
                         }
                     }
                 });
+
+        // Replace network fetch code with this to simulate network error
+//        mLoadingView.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                mLoading = false;
+//                showError();
+//            }
+//        }, 6000);
     }
 
+    private void showError() {
+        mLoadingView.getSpritzer().pause();
+        mLoadingView.getSpritzer().setLoopingPlayback(true);
+        mLoadingView.getSpritzer().setWpm(200);
+        mLoadingView.getSpritzer().setTextAndStart(getString(R.string.spritz_error), false);
+    }
+
+    private void showLoading() {
+        mLoadingView.getSpritzer().pause();
+        mLoadingView.getSpritzer().setLoopingPlayback(true);
+        mLoadingView.getSpritzer().setWpm(400);
+        mLoadingView.getSpritzer().setTextAndStart(getString(R.string.spritz_loading), false);
+    }
 }

@@ -1,12 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical">
+    android:layout_height="fill_parent">
 
     <ListView
-        android:id="@+id/list"
+        android:id="@android:id/list"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
-</LinearLayout>
+        android:layout_height="fill_parent" />
+
+    <!--
+    <ProgressBar
+        android:id="@android:id/empty"
+        android:indeterminate="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center" />
+        -->
+
+    <pro.dbro.glance.lib.SpritzerTextView
+        android:id="@android:id/empty"
+        android:indeterminate="true"
+        android:layout_width="400dp"
+        android:layout_height="wrap_content"
+        android:textSize="40sp"
+        android:typeface="monospace"
+        android:layout_gravity="center|left"
+        android:layout_margin="32dp"
+        android:gravity="left" />
+</FrameLayout>
