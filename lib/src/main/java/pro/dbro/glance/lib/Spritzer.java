@@ -40,6 +40,7 @@ public class Spritzer {
     protected boolean mPlaying;
     protected boolean mPlayingRequested;
     protected boolean mSpritzThreadStarted;
+    protected boolean mLoopingPlayback;
 
     protected Bus mBus;
     protected int mCurWordIdx;
@@ -52,6 +53,10 @@ public class Spritzer {
         init();
         mTarget = target;
         mSpritzHandler = new SpritzHandler(this);
+    }
+
+    public void setLoopingPlayback(boolean doLoop) {
+        mLoopingPlayback = doLoop;
     }
 
     public void setTextAndStart(String input, boolean fireFinishEvent) {
@@ -121,7 +126,7 @@ public class Spritzer {
 
     protected void init() {
         mCurWordIdx = 0;
-        mDisplayWordList = new ArrayList<String>();
+        mDisplayWordList = new ArrayList<>();
         mWPM = 500;
         mPlaying = false;
         mPlayingRequested = false;
@@ -422,6 +427,10 @@ public class Spritzer {
                             try {
                                 processNextWord();
                                 if (isWordListComplete()) {
+                                    if (mLoopingPlayback) {
+                                        refillWordDisplayList();
+                                        continue;
+                                    }
                                     if (VERBOSE) {
                                         Log.i(TAG, "Word list completely displayed after processNextWord. Pausing");
                                     }
