@@ -24,13 +24,22 @@ public class GlancePrefsManager {
     private static final String APP_CHAPTER = "chapter";
     private static final String APP_WORD = "word";
     private static final String APP_WPM = "wpm";
+    private static final String APP_SAW_ONBOARDER = "onboarder";
 
     /** Default SharedPreferences Values */
     public static final int DEFAULT_APP_WPM = 500;
 
+    public static boolean getShouldShowOnboarder(Context context) {
+        boolean result = context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
+                .getBoolean(APP_SAW_ONBOARDER, false);
 
+        if (!result)
+            context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE).edit().putBoolean(APP_SAW_ONBOARDER, true).apply();
 
-    public static final int getTheme(Context context) {
+        return !result;
+    }
+
+    public static int getTheme(Context context) {
         return context.getSharedPreferences(UI_PREFS, Context.MODE_PRIVATE)
                 .getInt(UI_THEME, 1);
     }

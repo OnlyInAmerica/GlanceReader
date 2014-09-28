@@ -1,6 +1,7 @@
 package pro.dbro.glance.activities;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -54,6 +55,11 @@ public class CommunityActivity extends FragmentActivity {
         tabs.setViewPager(pager);
 
         checkForUpdates();
+
+        if (GlancePrefsManager.getShouldShowOnboarder(this)) {
+            showOnboarder();
+        }
+
     }
 
     @Override
@@ -138,6 +144,13 @@ public class CommunityActivity extends FragmentActivity {
     private void checkForUpdates() {
         // Remove this for store builds!
         UpdateManager.register(this, SECRETS.getHockeyAppId());
+    }
+
+    private void showOnboarder() {
+        new AlertDialog.Builder(this)
+                .setView(getLayoutInflater().inflate(R.layout.dialog_on_boarder, null))
+                .setPositiveButton("Got it", null)
+                .show();
     }
 }
 

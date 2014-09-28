@@ -1,4 +1,4 @@
-package pro.dbro.glance;
+package pro.dbro.glance.adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -12,7 +12,7 @@ import pro.dbro.glance.activities.MainActivity;
  *
  * Created by davidbrodsky on 9/12/14.
  */
-public class Utils {
+public class AdapterUtils {
 
     /** Intent key to specify whether Activity should finish after
      * completing action specified in Intent

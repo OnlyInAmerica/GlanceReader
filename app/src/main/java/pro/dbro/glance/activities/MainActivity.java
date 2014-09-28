@@ -26,11 +26,11 @@ import com.squareup.otto.Subscribe;
 
 import java.util.List;
 
+import pro.dbro.glance.adapters.AdapterUtils;
 import pro.dbro.glance.GlanceApplication;
 import pro.dbro.glance.GlancePrefsManager;
 import pro.dbro.glance.R;
 import pro.dbro.glance.SECRETS;
-import pro.dbro.glance.Utils;
 import pro.dbro.glance.billing.Catalog;
 import pro.dbro.glance.billing.IabHelper;
 import pro.dbro.glance.billing.IabResult;
@@ -165,7 +165,7 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
             }
 
             if (intentIncludesMediaUri && intentUri != null) {
-                if (getIntent().hasExtra(Utils.INTENT_FINISH_AFTER)) mFinishAfterSpritz = true;
+                if (getIntent().hasExtra(AdapterUtils.INTENT_FINISH_AFTER)) mFinishAfterSpritz = true;
                 SpritzFragment frag = getSpritzFragment();
                 frag.feedMediaUriToSpritzer(intentUri);
             }

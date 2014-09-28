@@ -15,7 +15,6 @@ import java.util.Calendar;
 import java.util.Date;
 
 import pro.dbro.glance.R;
-import pro.dbro.glance.Utils;
 
 public class ArticleAdapter extends ParseQueryAdapter<ParseObject> {
 
@@ -80,7 +79,7 @@ public class ArticleAdapter extends ParseQueryAdapter<ParseObject> {
         reads.setText(String.valueOf(object.getInt("reads")));
         reads.setLines(1);
 
-        convertView.setOnClickListener(Utils.getArticleClickListener(convertView.getContext()));
+        convertView.setOnClickListener(AdapterUtils.getArticleClickListener(convertView.getContext()));
 
         return convertView;
     }
