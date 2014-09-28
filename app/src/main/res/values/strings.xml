@@ -28,5 +28,7 @@
     <string name="pref_title_sharing">Sharing</string>
     <string name="pref_summary_sharing">%s submit read articles for inclusion in Recent and Popular Feeds. Only the article URL and Title is transmitted. No identifying information is transmitted.</string>
     <string name="pref_dialog_title_sharing">Sharing mode</string>
+    <string name="spritz_loading"> \ | / - \ | /  Load It Harder  \ | / - \ | /  Load it Better  \ | / - \ | /  Load It Faster  \ | / - \ | /  Load Us Stronger</string>
+    <string name="spritz_error">Error Error Error Error Error Error Error Error Error Error Sorry about that Error Error Error Error Error Error Error Error Error Error Maybe this message is an</string>
 
 </resources>
