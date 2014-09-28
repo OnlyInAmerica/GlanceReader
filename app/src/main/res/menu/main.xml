@@ -1,12 +1,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="pro.dbro.glance.MainActivity">
-
+<!--
     <item
         android:id="@+id/action_donate"
         android:icon="?attr/love_icon"
         android:title="@string/donate"
         android:showAsAction="ifRoom" />
+        -->
 
     <item
         android:id="@+id/action_speed"

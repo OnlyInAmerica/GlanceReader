@@ -198,17 +198,17 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
         mMenu = menu;
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
-        if (mIsPremium) {
-            menu.removeItem(R.id.action_donate);
-        }
+//        if (mIsPremium) {
+//            menu.removeItem(R.id.action_donate);
+//        }
         return true;
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        if (mIsPremium) {
-            menu.removeItem(R.id.action_donate);
-        }
+//        if (mIsPremium) {
+//            menu.removeItem(R.id.action_donate);
+//        }
         return true;
     }
 
@@ -236,9 +236,9 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
             getSpritzFragment().chooseMedia();
         }
         */
-        else if(id == R.id.action_donate) {
-            showDonateDialog();
-        }
+//        else if(id == R.id.action_donate) {
+//            showDonateDialog();
+//        }
         return super.onOptionsItemSelected(item);
     }
 
