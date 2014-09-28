@@ -7,7 +7,7 @@ android {
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 19
-        versionCode 5
+        versionCode 6
         versionName "1.0"
     }
 
@@ -56,6 +56,7 @@ dependencies {
     compile 'net.hockeyapp.android:HockeySDK:3.5.0-b.4'
     compile 'com.github.amlcurran.showcaseview:library:5.0.0'
     compile 'com.facebook.rebound:rebound:0.3.6'
+    compile 'org.slf4j:slf4j-android:1.7.7'
     compile group: 'com.google.guava', name: 'guava', version: '12.0'
 
     compile project(":lib")
