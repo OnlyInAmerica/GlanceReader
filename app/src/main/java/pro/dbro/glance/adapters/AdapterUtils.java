@@ -3,7 +3,6 @@ package pro.dbro.glance.adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.view.View;
-import android.widget.TextView;
 
 import pro.dbro.glance.activities.MainActivity;
 
@@ -14,10 +13,17 @@ import pro.dbro.glance.activities.MainActivity;
  */
 public class AdapterUtils {
 
-    /** Intent key to specify whether Activity should finish after
+    /** Intent Keys */
+
+    /** Whether Activity should finish after
      * completing action specified in Intent
      */
-    public static final String INTENT_FINISH_AFTER = "FinishAfter";
+    public static final String FINISH_AFTER = "FinishAfter";
+
+    /** Indicates this media is internal to the Glance network and NOT from an external source
+     * e.g: Media shared from a web browser
+     */
+    public static final String IS_INTERNAL_MEDIA = "InternalMedia";
 
     public static View.OnClickListener getArticleClickListener(final Context c) {
         return new View.OnClickListener() {
@@ -26,7 +32,8 @@ public class AdapterUtils {
                 Intent communityIntent = new Intent(c, MainActivity.class);
                 communityIntent.setAction(Intent.ACTION_SEND);
                 communityIntent.putExtra(Intent.EXTRA_TEXT, (String) view.getTag());
-                communityIntent.putExtra(INTENT_FINISH_AFTER, true);
+                communityIntent.putExtra(IS_INTERNAL_MEDIA, true);
+                communityIntent.putExtra(FINISH_AFTER, true);
                 c.startActivity(communityIntent);
             }
         };

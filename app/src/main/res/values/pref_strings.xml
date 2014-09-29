@@ -21,5 +21,5 @@
         </string-array>
 
         <!-- Default Value -->
-        <string name="pref_share_mode_default">never</string>
+        <string name="pref_share_mode_default">ask</string>
 </resources>

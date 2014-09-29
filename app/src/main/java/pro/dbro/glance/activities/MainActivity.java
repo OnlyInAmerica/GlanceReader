@@ -155,7 +155,7 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
         boolean intentIncludesMediaUri = false;
         String action = getIntent().getAction();
         Uri intentUri = null;
-        if(!isIntentMarkedAsHandled(getIntent())) {
+        if (!isIntentMarkedAsHandled(getIntent())) {
             if (action.equals(Intent.ACTION_VIEW)) {
                 intentIncludesMediaUri = true;
                 intentUri = getIntent().getData();
@@ -165,7 +165,7 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
             }
 
             if (intentIncludesMediaUri && intentUri != null) {
-                if (getIntent().hasExtra(AdapterUtils.INTENT_FINISH_AFTER)) mFinishAfterSpritz = true;
+                if (getIntent().hasExtra(AdapterUtils.FINISH_AFTER)) mFinishAfterSpritz = true;
                 SpritzFragment frag = getSpritzFragment();
                 frag.feedMediaUriToSpritzer(intentUri);
             }
@@ -263,14 +263,12 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
 
     @Subscribe
     public void onSpritzFinished(SpritzFinishedEvent event) {
-        if (mFinishAfterSpritz) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    takeSharingActionifAppropriateAndFinish(getSpritzFragment().getSpritzer().getMedia());
-                }
-            });
-        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                takeSharingActionifAppropriateAndFinish(getSpritzFragment().getSpritzer().getMedia());
+            }
+        });
     }
 
     @Subscribe
@@ -393,12 +391,18 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
      */
     public void takeSharingActionifAppropriateAndFinish(SpritzerMedia media) {
         if (!(media instanceof HtmlPage)) return;
+        boolean isInternalMedia = getIntent().getBooleanExtra(AdapterUtils.IS_INTERNAL_MEDIA, false);
+        if (isInternalMedia) {
+            recordHtmlPageRead((HtmlPage) media);
+            if (mFinishAfterSpritz) finish();
+            return;
+        }
         GlancePrefsManager.SharePref sharePref = GlancePrefsManager.getShareMode(this);
         switch (sharePref) {
             case ALWAYS:
                 recordHtmlPageRead((HtmlPage) media);
             case NEVER:
-                finish();
+                if (mFinishAfterSpritz) finish();
                 break;
             case ASK:
                 showShareHtmlPageDialog((HtmlPage) media);
@@ -408,21 +412,21 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
 
     private void showShareHtmlPageDialog(final HtmlPage page) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                .setTitle("Share this Read?")
-                .setMessage("Submit this article for tallying in Popular and Recent feeds?")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                .setTitle(getString(R.string.share_dialog_title))
+                .setMessage(getString(R.string.share_dialog_message))
+                .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         recordHtmlPageRead(page);
                     }
                 })
-                .setNegativeButton("No", null);
+                .setNegativeButton(getString(R.string.no), null);
 
         AlertDialog dialog = builder.create();
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
-                MainActivity.this.finish();
+                if (mFinishAfterSpritz) MainActivity.this.finish();
             }
         });
 
@@ -445,7 +449,7 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
                 if (e == null) {
                     Log.d("score", "Retrieved " + scoreList.size() + " scores");
 
-                    if(scoreList.isEmpty()){
+                    if (scoreList.isEmpty()) {
                         // Don't have the object, create it.
                         ParseObject article = new ParseObject("Article");
                         article.put("url", page.getUrl());
