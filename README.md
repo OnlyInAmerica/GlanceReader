@@ -2,7 +2,7 @@
 
 ![Glance](http://i.imgur.com/pO9as8z.gif)
 
-Glance is a [RSVP](http://en.wikipedia.org/wiki/Rapid_serial_visual_presentation) reader for Android 3.0+ (API 11). Glance also includes a curated collection of feeds for your reading pleasure thanks to work by [Rich Jones](https://github.com/miserlou). The Glance reading collection is also available at [glance.wtf](http://glance.wtf), because silly TLDs are great.
+Glance is a [RSVP](http://en.wikipedia.org/wiki/Rapid_serial_visual_presentation) reader for Android 4.0.4+ (API 15). Glance also includes a curated collection of feeds for your reading pleasure thanks to work by [Rich Jones](https://github.com/miserlou). The Glance reading collection is also available at [glance.wtf](http://glance.wtf), because silly TLDs are great.
 
 You can share URLs to Glance from your favorite web browser, or open .epubs on your device's external storage directly.
 

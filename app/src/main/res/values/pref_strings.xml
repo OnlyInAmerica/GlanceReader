@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Anonymous Sharing -->
+
+        <!-- pref key -->
+        <string name="pref_key_share_mode">share_mode</string>
+
+        <!-- Entries -->
+        <string-array name="pref_share_mode_human">
+            <item>Always</item>
+            <item>Ask to</item>
+            <item>Never</item>
+        </string-array>
+
+        <!-- Entry Values -->
+        <string-array name="pref_share_mode_machine">
+            <item>always</item>
+            <item>ask</item>
+            <item>never</item>
+        </string-array>
+
+        <!-- Default Value -->
+        <string name="pref_share_mode_default">ask</string>
+</resources>

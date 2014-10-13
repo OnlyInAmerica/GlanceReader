@@ -1,8 +1,7 @@
 package pro.dbro.glance.fragments;
 
-import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -10,12 +9,21 @@ import android.support.v4.app.Fragment;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.TextAppearanceSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.facebook.rebound.SimpleSpringListener;
+import com.facebook.rebound.Spring;
+import com.facebook.rebound.SpringSystem;
+import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.PointTarget;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
@@ -23,13 +31,13 @@ import java.lang.ref.WeakReference;
 
 import pro.dbro.glance.AppSpritzer;
 import pro.dbro.glance.GlanceApplication;
+import pro.dbro.glance.GlancePrefsManager;
 import pro.dbro.glance.R;
 import pro.dbro.glance.events.ChapterSelectRequested;
 import pro.dbro.glance.events.HttpUrlParsedEvent;
 import pro.dbro.glance.events.NextChapterEvent;
 import pro.dbro.glance.formats.SpritzerMedia;
 import pro.dbro.glance.lib.SpritzerTextView;
-import pro.dbro.glance.lib.TextUtil;
 import pro.dbro.glance.lib.events.SpritzFinishedEvent;
 
 public class SpritzFragment extends Fragment {
@@ -48,7 +56,7 @@ public class SpritzFragment extends Fragment {
     private SpritzerTextView mSpritzView;
     private Bus mBus;
     private SpritzFragmentHandler mHandler;
-    private boolean mUserIsChoosingEpub;
+    private boolean mShowingTips;
 
     public static SpritzFragment newInstance() {
         SpritzFragment fragment = new SpritzFragment();
@@ -118,12 +126,6 @@ public class SpritzFragment extends Fragment {
         mProgress.setMax((mSpritzer.getMaxChapter() + 1) * progressScale);
 
         mProgress.setProgress(progress);
-
-        if (!mSpritzer.isPlaying()) {
-            // If we're paused, show the Spritz history
-            int mSpritzHistoryViewLength = TextUtil.calculateMonospacedCharacterLimit(mSpritzHistoryView, getResources().getInteger(R.integer.spritz_history_line_count));
-            mSpritzHistoryView.setText(mSpritzer.getHistoryString(mSpritzHistoryViewLength));
-        }
     }
 
     /**
@@ -134,22 +136,23 @@ public class SpritzFragment extends Fragment {
      */
     public void showMetaUi(boolean show) {
         if (show) {
-            mAuthorView.setVisibility(View.VISIBLE);
+            if (getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE) {
+                mAuthorView.setVisibility(View.VISIBLE);
+            }
             mTitleView.setVisibility(View.VISIBLE);
             mChapterView.setVisibility(View.VISIBLE);
             mProgress.setVisibility(View.VISIBLE);
-            mSpritzHistoryView.setVisibility(View.VISIBLE);
         } else {
             mAuthorView.setVisibility(View.INVISIBLE);
             mTitleView.setVisibility(View.INVISIBLE);
             mChapterView.setVisibility(View.INVISIBLE);
             mProgress.setVisibility(View.INVISIBLE);
-            mSpritzHistoryView.setVisibility(View.INVISIBLE);
             //mSpritzHistoryView.setText("");
         }
     }
 
-    public void dimActionBar(boolean dim) {
+    public void hideActionBar(boolean dim) {
+        if (getActivity().getActionBar() == null) return;
         if (dim) {
             getActivity().getActionBar().hide();
         } else {
@@ -172,6 +175,9 @@ public class SpritzFragment extends Fragment {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_spritz, container, false);
         mAuthorView = ((TextView) root.findViewById(R.id.author));
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            mAuthorView.setVisibility(View.GONE);
+        }
         mTitleView = ((TextView) root.findViewById(R.id.url));
         mChapterView = ((TextView) root.findViewById(R.id.chapter));
         mChapterView.setOnClickListener(new View.OnClickListener() {
@@ -187,26 +193,195 @@ public class SpritzFragment extends Fragment {
         mSpritzView = (SpritzerTextView) root.findViewById(R.id.spritzText);
         //mSpritzView.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "UbuntuMono-R.ttf"));
         //mSpritzHistoryView.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "UbuntuMono-R.ttf"));
-        mSpritzView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mSpritzer != null && mSpritzer.isMediaSelected()) {
-                    if (mSpritzer.isPlaying()) {
-                        mSpritzer.pause();
-                        updateMetaUi();
+        setupViews(mSpritzView, mSpritzHistoryView);
+        return root;
+    }
+
+    private void showTips() {
+        mShowingTips = true;
+        int[] viewLocation = new int[2];
+        mSpritzView.getLocationOnScreen(viewLocation);
+        PointTarget target = new PointTarget(viewLocation[0] + mSpritzView.getWidth() / 3, viewLocation[1] + mSpritzView.getHeight() / 2);
+        final long SHOWCASE_SINGLESHOT_ID = 3141519;
+        new ShowcaseView.Builder(getActivity())
+                .setShowcaseEventListener(new OnShowcaseEventListener() {
+                    @Override
+                    public void onShowcaseViewHide(ShowcaseView showcaseView) {
                         showMetaUi(true);
-                        dimActionBar(false);
-                    } else {
-                        mSpritzer.start(true);
-                        showMetaUi(false);
-                        dimActionBar(true);
                     }
-                } else {
-                    chooseMedia();
-                }
+
+                    @Override
+                    public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+
+                    }
+
+                    @Override
+                    public void onShowcaseViewShow(ShowcaseView showcaseView) {
+                        showcaseView.postDelayed(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                Log.i(TAG, "hiding meta uti");
+                                showMetaUi(false);
+                            }
+
+                        }, 500);
+                    }
+                })
+                .singleShot(SHOWCASE_SINGLESHOT_ID)
+                .setTarget(target)
+                .setContentTitle("Welcome to Glance")
+                .setContentText("Touch the glance view to pause or resume. If you miss something, pull down to view a brief history")
+                .hideOnTouchOutside()
+                .build();
+    }
+
+    private void pauseSpritzer() {
+        mSpritzer.pause();
+        updateMetaUi();
+        showMetaUi(true);
+        hideActionBar(false);
+    }
+
+    private void startSpritzer() {
+        mSpritzer.start(true);
+        showMetaUi(false);
+        hideActionBar(true);
+    }
+
+    static float initHeight;
+
+    /**
+     * Adjust the target View's height in proportion to
+     * drag events. On drag release, snap the view back into
+     * it's original place.
+     */
+    private void setupViews(final View touchTarget, final View transformTarget) {
+        touchTarget.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                if (initHeight == 0)
+                    initHeight = transformTarget.getHeight();
             }
         });
-        return root;
+        touchTarget.setOnTouchListener(new View.OnTouchListener() {
+
+            private ViewGroup.LayoutParams params;
+            private float peakHeight;
+            private float lastTouchY;
+            private float firstTouchY;
+            private final float fullOpacityHeight = 300;
+            /** The distance between ACTION_DOWN and ACTION_UP, above which should
+             * be interpreted as a drag, below which a click.
+             */
+            private final float movementForDragThreshold = 20;
+            /** The time between ACTION_DOWN and ACTION_MOVE, above which should
+             * be interpreted as a drag, and the spritzer paused
+             */
+            private final int timeForPauseThreshold = 50;
+
+            private boolean mSetText = false;
+            private boolean mAnimatingBack = false;
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (params == null) params = transformTarget.getLayoutParams();
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    if (mSpritzer.isPlaying())
+                        mSpritzer.pause();
+                    else
+                        mSpritzer.start(true);
+//                    Log.i("TOUCH", "Down");
+                    int coords[] = new int[2];
+                    transformTarget.getLocationOnScreen(coords);
+                    lastTouchY = firstTouchY = event.getRawY();
+                }
+                if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                    if (mSpritzer.isPlaying() && (event.getEventTime() - event.getDownTime() > timeForPauseThreshold)) mSpritzer.pause();
+                    if (!mSetText) {
+                        mSpritzHistoryView.setText(mSpritzer.getHistoryString(400));
+                        mSetText = true;
+                    }
+                    float newHeight = event.getRawY() - lastTouchY + transformTarget.getHeight();
+//                    Log.i("MOVE", "touch-y: " + event.getRawY() + " lastTouch: " + lastTouchY + " height: " + transformTarget.getHeight());
+                    if (newHeight > initHeight) {
+//                        Log.i("TOUCH", "setting height " + params.height);
+                        params.height = (int) newHeight;
+                        if (newHeight >= fullOpacityHeight) {
+                            transformTarget.setAlpha(1f);
+//                            Log.i("TOUCH", "alpha 1");
+                        } else {
+                            transformTarget.setAlpha((newHeight / fullOpacityHeight) * .8f);
+//                            Log.i("TOUCH", "alpha " + newHeight / fullOpacityHeight);
+                        }
+                        transformTarget.requestLayout();
+                    }
+                    lastTouchY = event.getRawY();
+                }
+                if (event.getAction() == MotionEvent.ACTION_UP && !mAnimatingBack) {
+                    if (event.getRawY() - firstTouchY < movementForDragThreshold) {
+                        // This is a click, not a drag
+                        // show/hide meta ui on release
+                        if (!mSpritzer.isPlaying()) pauseSpritzer();
+                        else startSpritzer();
+                        return false;
+                    }
+                    peakHeight = event.getRawY() - lastTouchY + transformTarget.getHeight();
+                    mAnimatingBack = true;
+//                    Log.i("TOUCH", "animating back up " + initHeight + " " + transformTarget.getHeight());
+                    invokeSpring(transformTarget);
+
+                }
+                return true;
+            }
+
+            private void invokeSpring(final View targetView) {
+                mAnimatingBack = true;
+                // Create a system to run the physics loop for a set of springs.
+                SpringSystem springSystem = SpringSystem.create();
+
+                // Add a spring to the system.
+                Spring spring = springSystem.createSpring();
+
+                // Add a listener to observe the motion of the spring.
+                spring.addListener(new SimpleSpringListener() {
+
+                    @Override
+                    public void onSpringUpdate(Spring spring) {
+                        // You can observe the updates in the spring
+                        // state by asking its current value in onSpringUpdate.
+                        float value = (float) spring.getCurrentValue();
+                        float scale = 1f - (value);
+                        //Log.i("SPRING", String.valueOf(value));
+                        // 0 - initHeight
+                        // 1 - peakHeight
+                        if (scale < 0.05) {
+                            //Log.i("SPRING", "finished");
+                            mSpritzHistoryView.setText("");
+                            mSetText = false;
+                            params.height = (int) initHeight;
+                            transformTarget.setAlpha(0);
+                            mAnimatingBack = false;
+                            startSpritzer();
+                        } else if (mAnimatingBack) {
+                            params.height = (int) ((scale * (peakHeight - initHeight)) + initHeight);
+                            if (transformTarget.getHeight() >= fullOpacityHeight * 2) {
+                                transformTarget.setAlpha(1f);
+                            } else {
+                                //fullOpacityHeight*2 = full
+                                //fullOpacityHeight = empty
+                                transformTarget.setAlpha(Math.max(0, fullOpacityHeight - transformTarget.getHeight() * 1.1f));
+                                //Log.i("TOUCH", "alpha " + touchTarget.getHeight() / fullOpacityHeight);
+                            }
+                        }
+                        transformTarget.requestLayout();
+                    }
+                });
+
+                // Set the spring in motion; moving from 0 to 1
+                spring.setEndValue(1);
+            }
+        });
     }
 
     @Override
@@ -224,7 +399,7 @@ public class SpritzFragment extends Fragment {
         if (mSpritzer == null) {
             mSpritzer = new AppSpritzer(mBus, mSpritzView);
             mSpritzView.setSpritzer(mSpritzer);
-            if (mSpritzer.getMedia() == null && !mUserIsChoosingEpub) {
+            if (mSpritzer.getMedia() == null) {
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SPRITZ_TEXT, getString(R.string.select_epub)), 1500);
             } else {
                 // AppSpritzer loaded the last book being read
@@ -241,11 +416,23 @@ public class SpritzFragment extends Fragment {
                 // If the spritzer is currently playing, be sure to hide the ActionBar
                 // Might the Android linter be a bit aggressive with these null checks?
                 if (getActivity() != null && getActivity().getActionBar() != null) {
-                    getActivity().getActionBar().hide();
+                    hideActionBar(true);
                 }
             }
         }
+        mSpritzView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                if (!sShownTips) {
+                    showTips();
+                    sShownTips = true;
+                }
+            }
+        });
+
     }
+
+    private static boolean sShownTips = false;
 
     @Override
     public void onStop() {
@@ -275,7 +462,7 @@ public class SpritzFragment extends Fragment {
             public void run() {
                 updateMetaUi();
                 showMetaUi(true);
-                dimActionBar(false);
+                hideActionBar(false);
             }
         });
     }
@@ -302,52 +489,12 @@ public class SpritzFragment extends Fragment {
         showIndeterminateProgress(false);
         //mSpritzer.pause();
         updateMetaUi();
-        showMetaUi(true);
+        if (!mShowingTips)
+            showMetaUi(true);
     }
 
     public AppSpritzer getSpritzer() {
         return mSpritzer;
-    }
-
-    private static final int SELECT_MEDIA = 42;
-
-    /**
-     * Fires an intent to spin up the "file chooser" UI and select an image.
-     */
-    public void chooseMedia() {
-
-        // ACTION_OPEN_DOCUMENT is the new API 19 action for the Android file manager
-        Intent intent;
-        if (Build.VERSION.SDK_INT >= 19) {
-            intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        } else {
-            intent = new Intent(Intent.ACTION_GET_CONTENT);
-        }
-
-        // Filter to only show results that can be "opened", such as a
-        // file (as opposed to a list of contacts or timezones)
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-
-        // Currently no recognized epub MIME type
-        intent.setType("*/*");
-
-        mUserIsChoosingEpub = true;
-        startActivityForResult(intent, SELECT_MEDIA);
-    }
-
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == SELECT_MEDIA && data != null) {
-            mUserIsChoosingEpub = false;
-            Uri uri = data.getData();
-            if (Build.VERSION.SDK_INT >= 19) {
-                final int takeFlags = data.getFlags()
-                        & (Intent.FLAG_GRANT_READ_URI_PERMISSION
-                        | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                getActivity().getContentResolver().takePersistableUriPermission(uri, takeFlags);
-            }
-            feedMediaUriToSpritzer(uri);
-            updateMetaUi();
-        }
     }
 
     /**

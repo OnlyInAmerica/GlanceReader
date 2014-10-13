@@ -8,8 +8,9 @@
     -->
     <uses-permission android:name="com.android.vending.BILLING" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.MANAGE_DOCUMENTS" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.MANAGE_DOCUMENTS" />
 
     <application
         android:name=".GlanceApplication"
@@ -36,13 +37,23 @@
         </activity>
         <activity
             android:name=".activities.CommunityActivity"
-            android:label="@string/title_activity_community"
-            android:theme="@style/Dark.NoActionBar">
+            android:label="@string/title_activity_community" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <!-- Hockey SDK : Upgrade Activity -->
+        <activity android:name="net.hockeyapp.android.UpdateActivity" />
+        <activity
+            android:name=".activities.PreferencesActivity"
+            android:label="@string/title_activity_preferences"
+            android:parentActivityName=".activities.CommunityActivity" >
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.CommunityActivity" />
         </activity>
     </application>
 

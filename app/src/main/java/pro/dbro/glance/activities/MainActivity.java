@@ -4,15 +4,12 @@ import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.app.FragmentTransaction;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
@@ -20,13 +17,20 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
+import java.util.List;
+
+import pro.dbro.glance.adapters.AdapterUtils;
 import pro.dbro.glance.GlanceApplication;
+import pro.dbro.glance.GlancePrefsManager;
 import pro.dbro.glance.R;
 import pro.dbro.glance.SECRETS;
-import pro.dbro.glance.Utils;
 import pro.dbro.glance.billing.Catalog;
 import pro.dbro.glance.billing.IabHelper;
 import pro.dbro.glance.billing.IabResult;
@@ -35,17 +39,17 @@ import pro.dbro.glance.billing.Purchase;
 import pro.dbro.glance.events.ChapterSelectRequested;
 import pro.dbro.glance.events.ChapterSelectedEvent;
 import pro.dbro.glance.events.WpmSelectedEvent;
+import pro.dbro.glance.formats.HtmlPage;
 import pro.dbro.glance.formats.SpritzerMedia;
 import pro.dbro.glance.fragments.SpritzFragment;
 import pro.dbro.glance.fragments.TocDialogFragment;
 import pro.dbro.glance.fragments.WpmDialogFragment;
 import pro.dbro.glance.lib.events.SpritzFinishedEvent;
 
-public class MainActivity extends ActionBarActivity implements View.OnSystemUiVisibilityChangeListener {
+public class MainActivity extends FragmentActivity implements View.OnSystemUiVisibilityChangeListener {
     private static final String TAG = "MainActivity";
     public static final boolean VERBOSE = false;
     public static final String SPRITZ_FRAG_TAG = "spritzfrag";
-    private static final String PREFS = "ui_prefs";
     private static final int THEME_LIGHT = 0;
     private static final int THEME_DARK = 1;
     private IabHelper mBillingHelper;
@@ -113,13 +117,11 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
         }
     };
 
-    private int mWpm;
     private Bus mBus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        int theme = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-                .getInt("THEME", 0);
+        int theme = GlancePrefsManager.getTheme(this);
         switch (theme) {
             case THEME_LIGHT:
                 setTheme(R.style.Light);
@@ -153,7 +155,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
         boolean intentIncludesMediaUri = false;
         String action = getIntent().getAction();
         Uri intentUri = null;
-        if(!isIntentMarkedAsHandled(getIntent())) {
+        if (!isIntentMarkedAsHandled(getIntent())) {
             if (action.equals(Intent.ACTION_VIEW)) {
                 intentIncludesMediaUri = true;
                 intentUri = getIntent().getData();
@@ -163,7 +165,7 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
             }
 
             if (intentIncludesMediaUri && intentUri != null) {
-                if (getIntent().hasExtra(Utils.INTENT_FINISH_AFTER)) mFinishAfterSpritz = true;
+                if (getIntent().hasExtra(AdapterUtils.FINISH_AFTER)) mFinishAfterSpritz = true;
                 SpritzFragment frag = getSpritzFragment();
                 frag.feedMediaUriToSpritzer(intentUri);
             }
@@ -196,17 +198,17 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
         mMenu = menu;
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
-        if (mIsPremium) {
-            menu.removeItem(R.id.action_donate);
-        }
+//        if (mIsPremium) {
+//            menu.removeItem(R.id.action_donate);
+//        }
         return true;
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        if (mIsPremium) {
-            menu.removeItem(R.id.action_donate);
-        }
+//        if (mIsPremium) {
+//            menu.removeItem(R.id.action_donate);
+//        }
         return true;
     }
 
@@ -217,20 +219,12 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_speed) {
-            if (mWpm == 0) {
-                if (getSpritzFragment().getSpritzer() != null) {
-                    mWpm = getSpritzFragment().getSpritzer().getWpm();
-                } else {
-                    mWpm = 500;
-                }
-            }
             FragmentTransaction ft = getFragmentManager().beginTransaction();
-            DialogFragment newFragment = WpmDialogFragment.newInstance(mWpm);
+            DialogFragment newFragment = WpmDialogFragment.newInstance();
             newFragment.show(ft, "dialog");
             return true;
         } else if (id == R.id.action_theme) {
-            int theme = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-                    .getInt("THEME", THEME_LIGHT);
+            int theme = GlancePrefsManager.getTheme(this);
             if (theme == THEME_LIGHT) {
                 applyDarkTheme();
             } else {
@@ -242,9 +236,9 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
             getSpritzFragment().chooseMedia();
         }
         */
-        else if(id == R.id.action_donate) {
-            showDonateDialog();
-        }
+//        else if(id == R.id.action_donate) {
+//            showDonateDialog();
+//        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -254,27 +248,27 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
             getSpritzFragment().getSpritzer()
                     .setWpm(event.getWpm());
         }
-        mWpm = event.getWpm();
     }
 
     private void applyDarkTheme() {
-        getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-                .putInt("THEME", THEME_DARK)
-                .commit();
+        GlancePrefsManager.setTheme(this, THEME_DARK);
         recreate();
 
     }
 
     private void applyLightTheme() {
-        getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-                .putInt("THEME", THEME_LIGHT)
-                .commit();
+        GlancePrefsManager.setTheme(this, THEME_LIGHT);
         recreate();
     }
 
     @Subscribe
     public void onSpritzFinished(SpritzFinishedEvent event) {
-        if (mFinishAfterSpritz) this.finish();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                takeSharingActionifAppropriateAndFinish(getSpritzFragment().getSpritzer().getMedia());
+            }
+        });
     }
 
     @Subscribe
@@ -311,7 +305,6 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
         actionBar.setTitle("");
         actionBar.setDisplayShowHomeEnabled(false);
         actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
     }
 
     private void dimSystemUi(boolean doDim) {
@@ -391,6 +384,91 @@ public class MainActivity extends ActionBarActivity implements View.OnSystemUiVi
                         dialog.dismiss();
                     }
                 }).show();
+    }
+
+    /**
+     * Take the appropriate sharing action based on the recorded Preference
+     */
+    public void takeSharingActionifAppropriateAndFinish(SpritzerMedia media) {
+        if (!(media instanceof HtmlPage)) return;
+        boolean isInternalMedia = getIntent().getBooleanExtra(AdapterUtils.IS_INTERNAL_MEDIA, false);
+        if (isInternalMedia) {
+            recordHtmlPageRead((HtmlPage) media);
+            if (mFinishAfterSpritz) finish();
+            return;
+        }
+        GlancePrefsManager.SharePref sharePref = GlancePrefsManager.getShareMode(this);
+        switch (sharePref) {
+            case ALWAYS:
+                recordHtmlPageRead((HtmlPage) media);
+            case NEVER:
+                if (mFinishAfterSpritz) finish();
+                break;
+            case ASK:
+                showShareHtmlPageDialog((HtmlPage) media);
+                break;
+        }
+    }
+
+    private void showShareHtmlPageDialog(final HtmlPage page) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.share_dialog_title))
+                .setMessage(getString(R.string.share_dialog_message))
+                .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        recordHtmlPageRead(page);
+                    }
+                })
+                .setNegativeButton(getString(R.string.no), null);
+
+        AlertDialog dialog = builder.create();
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                if (mFinishAfterSpritz) MainActivity.this.finish();
+            }
+        });
+
+        dialog.show();
+    }
+
+    private void recordHtmlPageRead(final HtmlPage page) {
+
+        // Okay, so this is really shitty.
+        // I know.
+        // Here's the thing: I didn't know Parse can't do DISTINCT or GROUP BY.
+        // Now I do.
+        // Anyway, instead we're just incrementing a counter.
+
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("Article");
+        query.whereEqualTo("url", page.getUrl());
+        query.whereEqualTo("title", page.getTitle());
+        query.findInBackground(new FindCallback<ParseObject>() {
+            public void done(List<ParseObject> scoreList, ParseException e) {
+                if (e == null) {
+                    Log.d("score", "Retrieved " + scoreList.size() + " scores");
+
+                    if (scoreList.isEmpty()) {
+                        // Don't have the object, create it.
+                        ParseObject article = new ParseObject("Article");
+                        article.put("url", page.getUrl());
+                        article.put("title", page.getTitle());
+                        article.put("reads", 1);
+                        article.saveInBackground();
+                        return;
+                    } else {
+                        // Update object if we already have it.
+                        ParseObject article = scoreList.get(0);
+                        article.increment("reads");
+                        article.saveInBackground();
+                    }
+                } else {
+                    Log.d("score", "Error: " + e.getMessage());
+                }
+            }
+        });
+
     }
 
 }
