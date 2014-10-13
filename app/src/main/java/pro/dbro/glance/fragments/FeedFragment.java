@@ -23,7 +23,7 @@ import java.net.URL;
 
 import pro.dbro.glance.adapters.AdapterUtils;
 import pro.dbro.glance.R;
-import pro.dbro.glance.SECRETS;
+//import pro.dbro.glance.SECRETS;
 import pro.dbro.glance.adapters.ArticleAdapter;
 import pro.dbro.glance.adapters.ReaderSectionAdapter;
 import pro.dbro.glance.lib.SpritzerTextView;
@@ -52,7 +52,7 @@ public class FeedFragment extends ListFragment {
     }
 
     public void setupParse() {
-        Parse.initialize(this.getActivity(), SECRETS.getParseId(), SECRETS.getParseSecret());
+        Parse.initialize(this.getActivity(), "MY_GLANCE_READER_PARSE_ID", "MY_GLANCE_READER_SECRET_KEY");
         sParseSetup = true;
     }
 

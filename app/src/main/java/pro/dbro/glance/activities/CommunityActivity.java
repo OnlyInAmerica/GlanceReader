@@ -18,7 +18,6 @@ import net.hockeyapp.android.UpdateManager;
 
 import pro.dbro.glance.GlancePrefsManager;
 import pro.dbro.glance.R;
-import pro.dbro.glance.SECRETS;
 import pro.dbro.glance.adapters.ReaderSectionAdapter;
 
 public class CommunityActivity extends FragmentActivity {
@@ -138,12 +137,12 @@ public class CommunityActivity extends FragmentActivity {
     }
 
     private void checkForCrashes() {
-        CrashManager.register(this, SECRETS.getHockeyAppId());
+        //CrashManager.register(this, SECRETS.getHockeyAppId());
     }
 
     private void checkForUpdates() {
         // Remove this for store builds!
-        UpdateManager.register(this, SECRETS.getHockeyAppId());
+       // UpdateManager.register(this, SECRETS.getHockeyAppId());
     }
 
     private void showOnboarder() {

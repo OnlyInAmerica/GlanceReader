@@ -1,24 +1,10 @@
 package pro.dbro.glance.formats;
 
-import android.content.Context;
-import android.net.Uri;
-import android.text.Html;
+import android.os.AsyncTask;
 import android.util.Log;
 
-import com.google.gson.JsonObject;
-import com.koushikdutta.async.future.FutureCallback;
-import com.koushikdutta.ion.Ion;
-import com.parse.FindCallback;
-import com.parse.ParseException;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
-
-import pro.dbro.glance.SECRETS;
-import pro.dbro.glance.http.TrustManager;
+import de.jetwick.snacktory.HtmlFetcher;
+import de.jetwick.snacktory.JResult;
 
 /**
  * This provides an implementation of {@link pro.dbro.glance.formats.SpritzerMedia}
@@ -28,49 +14,33 @@ import pro.dbro.glance.http.TrustManager;
  */
 public class HtmlPage implements SpritzerMedia {
     public static final boolean VERBOSE = true;
-
-    private static boolean sSetupTrustManager = false;
     /**
      * The logging tag.
      */
     private static final String TAG = "HtmlPage";
 
-    private String mTitle;
-    private String mUrl;
-    private String mContent;
+    /**
+     * The JResult from snacktory's HTMLFetcher
+     */
+    private JResult mResult;
 
 
     /**
-     * Builds an HtmlPage from a {@link com.google.gson.JsonObject} in diffbot format.
-     * See http://www.diffbot.com/products/automatic/
+     * Builds an HtmlPage from a {@link de.jetwick.snacktory.JResult}
      *
-     * @param result The {@link com.google.gson.JsonObject} to display
+     * @param result The {@link de.jetwick.snacktory.JResult} to display
      */
-    private HtmlPage(JsonObject result) {
-        if (result != null)
-            initFromJson(result);
+    private HtmlPage(JResult result) {
+        mResult = result;
     }
 
-    public void setResult(JsonObject result) {
-        initFromJson(result);
+    public void setResult(JResult result) {
+        mResult = result;
     }
 
-    private void initFromJson(JsonObject json) {
-        // Diffbot json format
-        // see http://www.diffbot.com/products/automatic/
-        if (json == null) {
-            Log.e(TAG, "Error parsing page");
-            return;
-        }
-        if (json.has("title"))
-            mTitle   =  json.get("title").getAsString();
-        if (json.has("url"))
-            mUrl     =  json.get("url").getAsString();
-        if (json.has("text"))
-            mContent =  json.get("text").getAsString();
-
-        // Sanitize content
-        mContent = Html.fromHtml(mContent).toString().replaceAll("\\n+", " ").replaceAll("(?s)<!--.*?-->", "");
+    public String getUrl()
+    {
+        return mResult.getUrl();
     }
 
     /**
@@ -84,77 +54,58 @@ public class HtmlPage implements SpritzerMedia {
      * @return An HtmlPage with null JResult;
      * @throws pro.dbro.glance.formats.UnsupportedFormatException if HTML parsing fails
      */
-    public static HtmlPage fromUri(final Context context, String url, final HtmlPageParsedCallback cb) throws UnsupportedFormatException {
-    // Seems to be a bug in Ion setting trust manager
-    // When that's resolved, go back to Ion request
-//        if (!sSetupTrustManager) {
-//            sSetupTrustManager = TrustManager.setupIonTrustManager(context);
-//        }
+    public static HtmlPage fromUri(String url, final HtmlPageParsedCallback cb) throws UnsupportedFormatException {
         final HtmlPage page = new HtmlPage(null);
-        String encodedUrlToParse = Uri.encode(url);
-        String requestUrl = String.format("http://api.diffbot.com/v2/article?url=%s&token=%s", encodedUrlToParse, SECRETS.getDiffbotKey());
-        Log.i(TAG, "Loading url: " + requestUrl);
-//        TrustManager.makeTrustRequest(context, requestUrl, new TrustManager.TrustRequestCallback() {
-//            @Override
-//            public void onSuccess(JsonObject result) {
-//                page.setResult(result);
-//                recordRead(page);
-//
-//                if (cb != null) {
-//                    cb.onPageParsed(page);
-//
-//                }
-//            }
-//        });
-        Ion.getInstance(context, TrustManager.sIonInstanceName)
-                .build(context)
-                .load(requestUrl)
-                .asJsonObject()
-                .setCallback(new FutureCallback<JsonObject>() {
-                    @Override
-                    public void onCompleted(Exception e, JsonObject result) {
-                        if (e != null) {
-                            e.printStackTrace();
-                            Log.e(TAG, "Unable to parse page");
-                            return;
-                        }
-                        //Log.i(TAG, "Got diffbot result " + result.toString());
-                        page.setResult(result);
+        new AsyncTask<String, Void, JResult>() {
 
-                        if (cb != null) {
-                            cb.onPageParsed(page);
+            @Override
+            protected JResult doInBackground(String... url) {
+                try {
+                    HtmlFetcher fetcher = new HtmlFetcher();
+                    // set cache. e.g. take the map implementation from google collections:
+//                    fetcher.setCache((de.jetwick.snacktory.SCache) CacheBuilder.newBuilder()
+//                            .maximumSize(3)
+//                            .expireAfterWrite(1, TimeUnit.HOURS)
+//                            .build());
 
-                        }
+                    if (VERBOSE) Log.i(TAG, "Fetching " + url[0]);
+                    JResult result = fetcher.fetchAndExtract(url[0], 10 * 1000, true);
+                    if (result == null || result.getText().length() < 1) {
+                        throw new UnsupportedFormatException("Failed to parse text from " + url);
                     }
-                });
+                    page.setResult(result);
+                    return result;
 
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(JResult result) {
+                if (cb != null) {
+                    cb.onPageParsed(result);
+                }
+            }
+        }.execute(url);
         return page;
     }
 
 
-    public String getUrl() {
-        return mUrl;
-    }
-
     @Override
     public String getTitle() {
-        return (mTitle == null) ? "" : mTitle;
+        return (mResult == null || mResult.getTitle() == null) ? "" : mResult.getTitle();
     }
 
     @Override
     public String getAuthor() {
-        try {
-            if (mUrl != null)
-                return new URL(mUrl).getHost();
-            return "";
-        } catch (MalformedURLException e) {
-            return "";
-        }
+        return (mResult == null || mResult.getUrl() == null) ? "" : mResult.getUrl();
     }
 
     @Override
     public String loadChapter(int ignored) {
-        return (mContent == null) ? "" : mContent;
+        return (mResult == null || mResult.getText() == null) ? "" : mResult.getText();
     }
 
     @Override
@@ -169,7 +120,7 @@ public class HtmlPage implements SpritzerMedia {
     }
 
     public static interface HtmlPageParsedCallback {
-        public void onPageParsed(HtmlPage result);
+        public void onPageParsed(JResult result);
     }
 
 }

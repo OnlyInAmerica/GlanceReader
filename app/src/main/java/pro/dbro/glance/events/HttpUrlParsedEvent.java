@@ -1,5 +1,6 @@
 package pro.dbro.glance.events;
 
+import de.jetwick.snacktory.JResult;
 import pro.dbro.glance.formats.HtmlPage;
 
 /**
@@ -7,13 +8,13 @@ import pro.dbro.glance.formats.HtmlPage;
  */
 public class HttpUrlParsedEvent {
 
-    private HtmlPage mResult;
+    private JResult mResult;
 
-    public HttpUrlParsedEvent(HtmlPage result) {
+    public HttpUrlParsedEvent(JResult result) {
         mResult = result;
     }
 
-    public HtmlPage getResult() {
+    public JResult getResult() {
         return mResult;
     }
 

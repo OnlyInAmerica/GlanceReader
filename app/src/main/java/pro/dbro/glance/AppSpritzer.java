@@ -19,6 +19,7 @@ import com.squareup.otto.Bus;
 
 import java.util.List;
 
+import de.jetwick.snacktory.JResult;
 import pro.dbro.glance.events.HttpUrlParsedEvent;
 import pro.dbro.glance.events.NextChapterEvent;
 import pro.dbro.glance.formats.Epub;
@@ -80,9 +81,9 @@ public class AppSpritzer extends Spritzer {
     private void openHtmlPage(Uri htmlUri) {
         try {
             mMediaUri = htmlUri;
-            mMedia = HtmlPage.fromUri(mTarget.getContext().getApplicationContext(), htmlUri.toString(), new HtmlPage.HtmlPageParsedCallback() {
+            mMedia = HtmlPage.fromUri(htmlUri.toString(), new HtmlPage.HtmlPageParsedCallback() {
                 @Override
-                public void onPageParsed(HtmlPage result) {
+                public void onPageParsed(JResult result) {
                     restoreState(false);
                     if (mBus != null) {
                         mBus.post(new HttpUrlParsedEvent(result));

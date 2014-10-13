@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.text.Html;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,12 +26,13 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import java.util.List;
+import java.util.regex.Matcher;
 
 import pro.dbro.glance.adapters.AdapterUtils;
 import pro.dbro.glance.GlanceApplication;
 import pro.dbro.glance.GlancePrefsManager;
 import pro.dbro.glance.R;
-import pro.dbro.glance.SECRETS;
+//import pro.dbro.glance.SECRETS;
 import pro.dbro.glance.billing.Catalog;
 import pro.dbro.glance.billing.IabHelper;
 import pro.dbro.glance.billing.IabResult;
@@ -144,7 +146,7 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
 
         getWindow().getDecorView().setOnSystemUiVisibilityChangeListener(this);
 
-        setupBillingConnection(SECRETS.getBillingPubKey());
+        //setupBillingConnection(SECRETS.getBillingPubKey());
     }
 
     @Override
@@ -161,7 +163,7 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
                 intentUri = getIntent().getData();
             } else if (action.equals(Intent.ACTION_SEND)) {
                 intentIncludesMediaUri = true;
-                intentUri = Uri.parse(getIntent().getStringExtra(Intent.EXTRA_TEXT));
+                intentUri = Uri.parse(findURL(getIntent().getStringExtra(Intent.EXTRA_TEXT)));
             }
 
             if (intentIncludesMediaUri && intentUri != null) {
@@ -259,6 +261,22 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
     private void applyLightTheme() {
         GlancePrefsManager.setTheme(this, THEME_LIGHT);
         recreate();
+    }
+
+    private String findURL (String Text)
+    {
+        int longest_URL_length=-1;
+        String longest_URL = Text;
+        Matcher matcher = Patterns.WEB_URL.matcher(Text);
+        while (matcher.find())
+        {
+            if (matcher.group().length()>longest_URL_length)
+            {
+                longest_URL_length=matcher.group().length();
+                longest_URL= matcher.group();
+            }
+        }
+        return longest_URL;
     }
 
     @Subscribe
