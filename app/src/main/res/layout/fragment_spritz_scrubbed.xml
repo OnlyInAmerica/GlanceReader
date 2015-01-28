@@ -1,0 +1,84 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    tools:context="pro.dbro.glance.SpritzFragment">
+
+    <pro.dbro.glance.lib.SpritzerTextView
+        android:id="@+id/spritzText"
+        android:layout_width="@dimen/spritzer_text_view_width"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/chapter"
+        android:clickable="true"
+        android:focusableInTouchMode="true"
+        android:gravity="left"
+        android:keepScreenOn="true"
+        android:textSize="@dimen/spritzer_text_view_text_size"
+        android:typeface="monospace" />
+
+    <TextView
+        android:id="@+id/url"
+        style="@style/SubduedTextStyle"
+        android:layout_width="@dimen/spritzer_title_width"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="@dimen/spritzer_title_margin_left"
+        android:layout_marginTop="@dimen/spritzer_title_margin_top"
+        android:textStyle="italic"
+        android:ellipsize="marquee"
+        android:fontFamily="sans-serif-condensed"
+        android:singleLine="true"
+        android:textSize="@dimen/spritzer_title_text_size" />
+
+    <TextView
+        android:id="@+id/author"
+        style="@style/SubduedTextStyle"
+        android:layout_width="@dimen/spritzer_author_width"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/url"
+        android:layout_below="@id/url"
+        android:ellipsize="marquee"
+        android:fontFamily="sans-serif-condensed"
+        android:singleLine="true"
+        android:textSize="@dimen/spritzer_author_text_size" />
+
+    <TextView
+        android:id="@+id/spritzHistory"
+        style="@style/SubduedTextStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="bottom|left"
+        android:layout_above="@id/spritzText"
+        android:layout_below="@id/author"
+        android:typeface="monospace"
+        android:maxLines="@integer/spritz_history_line_count"
+        android:textSize="@dimen/spritzer_history_text_size" />
+
+    <ProgressBar
+        android:id="@+id/progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="@dimen/progress_margin"
+        android:layout_marginRight="@dimen/progress_margin"
+        android:indeterminate="false"
+        android:visibility="invisible" />
+
+    <TextView
+        android:id="@+id/chapter"
+        style="@style/SubduedTextStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/progress"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="@dimen/chapter_margin"
+        android:layout_marginLeft="@dimen/chapter_margin"
+        android:clickable="true"
+        android:fontFamily="sans-serif-condensed"
+        android:textColor="@color/chapter_text_color"
+        android:textSize="@dimen/chapter_text_size" />
+</RelativeLayout>

@@ -36,10 +36,11 @@ public class Spritzer {
     protected TextView mTarget;
     protected int mWPM;
     protected Handler mSpritzHandler;
-    protected Object mSpritzThreadStartedSync = new Object();
+    protected final Object mSpritzThreadStartedSync = new Object();
     protected boolean mPlaying;
     protected boolean mPlayingRequested;
     protected boolean mSpritzThreadStarted;
+    protected boolean mLoopingPlayback;
 
     protected Bus mBus;
     protected int mCurWordIdx;
@@ -54,24 +55,28 @@ public class Spritzer {
         mSpritzHandler = new SpritzHandler(this);
     }
 
-    public void setTextAndStart(String input) {
+    public void setLoopingPlayback(boolean doLoop) {
+        mLoopingPlayback = doLoop;
+    }
+
+    public void setTextAndStart(String input, boolean fireFinishEvent) {
         if (VERBOSE) Log.i(TAG, "setTextAndStart, no cb");
         pause();
         setText(input);
-        start();
+        start(fireFinishEvent);
     }
 
-    public void setTextAndStart(String input, SpritzerCallback cb) {
+    public void setTextAndStart(String input, SpritzerCallback cb, boolean fireFinishEvent) {
         if (VERBOSE) Log.i(TAG, "setTextAndStart, with cb");
         pause();
         setText(input);
-        start(cb);
+        start(cb, fireFinishEvent);
     }
 
     /**
      * Prepare to Spritz the given String input
      * <p/>
-     * Call {@link #start()} to begin display
+     * Call {@link #start(boolean)} to begin display
      *
      * @param input
      */
@@ -121,7 +126,7 @@ public class Spritzer {
 
     protected void init() {
         mCurWordIdx = 0;
-        mDisplayWordList = new ArrayList<String>();
+        mDisplayWordList = new ArrayList<>();
         mWPM = 500;
         mPlaying = false;
         mPlayingRequested = false;
@@ -200,8 +205,8 @@ public class Spritzer {
      * Start displaying the String input
      * fed to {@link #setText(String)}
      */
-    public void start() {
-        start(null);
+    public void start(boolean fireFinishEvent) {
+        start(null, fireFinishEvent);
     }
 
     /**
@@ -211,7 +216,7 @@ public class Spritzer {
      * @param cb callback to be notified when Spritzer finished.
      *           Called from background thread.
      */
-    public void start(SpritzerCallback cb) {
+    public void start(SpritzerCallback cb, boolean fireFinishEvent) {
         if (mPlaying || mWordArray == null) {
             if (VERBOSE) Log.w(TAG, "Start called in invalid state");
             return;
@@ -219,7 +224,7 @@ public class Spritzer {
         if (VERBOSE) Log.i(TAG, "Start called " + ((cb == null) ? "without" : "with") + " callback." );
 
         mPlayingRequested = true;
-        startTimerThread(cb);
+        startTimerThread(cb, fireFinishEvent);
     }
 
     private int getInterWordDelay() {
@@ -404,7 +409,7 @@ public class Spritzer {
     /**
      * Begin the background timer thread
      */
-    private void startTimerThread(final SpritzerCallback cb) {
+    private void startTimerThread(final SpritzerCallback cb, final boolean fireFinishEvent) {
         synchronized (mSpritzThreadStartedSync) {
             if (!mSpritzThreadStarted) {
                 new Thread(new Runnable() {
@@ -422,11 +427,15 @@ public class Spritzer {
                             try {
                                 processNextWord();
                                 if (isWordListComplete()) {
+                                    if (mLoopingPlayback) {
+                                        refillWordDisplayList();
+                                        continue;
+                                    }
                                     if (VERBOSE) {
                                         Log.i(TAG, "Word list completely displayed after processNextWord. Pausing");
                                     }
                                     mPlayingRequested = false;
-                                    if (mBus != null) {
+                                    if (mBus != null && fireFinishEvent) {
                                         mBus.post(new SpritzFinishedEvent());
                                     }
                                     if (cb != null) {

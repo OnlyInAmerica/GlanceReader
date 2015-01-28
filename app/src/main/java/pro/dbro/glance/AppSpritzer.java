@@ -1,23 +1,24 @@
 package pro.dbro.glance;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.SharedPreferences;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.UriPermission;
 import android.net.Uri;
 import android.os.Build;
+import android.text.Html;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.parse.GetCallback;
+import com.parse.FindCallback;
+import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.squareup.otto.Bus;
 
 import java.util.List;
 
-import de.jetwick.snacktory.JResult;
 import pro.dbro.glance.events.HttpUrlParsedEvent;
 import pro.dbro.glance.events.NextChapterEvent;
 import pro.dbro.glance.formats.Epub;
@@ -27,22 +28,14 @@ import pro.dbro.glance.formats.UnsupportedFormatException;
 import pro.dbro.glance.lib.Spritzer;
 
 /**
- * Parse a SpritzerMedia instance into a Queue of words
- * and display them on a TextView at
- * a given WPM
+ * A higher-level {@link pro.dbro.glance.lib.Spritzer} that operates
+ * on Uris pointing to .epubs on disk or http urls, instead
+ * of a plain String
  */
 // TODO: Save State for multiple books
 public class AppSpritzer extends Spritzer {
     public static final boolean VERBOSE = true;
     public static final int SPECIAL_MESSAGE_WPM = 100;
-    public static final int DEFAULT_WPM = 500;
-
-    private static final String PREFS = "espritz";
-    private static final String PREF_URI = "uri";
-    private static final String PREF_TITLE = "title";
-    private static final String PREF_CHAPTER = "chapter";
-    private static final String PREF_WORD = "word";
-    private static final String PREF_WPM = "wpm";
 
     private int mChapter;
     private SpritzerMedia mMedia;
@@ -87,9 +80,9 @@ public class AppSpritzer extends Spritzer {
     private void openHtmlPage(Uri htmlUri) {
         try {
             mMediaUri = htmlUri;
-            mMedia = HtmlPage.fromUri(htmlUri.toString(), new HtmlPage.HtmlPageParsedCallback() {
+            mMedia = HtmlPage.fromUri(mTarget.getContext().getApplicationContext(), htmlUri.toString(), new HtmlPage.HtmlPageParsedCallback() {
                 @Override
-                public void onPageParsed(JResult result) {
+                public void onPageParsed(HtmlPage result) {
                     restoreState(false);
                     if (mBus != null) {
                         mBus.post(new HttpUrlParsedEvent(result));
@@ -184,24 +177,24 @@ public class AppSpritzer extends Spritzer {
     public void saveState() {
         if (mMedia != null) {
             if (VERBOSE) Log.i(TAG, "Saving state at chapter " + mChapter + " word: " + mCurWordIdx);
-            SharedPreferences.Editor editor = mTarget.getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit();
-            editor.putInt(PREF_CHAPTER, mChapter)
-                    .putString(PREF_URI, mMediaUri.toString())
-                    .putInt(PREF_WORD, mCurWordIdx)
-                    .putString(PREF_TITLE, mMedia.getTitle())
-                    .putInt(PREF_WPM, mWPM)
-                    .apply();
+            GlancePrefsManager.saveState(
+                    mTarget.getContext(),
+                    mChapter,
+                    mMediaUri.toString(),
+                    mCurWordIdx,
+                    mMedia.getTitle(),
+                    mWPM);
         }
     }
 
     @SuppressLint("NewApi")
     private void restoreState(boolean openLastMediaUri) {
-        SharedPreferences prefs = mTarget.getContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        final GlancePrefsManager.SpritzState state = GlancePrefsManager.getState(mTarget.getContext());
         String content = "";
         if (openLastMediaUri) {
             // Open the last selected media
-            if (prefs.contains(PREF_URI)) {
-                Uri mediaUri = Uri.parse(prefs.getString(PREF_URI, ""));
+            if (state.hasUri()) {
+                Uri mediaUri = state.getUri();
                 if (Build.VERSION.SDK_INT >= 19 && !isHttpUri(mediaUri)) {
                     boolean uriPermissionPersisted = false;
                     List<UriPermission> uriPermissions = mTarget.getContext().getContentResolver().getPersistedUriPermissions();
@@ -214,30 +207,29 @@ public class AppSpritzer extends Spritzer {
                     }
                     if (!uriPermissionPersisted) {
                         Log.w(TAG, String.format("Permission not persisted for uri: %s. Clearing SharedPreferences ", mediaUri.toString()));
-                        prefs.edit().clear().apply();
+                        GlancePrefsManager.clearState(mTarget.getContext());
                         return;
                     }
                 } else {
                     openMedia(mediaUri);
                 }
             }
-        } else if (prefs.contains(PREF_TITLE) && mMedia.getTitle().compareTo(prefs.getString(PREF_TITLE, "")) == 0) {
+        } else if (state.hasTitle() && mMedia.getTitle().compareTo(state.getTitle()) == 0) {
             // Resume media at previous point
-            mChapter = prefs.getInt(PREF_CHAPTER, 0);
+            mChapter = state.getChapter();
             content = loadCleanStringFromNextNonEmptyChapter(mChapter);
-            setWpm(prefs.getInt(PREF_WPM, DEFAULT_WPM));
-            mCurWordIdx = prefs.getInt(PREF_WORD, 0);
+            setWpm(state.getWpm());
+            mCurWordIdx = state.getWordIdx();
             if (VERBOSE) Log.i(TAG, "Resuming " + mMedia.getTitle() + " from chapter " + mChapter + " word " + mCurWordIdx);
         } else {
             // Begin content anew
             mChapter = 0;
             mCurWordIdx = 0;
-            setWpm(prefs.getInt(PREF_WPM, DEFAULT_WPM));
+            setWpm(state.getWpm());
             content = loadCleanStringFromNextNonEmptyChapter(mChapter);
         }
         final String finalContent = content;
         if (!mPlaying && finalContent.length() > 0) {
-            final int initialWpm = getWpm();
             setWpm(SPECIAL_MESSAGE_WPM);
             // Set mSpritzingSpecialMessage to true, so processNextWord doesn't
             // automatically proceed to the next chapter
@@ -247,10 +239,10 @@ public class AppSpritzer extends Spritzer {
                 @Override
                 public void onSpritzerFinished() {
                     setText(finalContent);
-                    setWpm(initialWpm);
+                    setWpm(state.getWpm());
                     mSpritzHandler.sendMessage(mSpritzHandler.obtainMessage(MSG_SET_ENABLED));
                 }
-            });
+            }, false);
         }
     }
 
@@ -266,10 +258,11 @@ public class AppSpritzer extends Spritzer {
      * Return a String representing the maxChars most recently
      * Spritzed characters.
      *
-     * @param maxChars
+     * @param maxChars The max number of characters to return. Pass a value less than 1 for no limit.
      * @return The maxChars number of most recently spritzed characters during this segment
      */
     public String getHistoryString(int maxChars) {
+        if (maxChars <= 0) maxChars = Integer.MAX_VALUE;
         if (mCurWordIdx < 2 || mDisplayWordList.size() < 2) return "";
         StringBuilder builder = new StringBuilder();
         int numWords = 0;

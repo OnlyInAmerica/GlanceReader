@@ -1,8 +1,9 @@
-package pro.dbro.glance;
+package pro.dbro.glance.fragments;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.Animation;
@@ -12,6 +13,9 @@ import android.widget.TextView;
 
 import com.squareup.otto.Bus;
 
+import pro.dbro.glance.GlanceApplication;
+import pro.dbro.glance.GlancePrefsManager;
+import pro.dbro.glance.R;
 import pro.dbro.glance.events.WpmSelectedEvent;
 
 
@@ -20,9 +24,9 @@ import pro.dbro.glance.events.WpmSelectedEvent;
  */
 public class WpmDialogFragment extends DialogFragment {
 
-    public static final int MAX_WPM = 1800;
-    public static final int WHOAH_THRESHOLD_WPM = 1200;
-    public static final int MIN_WPM = 60;
+    public static final int MAX_WPM = 1200;
+    public static final int WHOAH_THRESHOLD_WPM = 800;
+    public static final int MIN_WPM = 300;
 
     private View mView;
     private Animation mCurrentAnimation;
@@ -32,21 +36,15 @@ public class WpmDialogFragment extends DialogFragment {
     private int mWpm;
     private Bus mBus;
 
-    static WpmDialogFragment newInstance(int wpm) {
+    public static WpmDialogFragment newInstance() {
         WpmDialogFragment f = new WpmDialogFragment();
-
-        // Supply num input as an argument.
-        Bundle args = new Bundle();
-        args.putInt("wpm", wpm);
-        f.setArguments(args);
-
         return f;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mWpm = Math.max(MIN_WPM, getArguments().getInt("wpm"));
+        mWpm = GlancePrefsManager.getWpm(getActivity());
         mAnimationRunning = false;
 
         GlanceApplication app = (GlanceApplication) getActivity().getApplication();
@@ -69,7 +67,6 @@ public class WpmDialogFragment extends DialogFragment {
                 mWpm = Math.max(MIN_WPM, (int) ((progress / 100.0) * MAX_WPM));
                 String wpmStr = mWpm + " WPM";
                 mWpmLabel.setText(wpmStr);
-                mBus.post(new WpmSelectedEvent(mWpm));
                 getDialog().setTitle(wpmStr);
                 if (mWpm >= WHOAH_THRESHOLD_WPM + 50 && !mAnimationRunning) {
                     setTrippin(true);
@@ -109,5 +106,12 @@ public class WpmDialogFragment extends DialogFragment {
             mView.clearAnimation();
             mAnimationRunning = false;
         }
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        mBus.post(new WpmSelectedEvent(mWpm));
+        GlancePrefsManager.setWpm(getActivity(), mWpm);
+        getActivity().getFragmentManager().beginTransaction().remove(this).commit();
     }
 }

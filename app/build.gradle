@@ -5,9 +5,9 @@ android {
     buildToolsVersion "19.1.0"
 
     defaultConfig {
-        minSdkVersion 11
+        minSdkVersion 15
         targetSdkVersion 19
-        versionCode 3
+        versionCode 6
         versionName "1.0"
     }
 
@@ -31,6 +31,11 @@ android {
     packagingOptions {
         exclude 'log4j.properties'
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
 }
 
 // Read Signing key from gradle.properties located in project root
@@ -48,17 +53,19 @@ if (project.hasProperty('keyPassword')) {
 }
 
 dependencies {
+    compile 'net.hockeyapp.android:HockeySDK:3.5.0-b.4'
+    compile 'com.github.amlcurran.showcaseview:library:5.0.0'
+    compile 'com.facebook.rebound:rebound:0.3.6'
+    compile 'org.slf4j:slf4j-android:1.7.7'
     compile group: 'com.google.guava', name: 'guava', version: '12.0'
 
     compile project(":lib")
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'de.jetwick:snacktory:+'
-    compile 'com.android.support:appcompat-v7:20.+'
     // You must install or update the Support Repository through the SDK manager to use this dependency.
     compile 'com.android.support:support-v4:20.+'
     compile 'com.squareup:otto:1.3.4'
     compile 'com.astuetz:pagerslidingtabstrip:1.0.1'
-    compile 'com.koushikdutta.ion:ion:1.+'
+    compile 'com.koushikdutta.ion:ion:1.3.8'
 
     compile fileTree('libs')
 }

@@ -18,7 +18,6 @@ package pro.dbro.glance.billing;
 import android.text.TextUtils;
 import android.util.Log;
 
-
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;

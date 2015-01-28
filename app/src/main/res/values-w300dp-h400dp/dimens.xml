@@ -6,6 +6,6 @@
     <dimen name="spritzer_title_margin_top">38dp</dimen>
     <dimen name="spritzer_title_text_size">28sp</dimen>
     <dimen name="spritzer_author_width">250dp</dimen>
-    <dimen name="spritzer_author_text_size">22sp</dimen>
+    <dimen name="spritzer_author_text_size">18sp</dimen>
     <dimen name="spritzer_history_text_size">16sp</dimen>
 </resources>
