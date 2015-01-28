@@ -18,6 +18,8 @@ import com.parse.Parse;
 import com.parse.ParseObject;
 import com.parse.ParseQueryAdapter;
 
+import org.json.JSONObject;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -119,12 +121,14 @@ public class BookFeedFragment extends ListFragment {
                     TextView text = (TextView) convertView.findViewById(R.id.url);
                     convertView.setTag((post.get("link").getAsString()));
                     try {
-                        text.setText(new URL(post.get("link").getAsString()).getHost());
-                    } catch (MalformedURLException e) {
-                        text.setText(post.get("link").getAsString());
+                        JsonObject author = post.get("author").getAsJsonObject();
+                        String name = author.get("name").getAsString();
+                        text.setText(name);
+                    } catch (Exception e) {
+                        text.setText(post.get("author").getAsString());
                     }
 
-                    convertView.setOnClickListener(AdapterUtils.getArticleClickListener(convertView.getContext()));
+                    convertView.setOnClickListener(AdapterUtils.getBookClickListener(convertView.getContext()));
                 } catch (Exception e) {
                     // Parsing is fucked. NSFO.
                 }
