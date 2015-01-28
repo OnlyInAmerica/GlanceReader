@@ -17,7 +17,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
-import pro.dbro.glance.SECRETS;
+//import pro.dbro.glance.SECRETS;
 import pro.dbro.glance.http.TrustManager;
 
 /**
@@ -85,14 +85,14 @@ public class HtmlPage implements SpritzerMedia {
      * @throws pro.dbro.glance.formats.UnsupportedFormatException if HTML parsing fails
      */
     public static HtmlPage fromUri(final Context context, String url, final HtmlPageParsedCallback cb) throws UnsupportedFormatException {
-    // Seems to be a bug in Ion setting trust manager
-    // When that's resolved, go back to Ion request
+        // Seems to be a bug in Ion setting trust manager
+        // When that's resolved, go back to Ion request
 //        if (!sSetupTrustManager) {
 //            sSetupTrustManager = TrustManager.setupIonTrustManager(context);
 //        }
         final HtmlPage page = new HtmlPage(null);
         String encodedUrlToParse = Uri.encode(url);
-        String requestUrl = String.format("http://api.diffbot.com/v2/article?url=%s&token=%s", encodedUrlToParse, SECRETS.getDiffbotKey());
+        String requestUrl = String.format("http://api.diffbot.com/v2/article?url=%s&token=%s", encodedUrlToParse, "2efef432c72b5a923408e04353c39a7c");
         Log.i(TAG, "Loading url: " + requestUrl);
 //        TrustManager.makeTrustRequest(context, requestUrl, new TrustManager.TrustRequestCallback() {
 //            @Override

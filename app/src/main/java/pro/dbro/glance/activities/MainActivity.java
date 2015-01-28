@@ -30,7 +30,7 @@ import pro.dbro.glance.adapters.AdapterUtils;
 import pro.dbro.glance.GlanceApplication;
 import pro.dbro.glance.GlancePrefsManager;
 import pro.dbro.glance.R;
-import pro.dbro.glance.SECRETS;
+//import pro.dbro.glance.SECRETS;
 import pro.dbro.glance.billing.Catalog;
 import pro.dbro.glance.billing.IabHelper;
 import pro.dbro.glance.billing.IabResult;
@@ -144,7 +144,7 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
 
         getWindow().getDecorView().setOnSystemUiVisibilityChangeListener(this);
 
-        setupBillingConnection(SECRETS.getBillingPubKey());
+        //setupBillingConnection(SECRETS.getBillingPubKey());
     }
 
     @Override
