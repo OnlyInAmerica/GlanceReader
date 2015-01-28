@@ -38,4 +38,25 @@ public class AdapterUtils {
             }
         };
     }
+
+    // XXX: If don't have book:
+        //      Start book download
+        //      Add to local library
+        //      Open book
+    //  If have book:
+        //      Open book
+    public static View.OnClickListener getBookClickListener(final Context c) {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent communityIntent = new Intent(c, MainActivity.class);
+                communityIntent.setAction(Intent.ACTION_SEND);
+                communityIntent.putExtra(Intent.EXTRA_TEXT, (String) view.getTag());
+                communityIntent.putExtra(IS_INTERNAL_MEDIA, true);
+                communityIntent.putExtra(FINISH_AFTER, true);
+                c.startActivity(communityIntent);
+            }
+        };
+    }
+
 }

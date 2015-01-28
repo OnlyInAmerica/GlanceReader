@@ -21,14 +21,16 @@ import com.parse.ParseQueryAdapter;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import pro.dbro.glance.adapters.AdapterUtils;
 import pro.dbro.glance.R;
-//import pro.dbro.glance.SECRETS;
+import pro.dbro.glance.adapters.AdapterUtils;
 import pro.dbro.glance.adapters.ArticleAdapter;
+import pro.dbro.glance.adapters.BookSectionAdapter;
 import pro.dbro.glance.adapters.ReaderSectionAdapter;
 import pro.dbro.glance.lib.SpritzerTextView;
 
-public class FeedFragment extends ListFragment {
+//import pro.dbro.glance.SECRETS;
+
+public class BookFeedFragment extends ListFragment {
 
     ArrayAdapter<JsonObject> mFeedItemAdapter;
     ParseQueryAdapter<ParseObject> mArticleAdapter;
@@ -43,8 +45,8 @@ public class FeedFragment extends ListFragment {
     private static boolean sParseSetup = false;
     private boolean mLoading = false;
 
-    public static FeedFragment newInstance(ReaderSectionAdapter.Feed feed) {
-        FeedFragment f = new FeedFragment();
+    public static BookFeedFragment newInstance(BookSectionAdapter.BookFeed feed) {
+        BookFeedFragment f = new BookFeedFragment();
         Bundle b = new Bundle();
         b.putSerializable(ARG_FEED, feed);
         f.setArguments(b);
