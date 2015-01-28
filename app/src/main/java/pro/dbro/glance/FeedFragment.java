@@ -27,6 +27,7 @@ public class FeedFragment extends Fragment {
     private static String FICTION_URL = "http://pipes.yahoo.com/pipes/pipe.run?_id=ee8d2db2513114660b054cd82da29b69&_render=json";
     private static String HN_URL = "http://pipes.yahoo.com/pipes/pipe.run?_id=af38f38c0a21785ef8409d48ab4c1246&_render=json";
     private static String TRUEREDDIT_URL = "http://pipes.yahoo.com/pipes/pipe.run?_id=792a6a5fc2c23eafe6a80855263ac259&_render=json";
+    private static String DIGG_URL = "http://pipes.yahoo.com/pipes/pipe.run?_id=8ef995083e5fe68ae3fe2d3d95f71844&_render=json";
 
     ArrayAdapter<JsonObject> feedItemAdapter;
     ParseQueryAdapter<ParseObject> articleAdapter;

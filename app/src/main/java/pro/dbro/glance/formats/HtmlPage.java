@@ -70,7 +70,6 @@ public class HtmlPage implements SpritzerMedia {
 
                 ParseQuery<ParseObject> query = ParseQuery.getQuery("Article");
                 query.whereEqualTo("url", url);
-                query.whereEqualTo("title", title);
                 query.findInBackground(new FindCallback<ParseObject>() {
                     public void done(List<ParseObject> scoreList, ParseException e) {
                         if (e == null) {
