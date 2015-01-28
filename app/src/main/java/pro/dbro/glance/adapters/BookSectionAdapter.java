@@ -17,8 +17,7 @@ public class BookSectionAdapter extends FragmentPagerAdapter {
      * {@link ArticleAdapter}
     */
     public static enum BookFeed {
-        POPULAR     ("Most Popular"),
-        RECENT      ("Recent"),
+        LIBRARY     ("Your Library"),
         FEATURED    ("Featured",       "http://pipes.yahoo.com/pipes/pipe.run?_id=91eda8779a03f39b0e6d097cdde06284&_render=json"),
         FICTION  ("Fiction", "http://pipes.yahoo.com/pipes/pipe.run?_id=91eda8779a03f39b0e6d097cdde06284&_render=json"),
         NONFICTION ("Non-Fiction", "http://pipes.yahoo.com/pipes/pipe.run?_id=91eda8779a03f39b0e6d097cdde06284&_render=json");
