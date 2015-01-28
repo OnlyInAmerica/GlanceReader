@@ -17,7 +17,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
-import pro.dbro.glance.SECRETS;
+//import pro.dbro.glance.SECRETS;
 import pro.dbro.glance.http.TrustManager;
 
 /**
@@ -85,49 +85,14 @@ public class HtmlPage implements SpritzerMedia {
      * @throws pro.dbro.glance.formats.UnsupportedFormatException if HTML parsing fails
      */
     public static HtmlPage fromUri(final Context context, String url, final HtmlPageParsedCallback cb) throws UnsupportedFormatException {
-    // Seems to be a bug in Ion setting trust manager
-    // When that's resolved, go back to Ion request
+        // Seems to be a bug in Ion setting trust manager
+        // When that's resolved, go back to Ion request
 //        if (!sSetupTrustManager) {
 //            sSetupTrustManager = TrustManager.setupIonTrustManager(context);
 //        }
         final HtmlPage page = new HtmlPage(null);
-<<<<<<< HEAD
-        new AsyncTask<String, Void, JResult>() {
-
-            public void recordRead(final String url, final String title){
-
-                // Okay, so this is really shitty.
-                // I know.
-                // Here's the thing: I didn't know Parse can't do DISTINCT or GROUP BY.
-                // Now I do.
-                // Anyway, instead we're just incrementing a counter.
-
-                ParseQuery<ParseObject> query = ParseQuery.getQuery("Article");
-                query.whereEqualTo("url", url);
-                query.findInBackground(new FindCallback<ParseObject>() {
-                    public void done(List<ParseObject> scoreList, ParseException e) {
-                        if (e == null) {
-                            Log.d("score", "Retrieved " + scoreList.size() + " scores");
-
-                           if(scoreList.isEmpty()){
-                               // Don't have the object, create it.
-                               ParseObject article = new ParseObject("Article");
-                               article.put("url", url);
-                               article.put("title", title);
-                               article.put("reads", 1);
-                               article.saveInBackground();
-                               return;
-                            } else {
-                               // Update object if we already have it.
-                               ParseObject article = scoreList.get(0);
-                               article.increment("reads");
-                               article.saveInBackground();
-                           }
-                        } else {
-                            Log.d("score", "Error: " + e.getMessage());
-=======
         String encodedUrlToParse = Uri.encode(url);
-        String requestUrl = String.format("http://api.diffbot.com/v2/article?url=%s&token=%s", encodedUrlToParse, SECRETS.getDiffbotKey());
+        String requestUrl = String.format("http://api.diffbot.com/v2/article?url=%s&token=%s", encodedUrlToParse, "2efef432c72b5a923408e04353c39a7c");
         Log.i(TAG, "Loading url: " + requestUrl);
 //        TrustManager.makeTrustRequest(context, requestUrl, new TrustManager.TrustRequestCallback() {
 //            @Override
@@ -152,7 +117,6 @@ public class HtmlPage implements SpritzerMedia {
                             e.printStackTrace();
                             Log.e(TAG, "Unable to parse page");
                             return;
->>>>>>> 4a4010ffb9cef8708fd5d3a531a41b26320a9486
                         }
                         //Log.i(TAG, "Got diffbot result " + result.toString());
                         page.setResult(result);
