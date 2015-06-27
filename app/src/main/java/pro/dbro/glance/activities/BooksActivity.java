@@ -15,6 +15,7 @@ import com.astuetz.PagerSlidingTabStrip;
 
 import pro.dbro.glance.GlancePrefsManager;
 import pro.dbro.glance.R;
+import pro.dbro.glance.adapters.BookSectionAdapter;
 import pro.dbro.glance.adapters.ReaderSectionAdapter;
 
 //import pro.dbro.glance.SECRETS;
@@ -46,7 +47,7 @@ public class BooksActivity extends FragmentActivity {
 
         // Initialize the ViewPager and set an adapter
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
-        pager.setAdapter(new ReaderSectionAdapter(getSupportFragmentManager()));
+        pager.setAdapter(new BookSectionAdapter(getSupportFragmentManager()));
 
         // Bind the tabs to the ViewPager
         PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);

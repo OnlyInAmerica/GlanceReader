@@ -20,6 +20,7 @@ import com.parse.ParseQueryAdapter;
 
 import org.json.JSONObject;
 
+import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -43,7 +44,7 @@ public class BookFeedFragment extends ListFragment {
     Future<JsonObject> mFuture;
 
     private static final String ARG_FEED = "feed";
-    private ReaderSectionAdapter.Feed mFeed;
+    private BookSectionAdapter.BookFeed mFeed;
     private static boolean sParseSetup = false;
     private boolean mLoading = false;
 
@@ -63,7 +64,7 @@ public class BookFeedFragment extends ListFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mFeed = (ReaderSectionAdapter.Feed) getArguments().getSerializable(ARG_FEED);
+        mFeed = (BookSectionAdapter.BookFeed) getArguments().getSerializable(ARG_FEED);
         if (!sParseSetup) {
             setupParse();
         }
@@ -84,12 +85,8 @@ public class BookFeedFragment extends ListFragment {
 
         switch (mFeed) {
 
-            case POPULAR:
+            case LIBRARY:
                 mArticleAdapter = new ArticleAdapter(getActivity(), ArticleAdapter.ArticleFilter.RECENT);
-                listView.setAdapter(mArticleAdapter);
-                break;
-            case RECENT:
-                mArticleAdapter = new ArticleAdapter(getActivity(), ArticleAdapter.ArticleFilter.ALL);
                 listView.setAdapter(mArticleAdapter);
                 break;
             default:
@@ -119,7 +116,8 @@ public class BookFeedFragment extends ListFragment {
                     handle.setText(title);
 
                     TextView text = (TextView) convertView.findViewById(R.id.url);
-                    convertView.setTag((post.get("link").getAsString()));
+                    System.out.println(post.get("link").getAsString().replace(".atom", ".epub"));
+                    convertView.setTag((post.get("link").getAsString().replace(".atom", ".epub")));
                     try {
                         JsonObject author = post.get("author").getAsJsonObject();
                         String name = author.get("name").getAsString();
