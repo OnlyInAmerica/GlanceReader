@@ -13,6 +13,7 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Environment;
 import android.text.Html;
 import android.util.Log;
 import android.widget.TextView;
@@ -26,6 +27,7 @@ import com.parse.ParseQuery;
 import com.squareup.otto.Bus;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -80,8 +82,12 @@ public class AppSpritzer extends Spritzer {
     }
 
     private void openMedia(Uri uri) {
+
+        System.out.println("Opening.." + uri.toString());
+
         if (isHttpUri(uri)) {
             if (isRemoteEpub(uri)){
+                System.out.println("Remote epub.." + uri.toString());
                 openRemoteEpub(uri);
             } else {
                 openHtmlPage(uri);
@@ -343,16 +349,12 @@ public class AppSpritzer extends Spritzer {
         }
 
         public boolean isOnline() {
-            try {
-                ConnectivityManager cm = (ConnectivityManager) mCtx.getSystemService(Context.CONNECTIVITY_SERVICE);
-                return cm.getActiveNetworkInfo().isConnectedOrConnecting();
-            } catch (Exception e) {
-                return false;
-            }
+            return true;
         }
 
         @Override
         protected Drawable doInBackground(String... url) {
+            System.out.println("Execute.");
             try {
                 String filename = url[1];
                 if (isOnline()) {
@@ -388,7 +390,16 @@ public class AppSpritzer extends Spritzer {
                         status = COMPLETE;
                     }
                     try {
-                        FileOutputStream fos = new FileOutputStream(filename);
+                        File path = Environment.getExternalStoragePublicDirectory(
+                                Environment.DIRECTORY_DOCUMENTS);
+                        File file = new File(path, "/" + filename);
+
+                        // if file doesnt exists, then create it
+                        if (!file.exists()) {
+                            file.createNewFile();
+                        }
+
+                        FileOutputStream fos = new FileOutputStream(file);
                         fos.write(out.toByteArray());
                         fos.close();
                     } catch (IOException e) {
@@ -400,6 +411,7 @@ public class AppSpritzer extends Spritzer {
                     return d;
                 } // end of if isOnline
                 else {
+                    System.out.println("Not online.");
                     return null;
                 }
             } catch (Exception e) {
@@ -411,12 +423,15 @@ public class AppSpritzer extends Spritzer {
         @Override
         protected void onProgressUpdate(Integer... changed) {
             //progressDialog.setProgress(changed[0]);
+            System.out.println("Progress.");
+            System.out.println(changed[0].toString());
             setText("Downloading (" + changed[0].toString() + "%)..");
         }
 
         @Override
         protected void onPreExecute() {
-          setText("Downloading..");
+          System.out.println("Pre execute.");
+          setTextAndStart("Downloading..", true);
 //        progressDialog = new ProgressDialog(); // your activity
 //        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 //        progressDialog.setMessage("Downloading ...");

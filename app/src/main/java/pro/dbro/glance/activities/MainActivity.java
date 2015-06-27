@@ -150,7 +150,7 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
     @Override
     public void onResume() {
         super.onResume();
-        dimSystemUi(true);
+//        dimSystemUi(true);
 
         boolean intentIncludesMediaUri = false;
         String action = getIntent().getAction();

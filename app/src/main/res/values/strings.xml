@@ -28,8 +28,8 @@
     <string name="pref_title_sharing">Sharing</string>
     <string name="pref_summary_sharing">%s submit articles I share to Glance from external applications (e.g: my browser) to the Recent and Popular Feeds, which are visible to all users. Only the article URL and page Title is transmitted. No identifying information is transmitted.</string>
     <string name="pref_dialog_title_sharing">Sharing mode</string>
-    <string name="spritz_loading">Loading. Loading.. Loading... Loading. Loading.. Loading... Loading. Loading.. Loading... Loading. Loading.. Loading... </string>
-    <string name="spritz_error">Error Error Error Error Error Error Error Error Error Error</string>
+    <string name="spritz_loading">Loading..</string>
+    <string name="spritz_error">Error..</string>
     <string name="dialog_on_boarding">Glance is a speed reader for web pages and .epub books. \n\n<b>Sharing</b> \n\nIf you\'d like to anonymously submit articles you read for inclusion in the Popular and Recent Feeds check out the Settings menu (Gear icon in the Action Bar).  \n\n<b>Integrates with your Browser</b> \n\nYou can share URLs to Glance from your favorite browser\'s Share menu.  \n\n<b>Epub book support</b> \n\nTouch the book icon in the Action Bar to open an e-book in the Epub format (.epub).</string>
     <string name="share_dialog_message">Submit this article for inclusion in the Recent and Popular feeds? If you liked it, let other Glancers know!</string>
     <string name="share_dialog_title">Share this Read?</string>
