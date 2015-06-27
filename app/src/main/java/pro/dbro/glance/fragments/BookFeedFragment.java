@@ -18,17 +18,21 @@ import com.parse.Parse;
 import com.parse.ParseObject;
 import com.parse.ParseQueryAdapter;
 
+import org.json.JSONObject;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import pro.dbro.glance.adapters.AdapterUtils;
 import pro.dbro.glance.R;
-//import pro.dbro.glance.SECRETS;
+import pro.dbro.glance.adapters.AdapterUtils;
 import pro.dbro.glance.adapters.ArticleAdapter;
+import pro.dbro.glance.adapters.BookSectionAdapter;
 import pro.dbro.glance.adapters.ReaderSectionAdapter;
 import pro.dbro.glance.lib.SpritzerTextView;
 
-public class FeedFragment extends ListFragment {
+//import pro.dbro.glance.SECRETS;
+
+public class BookFeedFragment extends ListFragment {
 
     ArrayAdapter<JsonObject> mFeedItemAdapter;
     ParseQueryAdapter<ParseObject> mArticleAdapter;
@@ -43,8 +47,8 @@ public class FeedFragment extends ListFragment {
     private static boolean sParseSetup = false;
     private boolean mLoading = false;
 
-    public static FeedFragment newInstance(ReaderSectionAdapter.Feed feed) {
-        FeedFragment f = new FeedFragment();
+    public static BookFeedFragment newInstance(BookSectionAdapter.BookFeed feed) {
+        BookFeedFragment f = new BookFeedFragment();
         Bundle b = new Bundle();
         b.putSerializable(ARG_FEED, feed);
         f.setArguments(b);
@@ -117,12 +121,14 @@ public class FeedFragment extends ListFragment {
                     TextView text = (TextView) convertView.findViewById(R.id.url);
                     convertView.setTag((post.get("link").getAsString()));
                     try {
-                        text.setText(new URL(post.get("link").getAsString()).getHost());
-                    } catch (MalformedURLException e) {
-                        text.setText(post.get("link").getAsString());
+                        JsonObject author = post.get("author").getAsJsonObject();
+                        String name = author.get("name").getAsString();
+                        text.setText(name);
+                    } catch (Exception e) {
+                        text.setText(post.get("author").getAsString());
                     }
 
-                    convertView.setOnClickListener(AdapterUtils.getArticleClickListener(convertView.getContext()));
+                    convertView.setOnClickListener(AdapterUtils.getBookClickListener(convertView.getContext()));
                 } catch (Exception e) {
                     // Parsing is fucked. NSFO.
                 }
