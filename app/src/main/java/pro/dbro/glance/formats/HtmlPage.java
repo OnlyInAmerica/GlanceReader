@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.text.Html;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.gson.JsonObject;
@@ -20,6 +21,7 @@ import java.util.List;
 
 //import pro.dbro.glance.SECRETS;
 import pro.dbro.glance.http.TrustManager;
+import timber.log.Timber;
 
 /**
  * This provides an implementation of {@link pro.dbro.glance.formats.SpritzerMedia}
@@ -52,26 +54,31 @@ public class HtmlPage implements SpritzerMedia {
             initFromJson(result);
     }
 
-    public void setResult(JsonObject result) {
-        initFromJson(result);
+    public boolean setResult(JsonObject result) {
+        return initFromJson(result);
     }
 
-    private void initFromJson(JsonObject json) {
+    private boolean initFromJson(JsonObject json) {
         // Diffbot json format
         // see http://www.diffbot.com/products/automatic/
         if (json == null) {
-            Log.e(TAG, "Error parsing page");
-            return;
+            Timber.e("Error parsing page");
+            return false;
         }
         if (json.has("title"))
             mTitle = json.get("title").getAsString();
         if (json.has("url"))
             mUrl = json.get("url").getAsString();
-        if (json.has("text"))
+        if (json.has("text") && !TextUtils.isEmpty(json.get("text").getAsString()))
             mContent = json.get("text").getAsString();
+        else {
+            Timber.e("Got json response, but it contained no content text");
+            return false;
+        }
 
         // Sanitize content
         mContent = Html.fromHtml(mContent).toString().replaceAll("\\n+", " ").replaceAll("(?s)<!--.*?-->", "");
+        return true;
     }
 
     /**
@@ -94,7 +101,7 @@ public class HtmlPage implements SpritzerMedia {
         final HtmlPage page = new HtmlPage(null);
         String encodedUrlToParse = Uri.encode(url);
         String requestUrl = String.format("http://api.diffbot.com/v2/article?url=%s&token=%s", encodedUrlToParse, "2efef432c72b5a923408e04353c39a7c");
-        Log.i(TAG, "Loading url: " + requestUrl);
+        Timber.d("Loading url: " + requestUrl);
 //        TrustManager.makeTrustRequest(context, requestUrl, new TrustManager.TrustRequestCallback() {
 //            @Override
 //            public void onSuccess(JsonObject result) {
@@ -115,20 +122,20 @@ public class HtmlPage implements SpritzerMedia {
                     @Override
                     public void onCompleted(Exception e, final JsonObject result) {
                         if (e != null) {
-                            e.printStackTrace();
-                            Log.e(TAG, "Unable to parse page");
+                            Timber.e(e, "Unable to parse page");
                             return;
                         }
 
+                        Timber.d("Got diffbot result " + result.toString());
                         new AsyncTask<JsonObject, Void, HtmlPage>() {
 
                             @Override
                             protected HtmlPage doInBackground(JsonObject... params) {
 
                                 JsonObject result = params[0];
-                                page.setResult(result);
+                                boolean sucess = page.setResult(result);
 
-                                return page;
+                                return sucess ? page : null;
                             }
 
                             @Override

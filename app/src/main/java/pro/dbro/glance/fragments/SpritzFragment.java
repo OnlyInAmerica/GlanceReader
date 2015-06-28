@@ -503,6 +503,8 @@ public class SpritzFragment extends Fragment {
         updateMetaUi();
         if (!mShowingTips)
             showMetaUi(true);
+        if (!event.isSuccessful())
+            mSpritzer.setStaticText(getString(R.string.spritz_error));
     }
 
     @Subscribe
