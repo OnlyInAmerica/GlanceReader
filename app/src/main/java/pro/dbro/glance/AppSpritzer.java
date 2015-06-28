@@ -14,11 +14,15 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.text.Html;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.koushikdutta.async.future.FutureCallback;
+import com.koushikdutta.ion.Ion;
+import com.koushikdutta.ion.ProgressCallback;
 import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
@@ -34,6 +38,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import pro.dbro.glance.events.HttpUrlParsedEvent;
 import pro.dbro.glance.events.NextChapterEvent;
@@ -42,6 +47,7 @@ import pro.dbro.glance.formats.HtmlPage;
 import pro.dbro.glance.formats.SpritzerMedia;
 import pro.dbro.glance.formats.UnsupportedFormatException;
 import pro.dbro.glance.lib.Spritzer;
+import timber.log.Timber;
 
 /**
  * A higher-level {@link pro.dbro.glance.lib.Spritzer} that operates
@@ -53,27 +59,25 @@ public class AppSpritzer extends Spritzer {
     public static final boolean VERBOSE = true;
     public static final int SPECIAL_MESSAGE_WPM = 100;
 
+    private Context context;
+
     private int mChapter;
     private SpritzerMedia mMedia;
     private Uri mMediaUri;
     private boolean mSpritzingSpecialMessage;
 
-    private Context application;
-
     public AppSpritzer(Bus bus, TextView target) {
         super(target);
+        context = target.getContext().getApplicationContext();
         setEventBus(bus);
         restoreState(true);
     }
 
     public AppSpritzer(Bus bus, TextView target, Uri mediaUri) {
         super(target);
+        context = target.getContext().getApplicationContext();
         setEventBus(bus);
         openMedia(mediaUri);
-    }
-
-    public void setApplicationContect(Context ctx) {
-        application = ctx;
     }
 
     public void setMediaUri(Uri uri) {
@@ -83,11 +87,11 @@ public class AppSpritzer extends Spritzer {
 
     private void openMedia(Uri uri) {
 
-        System.out.println("Opening.." + uri.toString());
+        Timber.d("Opening.." + uri.toString());
 
         if (isHttpUri(uri)) {
             if (isRemoteEpub(uri)){
-                System.out.println("Remote epub.." + uri.toString());
+                Timber.d("Remote epub.." + uri.toString());
                 openRemoteEpub(uri);
             } else {
                 openHtmlPage(uri);
@@ -98,8 +102,8 @@ public class AppSpritzer extends Spritzer {
     }
 
     private void initParse() {
-        Parse.initialize(application, "IKXOwtsEGwpJxjD56rloizwwsB4pijEve8nU5wkB", "8K0yHwwEevmCiuuHTjGj7HRhFTzHmycBXXspmnPU");
-        Parse.enableLocalDatastore(application);
+        Parse.initialize(context, "IKXOwtsEGwpJxjD56rloizwwsB4pijEve8nU5wkB", "8K0yHwwEevmCiuuHTjGj7HRhFTzHmycBXXspmnPU");
+        Parse.enableLocalDatastore(context);
     }
 
     private void openEpub(Uri epubUri) {
@@ -114,8 +118,41 @@ public class AppSpritzer extends Spritzer {
 
     private void openRemoteEpub(Uri epubUri) {
 
-        new EpubDownloadManager(application).execute(epubUri.toString(), "filename");
+        File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File file = new File(path, "/" + epubUri.getLastPathSegment());
 
+        if (file.exists()) {
+            Timber.d("Epub already downloaded");
+            openMedia(Uri.fromFile(file));
+            return;
+        }
+
+        Ion.with(context)
+            .load(epubUri.toString())
+            .progressHandler(new ProgressCallback() {
+                @Override
+                public void onProgress(long downloaded, long total) {
+                    int progress = (int) ((downloaded / ((float) total)) * 100);
+
+                    Timber.d("Progress %d", progress);
+                    setStaticText("Loading " + progress + "%");
+                }
+            })
+            .write(file)
+            .setCallback(new FutureCallback<File>() {
+                @Override
+                public void onCompleted(Exception e, File file) {
+                    // download done...
+                    // do stuff with the File or error
+                    if (e != null) {
+                        Timber.e(e, "Error downloading file");
+                        setTextAndStart("Error downloading book :(", true);
+                        return;
+                    }
+                    Timber.d("Download complete");
+                    openMedia(Uri.fromFile(file));
+                }
+            });
     }
 
     private void openHtmlPage(Uri htmlUri) {
@@ -256,7 +293,7 @@ public class AppSpritzer extends Spritzer {
                     openMedia(mediaUri);
                 }
             }
-        } else if (state.hasTitle() && mMedia.getTitle().compareTo(state.getTitle()) == 0) {
+        } else if (state.hasTitle() && mMedia.getTitle().equals(state.getTitle())) {
             // Resume media at previous point
             mChapter = state.getChapter();
             content = loadCleanStringFromNextNonEmptyChapter(mChapter);
@@ -319,140 +356,5 @@ public class AppSpritzer extends Spritzer {
             if (mCurWordIdx - (numWords + 2) < 0) break;
         }
         return builder.toString();
-    }
-
-    class EpubDownloadManager extends AsyncTask<String, Integer, Drawable> {
-
-        private Drawable d;
-        private HttpURLConnection conn;
-        private InputStream stream; //to read
-        private ByteArrayOutputStream out; //to write
-        private Context mCtx;
-
-        private double fileSize;
-        private double downloaded; // number of bytes downloaded
-        private int status = DOWNLOADING; //status of current process
-
-        private ProgressDialog progressDialog;
-
-        private static final int MAX_BUFFER_SIZE = 1024; //1kb
-        private static final int DOWNLOADING = 0;
-        private static final int COMPLETE = 1;
-
-        public EpubDownloadManager(Context ctx) {
-            d = null;
-            conn = null;
-            fileSize = 0;
-            downloaded = 0;
-            status = DOWNLOADING;
-            mCtx = ctx;
-        }
-
-        public boolean isOnline() {
-            return true;
-        }
-
-        @Override
-        protected Drawable doInBackground(String... url) {
-            System.out.println("Execute.");
-            try {
-                String filename = url[1];
-                if (isOnline()) {
-                    conn = (HttpURLConnection) new URL(url[0]).openConnection();
-                    fileSize = conn.getContentLength();
-                    out = new ByteArrayOutputStream((int) fileSize);
-                    conn.connect();
-
-                    stream = conn.getInputStream();
-                    // loop with step
-                    while (status == DOWNLOADING) {
-                        byte buffer[];
-
-                        if (fileSize - downloaded > MAX_BUFFER_SIZE) {
-                            buffer = new byte[MAX_BUFFER_SIZE];
-                        } else {
-                            buffer = new byte[(int) (fileSize - downloaded)];
-                        }
-                        int read = stream.read(buffer);
-
-                        if (read == -1) {
-                            publishProgress(100);
-                            break;
-                        }
-                        // writing to buffer
-                        out.write(buffer, 0, read);
-                        downloaded += read;
-                        // update progress bar
-                        publishProgress((int) ((downloaded / fileSize) * 100));
-                    } // end of while
-
-                    if (status == DOWNLOADING) {
-                        status = COMPLETE;
-                    }
-                    try {
-                        File path = Environment.getExternalStoragePublicDirectory(
-                                Environment.DIRECTORY_DOCUMENTS);
-                        File file = new File(path, "/" + filename);
-
-                        // if file doesnt exists, then create it
-                        if (!file.exists()) {
-                            file.createNewFile();
-                        }
-
-                        FileOutputStream fos = new FileOutputStream(file);
-                        fos.write(out.toByteArray());
-                        fos.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        return null;
-                    }
-
-                    //d = Drawable.createFromStream((InputStream) new ByteArrayInputStream(out.toByteArray()), "filename");
-                    return d;
-                } // end of if isOnline
-                else {
-                    System.out.println("Not online.");
-                    return null;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }// end of catch
-        } // end of class DownloadManager()
-
-        @Override
-        protected void onProgressUpdate(Integer... changed) {
-            //progressDialog.setProgress(changed[0]);
-            System.out.println("Progress.");
-            System.out.println(changed[0].toString());
-            setText("Downloading (" + changed[0].toString() + "%)..");
-        }
-
-        @Override
-        protected void onPreExecute() {
-          System.out.println("Pre execute.");
-          setTextAndStart("Downloading..", true);
-//        progressDialog = new ProgressDialog(); // your activity
-//        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-//        progressDialog.setMessage("Downloading ...");
-//        progressDialog.setCancelable(false);
-//        progressDialog.show();
-
-        }
-
-        @Override
-        protected void onPostExecute(Drawable result) {
-            //progressDialog.dismiss();
-            // do something
-
-//        try {
-//            mMediaUri = epubUri;
-//            mMedia = Epub.fromUri(mTarget.getContext(), mMediaUri);
-//            restoreState(false);
-//        } catch (UnsupportedFormatException e) {
-//            reportFileUnsupported();
-//        }
-
-        }
     }
 }

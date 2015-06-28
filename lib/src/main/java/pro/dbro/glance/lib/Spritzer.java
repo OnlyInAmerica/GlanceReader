@@ -59,6 +59,15 @@ public class Spritzer {
         mLoopingPlayback = doLoop;
     }
 
+    /**
+     * Display static text, pausing any current Spritz
+     * @param input
+     */
+    public void setStaticText(String input) {
+        pause();
+        mTarget.setText(input);
+    }
+
     public void setTextAndStart(String input, boolean fireFinishEvent) {
         if (VERBOSE) Log.i(TAG, "setTextAndStart, no cb");
         pause();
