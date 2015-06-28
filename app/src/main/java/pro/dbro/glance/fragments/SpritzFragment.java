@@ -37,6 +37,7 @@ import pro.dbro.glance.events.ChapterSelectRequested;
 import pro.dbro.glance.events.EpubDownloadedEvent;
 import pro.dbro.glance.events.HttpUrlParsedEvent;
 import pro.dbro.glance.events.NextChapterEvent;
+import pro.dbro.glance.events.SpritzMediaReadyEvent;
 import pro.dbro.glance.formats.SpritzerMedia;
 import pro.dbro.glance.lib.SpritzerTextView;
 import pro.dbro.glance.lib.events.SpritzFinishedEvent;
@@ -500,6 +501,13 @@ public class SpritzFragment extends Fragment {
     @Subscribe
     public void onEpubDownloaded(EpubDownloadedEvent event) {
         showIndeterminateProgress(false);
+        updateMetaUi();
+        if (!mShowingTips)
+            showMetaUi(true);
+    }
+
+    @Subscribe
+    public void onSpritzMediaReady(SpritzMediaReadyEvent event) {
         updateMetaUi();
         if (!mShowingTips)
             showMetaUi(true);
