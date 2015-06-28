@@ -76,9 +76,9 @@ public class SpritzFragment extends Fragment {
             mSpritzer.setMediaUri(mediaUri);
         }
 
-//        Why is this commented out?
+        // It is the Spritzer's responsibility to display loading text display
+        // It is this fragment's responsibility to toggle the progress indicator
         if (AppSpritzer.isHttpUri(mediaUri)) {
-            mSpritzer.setTextAndStart(getString(R.string.loading), false);
             showIndeterminateProgress(true);
         }
     }
