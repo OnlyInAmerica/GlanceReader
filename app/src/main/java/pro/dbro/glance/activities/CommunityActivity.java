@@ -83,8 +83,17 @@ public class CommunityActivity extends FragmentActivity {
             case R.id.action_settings:
                 showPreferencesActivity();
                 break;
+            case R.id.action_book:
+                showBookActivity();
+                break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showBookActivity() {
+        Intent bookIntent = new Intent(this, BooksActivity.class);
+        bookIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivity(bookIntent);
     }
 
     private void showPreferencesActivity() {

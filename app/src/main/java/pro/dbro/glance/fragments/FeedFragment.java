@@ -27,6 +27,7 @@ import pro.dbro.glance.R;
 import pro.dbro.glance.adapters.ArticleAdapter;
 import pro.dbro.glance.adapters.ReaderSectionAdapter;
 import pro.dbro.glance.lib.SpritzerTextView;
+import timber.log.Timber;
 
 public class FeedFragment extends ListFragment {
 
@@ -125,6 +126,7 @@ public class FeedFragment extends ListFragment {
                     convertView.setOnClickListener(AdapterUtils.getArticleClickListener());
                     convertView.setOnLongClickListener(AdapterUtils.getArticleLongClickListener());
                 } catch (Exception e) {
+                    Timber.e(e, "Bind error");
                     // Parsing is fucked. NSFO.
                 }
 

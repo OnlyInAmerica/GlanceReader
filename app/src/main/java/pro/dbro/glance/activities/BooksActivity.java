@@ -75,8 +75,17 @@ public class BooksActivity extends FragmentActivity {
             case R.id.action_settings:
                 showPreferencesActivity();
                 break;
+            case R.id.action_community:
+                showCommunityActivity();
+                break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showCommunityActivity() {
+        Intent commActivity = new Intent(this, CommunityActivity.class);
+        commActivity.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivity(commActivity);
     }
 
     private void showPreferencesActivity() {
@@ -109,7 +118,7 @@ public class BooksActivity extends FragmentActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.community, menu);
+        getMenuInflater().inflate(R.menu.books, menu);
         return true;
     }
 
