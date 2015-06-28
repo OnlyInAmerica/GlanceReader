@@ -141,6 +141,10 @@ public class MainActivity extends AppCompatActivity implements View.OnSystemUiVi
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.container, frag, SPRITZ_FRAG_TAG)
                     .commit();
+        } else if (getSpritzFragment().getSpritzer().isPlaying()) {
+            // If this Activity has been recreated while the SpritzFragment was playing
+            // hide our action bar
+            if (getSupportActionBar() != null) getSupportActionBar().hide();
         }
 
         GlanceApplication app = (GlanceApplication) getApplication();
