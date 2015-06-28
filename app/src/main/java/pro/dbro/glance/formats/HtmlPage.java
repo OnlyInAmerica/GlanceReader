@@ -2,6 +2,7 @@ package pro.dbro.glance.formats;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.text.Html;
 import android.util.Log;
 
@@ -63,11 +64,11 @@ public class HtmlPage implements SpritzerMedia {
             return;
         }
         if (json.has("title"))
-            mTitle   =  json.get("title").getAsString();
+            mTitle = json.get("title").getAsString();
         if (json.has("url"))
-            mUrl     =  json.get("url").getAsString();
+            mUrl = json.get("url").getAsString();
         if (json.has("text"))
-            mContent =  json.get("text").getAsString();
+            mContent = json.get("text").getAsString();
 
         // Sanitize content
         mContent = Html.fromHtml(mContent).toString().replaceAll("\\n+", " ").replaceAll("(?s)<!--.*?-->", "");
@@ -112,19 +113,31 @@ public class HtmlPage implements SpritzerMedia {
                 .asJsonObject()
                 .setCallback(new FutureCallback<JsonObject>() {
                     @Override
-                    public void onCompleted(Exception e, JsonObject result) {
+                    public void onCompleted(Exception e, final JsonObject result) {
                         if (e != null) {
                             e.printStackTrace();
                             Log.e(TAG, "Unable to parse page");
                             return;
                         }
-                        //Log.i(TAG, "Got diffbot result " + result.toString());
-                        page.setResult(result);
 
-                        if (cb != null) {
-                            cb.onPageParsed(page);
+                        new AsyncTask<JsonObject, Void, HtmlPage>() {
 
-                        }
+                            @Override
+                            protected HtmlPage doInBackground(JsonObject... params) {
+
+                                JsonObject result = params[0];
+                                page.setResult(result);
+
+                                return page;
+                            }
+
+                            @Override
+                            protected void onPostExecute(HtmlPage result) {
+                                if (cb != null)
+                                    cb.onPageParsed(result);
+                            }
+
+                        }.execute(result);
                     }
                 });
 
