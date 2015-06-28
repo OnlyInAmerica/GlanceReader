@@ -134,9 +134,14 @@ public class MainActivity extends AppCompatActivity implements View.OnSystemUiVi
         setupActionBar();
         setContentView(R.layout.activity_main);
 
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, new SpritzFragment(), SPRITZ_FRAG_TAG)
-                .commit();
+        if (savedInstanceState == null) {
+            // Retain the SpritzFragment instance so it survives screen rotation
+            SpritzFragment frag = new SpritzFragment();
+            frag.setRetainInstance(true);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.container, frag, SPRITZ_FRAG_TAG)
+                    .commit();
+        }
 
         GlanceApplication app = (GlanceApplication) getApplication();
         mBus = app.getBus();
