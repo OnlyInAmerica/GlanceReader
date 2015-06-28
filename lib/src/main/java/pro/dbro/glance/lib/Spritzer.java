@@ -26,15 +26,26 @@ public class Spritzer {
     protected static final String TAG = "Spritzer";
     protected static final boolean VERBOSE = true;
 
+    /**
+     * Scaling factor to translate a user-selected WPM e.g "500"
+     * to the likely realized WPM due to average prevalence of double-stops
+     * (long words, punctuation etc).
+     *
+     * This factor is used in {@link #getMinutesRemainingInQueue()} to present
+     * the user with a more accurate estimation of the remaining spritz duration.
+     *
+     */
+    public static final float WPM_REALIZED_SCALING_FACTOR = .8f;
+
     protected static final int MSG_PRINT_WORD = 1;
     protected static final int MSG_SET_ENABLED = 2;
 
     protected static final int CHARS_LEFT_OF_PIVOT = 3;
     protected int mMaxWordLength = 13;
     protected String[] mWordArray;                  // A parsed list of words parsed from {@link #setText(String input)}
-    protected ArrayList<String> mDisplayWordList;        // The queue of words from mWordArray yet to be displayed
+    protected ArrayList<String> mDisplayWordList;   // The queue of words from mWordArray yet to be displayed
     protected TextView mTarget;
-    protected int mWPM;
+    protected int mWPM;                             // The user-selected WPM. This is the speed at which singlestop words will be presented
     protected Handler mSpritzHandler;
     protected final Object mSpritzThreadStartedSync = new Object();
     protected boolean mPlaying;
@@ -167,7 +178,8 @@ public class Spritzer {
         if (mDisplayWordList.size() == 0) {
             return 0;
         }
-        return (mDisplayWordList.size() - (mCurWordIdx + 1)) / mWPM;
+        // Inflate estimates by a small factor to account for doublestops
+        return (int) ((mDisplayWordList.size() - (mCurWordIdx + 1)) / (mWPM * WPM_REALIZED_SCALING_FACTOR));
     }
 
     /**

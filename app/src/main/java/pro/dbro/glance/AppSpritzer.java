@@ -66,7 +66,8 @@ public class AppSpritzer extends Spritzer {
     private int mChapter;
     private SpritzerMedia mMedia;
     private Uri mMediaUri;
-    private boolean mSpritzingSpecialMessage;
+    private boolean mSpritzingSpecialMessage;   // Are we spritzing a special message like "Touch to Start"
+    private String mQueuedContent;              // Content to spritz after special message
 
     public AppSpritzer(Bus bus, TextView target) {
         super(target);
@@ -199,6 +200,18 @@ public class AppSpritzer extends Spritzer {
         return mChapter;
     }
 
+    @Override
+    public int getMinutesRemainingInQueue() {
+        // If we're spritzing "Touch to Start" etc, let
+        // time remaining reflect actual content.  We also don't actually parse
+        // all the words, but use a completely bullshit estimate that seemed
+        // to relate decently well to the actual estimate
+        if (isSpritzingSpecialMessage() && mQueuedContent != null)
+            return (int) ((.4f * mQueuedContent.length() / mMaxWordLength) / (mWPM));
+
+        return super.getMinutesRemainingInQueue();
+    }
+
     public int getMaxChapter() {
         return (mMedia == null) ? 0 : mMedia.countChapters() - 1;
     }
@@ -317,8 +330,8 @@ public class AppSpritzer extends Spritzer {
             setWpm(state.getWpm());
             content = loadCleanStringFromNextNonEmptyChapter(mChapter);
         }
-        final String finalContent = content;
-        if (!mPlaying && finalContent.length() > 0) {
+        mQueuedContent = content;
+        if (!mPlaying && mQueuedContent.length() > 0) {
             setWpm(SPECIAL_MESSAGE_WPM);
             // Set mSpritzingSpecialMessage to true, so processNextWord doesn't
             // automatically proceed to the next chapter
@@ -328,7 +341,8 @@ public class AppSpritzer extends Spritzer {
             setTextAndStart(mTarget.getContext().getString(R.string.touch_to_start), new SpritzerCallback() {
                 @Override
                 public void onSpritzerFinished() {
-                    setText(finalContent);
+                    setText(mQueuedContent);
+                    mQueuedContent = null;
                     setWpm(state.getWpm());
                     mSpritzHandler.sendMessage(mSpritzHandler.obtainMessage(MSG_SET_ENABLED));
                 }
