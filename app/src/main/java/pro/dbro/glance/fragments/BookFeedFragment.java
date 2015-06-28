@@ -30,7 +30,6 @@ import pro.dbro.glance.adapters.ArticleAdapter;
 import pro.dbro.glance.adapters.BookSectionAdapter;
 import pro.dbro.glance.adapters.ReaderSectionAdapter;
 import pro.dbro.glance.lib.SpritzerTextView;
-import timber.log.Timber;
 
 //import pro.dbro.glance.SECRETS;
 
@@ -84,18 +83,9 @@ public class BookFeedFragment extends ListFragment {
 //        mLoadingView = (ProgressBar) myFragmentView.findViewById(android.R.id.empty);
         mLoadingView = (SpritzerTextView) myFragmentView.findViewById(android.R.id.empty);
 
-        switch (mFeed) {
-
-            case LIBRARY:
-                mArticleAdapter = new ArticleAdapter(getActivity(), ArticleAdapter.ArticleFilter.RECENT);
-                listView.setAdapter(mArticleAdapter);
-                break;
-            default:
-                mFeedItemAdapter = createFeedAdapter();
-                listView.setAdapter(mFeedItemAdapter);
-                loadPipe(mFeed.getFeedUrl());
-                break;
-        }
+        mFeedItemAdapter = createFeedAdapter();
+        listView.setAdapter(mFeedItemAdapter);
+        loadPipe(mFeed.getFeedUrl());
 
         return myFragmentView;
     }
@@ -117,7 +107,7 @@ public class BookFeedFragment extends ListFragment {
                     handle.setText(title);
 
                     TextView text = (TextView) convertView.findViewById(R.id.url);
-                    Timber.d(post.get("link").getAsString().replace(".atom", ".epub"));
+                    System.out.println(post.get("link").getAsString().replace(".atom", ".epub"));
                     convertView.setTag((post.get("link").getAsString().replace(".atom", ".epub")));
                     try {
                         JsonObject author = post.get("author").getAsJsonObject();
