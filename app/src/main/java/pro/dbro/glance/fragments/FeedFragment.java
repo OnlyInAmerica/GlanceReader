@@ -183,14 +183,10 @@ public class FeedFragment extends ListFragment {
     }
 
     private void showError() {
-        mLoadingView.getSpritzer().pause();
-        mLoadingView.getSpritzer().setLoopingPlayback(true);
-        mLoadingView.getSpritzer().setTextAndStart(getString(R.string.spritz_error), false);
+        mLoadingView.getSpritzer().setStaticText(getString(R.string.spritz_error));
     }
 
     private void showLoading() {
-        mLoadingView.getSpritzer().pause();
-        mLoadingView.getSpritzer().setLoopingPlayback(true);
-        mLoadingView.getSpritzer().setTextAndStart(getString(R.string.spritz_loading), false);
+        mLoadingView.getSpritzer().setStaticText(getString(R.string.spritz_loading));
     }
 }
