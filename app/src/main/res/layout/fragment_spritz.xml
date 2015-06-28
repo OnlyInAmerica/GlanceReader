@@ -8,34 +8,6 @@
     tools:context="pro.dbro.glance.SpritzFragment">
 
     <TextView
-        android:id="@+id/url"
-        style="@style/SubduedTextStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:paddingTop="16dp"
-        android:layout_marginLeft="@dimen/spritzer_title_margin_left"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:ellipsize="marquee"
-        android:singleLine="false"
-        android:textSize="@dimen/spritzer_title_text_size" />
-
-    <TextView
-        android:id="@+id/author"
-        style="@style/UltraSubduedTextStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:layout_alignLeft="@id/url"
-        android:layout_below="@id/url"
-        android:ellipsize="marquee"
-        android:singleLine="true"
-        android:textSize="@dimen/spritzer_author_text_size" />
-
-    <TextView
         android:id="@+id/spritzHistory"
         style="@style/SubduedTextStyle"
         android:layout_width="@dimen/spritzer_text_view_width"
@@ -70,6 +42,34 @@
         android:keepScreenOn="true"
         android:textSize="@dimen/spritzer_text_view_text_size"
         android:typeface="monospace" />
+
+    <TextView
+        android:id="@+id/url"
+        style="@style/SubduedTextStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:paddingTop="16dp"
+        android:layout_marginLeft="@dimen/spritzer_title_margin_left"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:ellipsize="marquee"
+        android:singleLine="false"
+        android:textSize="@dimen/spritzer_title_text_size" />
+
+    <TextView
+        android:id="@+id/author"
+        style="@style/UltraSubduedTextStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:layout_alignLeft="@id/url"
+        android:layout_below="@id/url"
+        android:ellipsize="marquee"
+        android:singleLine="true"
+        android:textSize="@dimen/spritzer_author_text_size" />
 
     <ProgressBar
         android:id="@+id/progress"
