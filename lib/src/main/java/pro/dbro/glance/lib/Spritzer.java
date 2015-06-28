@@ -60,12 +60,13 @@ public class Spritzer {
     }
 
     /**
-     * Display static text, pausing any current Spritz
+     * Display static text, pausing andn clearing any current Spritz
      * @param input
      */
     public void setStaticText(String input) {
         pause();
-        mTarget.setText(input);
+        clearText();
+        printWord(input);
     }
 
     public void setTextAndStart(String input, boolean fireFinishEvent) {
