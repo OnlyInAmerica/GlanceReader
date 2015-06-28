@@ -122,7 +122,8 @@ public class FeedFragment extends ListFragment {
                         text.setText(post.get("link").getAsString());
                     }
 
-                    convertView.setOnClickListener(AdapterUtils.getArticleClickListener(convertView.getContext()));
+                    convertView.setOnClickListener(AdapterUtils.getArticleClickListener());
+                    convertView.setOnLongClickListener(AdapterUtils.getArticleLongClickListener());
                 } catch (Exception e) {
                     // Parsing is fucked. NSFO.
                 }

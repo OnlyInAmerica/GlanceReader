@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.view.View;
 
@@ -40,16 +41,28 @@ public class AdapterUtils {
      */
     public static final String IS_INTERNAL_MEDIA = "InternalMedia";
 
-    public static View.OnClickListener getArticleClickListener(final Context c) {
+    public static View.OnClickListener getArticleClickListener() {
         return new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent communityIntent = new Intent(c, MainActivity.class);
+                Context context = view.getContext();
+                Intent communityIntent = new Intent(context, MainActivity.class);
                 communityIntent.setAction(Intent.ACTION_SEND);
                 communityIntent.putExtra(Intent.EXTRA_TEXT, (String) view.getTag());
                 communityIntent.putExtra(IS_INTERNAL_MEDIA, true);
                 communityIntent.putExtra(FINISH_AFTER, true);
-                c.startActivity(communityIntent);
+                context.startActivity(communityIntent);
+            }
+        };
+    }
+
+    public static View.OnLongClickListener getArticleLongClickListener() {
+        return new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse((String) view.getTag()));
+                view.getContext().startActivity(browserIntent);
+                return true;
             }
         };
     }
@@ -60,16 +73,17 @@ public class AdapterUtils {
     //      Open book
     //  If have book:
     //      Open book
-    public static View.OnClickListener getBookClickListener(final Context c) {
+    public static View.OnClickListener getBookClickListener() {
         return new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent bookIntent = new Intent(c, MainActivity.class);
+                Context context = view.getContext();
+                Intent bookIntent = new Intent(context, MainActivity.class);
                 bookIntent.setAction(Intent.ACTION_SEND);
                 bookIntent.putExtra(Intent.EXTRA_TEXT, (String) view.getTag());
                 bookIntent.putExtra(IS_INTERNAL_MEDIA, true);
                 bookIntent.putExtra(FINISH_AFTER, true);
-                c.startActivity(bookIntent);
+                context.startActivity(bookIntent);
 
                 //new DownloadManager(c).execute((String) view.getTag(), (String) view.getTag());
 

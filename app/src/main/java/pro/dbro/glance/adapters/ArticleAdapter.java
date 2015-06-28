@@ -79,7 +79,7 @@ public class ArticleAdapter extends ParseQueryAdapter<ParseObject> {
         reads.setText(String.valueOf(object.getInt("reads")));
         reads.setLines(1);
 
-        convertView.setOnClickListener(AdapterUtils.getArticleClickListener(convertView.getContext()));
+        convertView.setOnClickListener(AdapterUtils.getArticleClickListener());
 
         return convertView;
     }

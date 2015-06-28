@@ -30,6 +30,7 @@ import pro.dbro.glance.adapters.ArticleAdapter;
 import pro.dbro.glance.adapters.BookSectionAdapter;
 import pro.dbro.glance.adapters.ReaderSectionAdapter;
 import pro.dbro.glance.lib.SpritzerTextView;
+import timber.log.Timber;
 
 //import pro.dbro.glance.SECRETS;
 
@@ -107,7 +108,7 @@ public class BookFeedFragment extends ListFragment {
                     handle.setText(title);
 
                     TextView text = (TextView) convertView.findViewById(R.id.url);
-                    System.out.println(post.get("link").getAsString().replace(".atom", ".epub"));
+                    Timber.d(post.get("link").getAsString().replace(".atom", ".epub"));
                     convertView.setTag((post.get("link").getAsString().replace(".atom", ".epub")));
                     try {
                         JsonObject author = post.get("author").getAsJsonObject();
@@ -117,8 +118,10 @@ public class BookFeedFragment extends ListFragment {
                         text.setText(post.get("author").getAsString());
                     }
 
-                    convertView.setOnClickListener(AdapterUtils.getBookClickListener(convertView.getContext()));
+                    convertView.setOnClickListener(AdapterUtils.getBookClickListener());
+                    convertView.setOnLongClickListener(AdapterUtils.getArticleLongClickListener());
                 } catch (Exception e) {
+                    Timber.e(e, "Bind error");
                     // Parsing is fucked. NSFO.
                 }
 
