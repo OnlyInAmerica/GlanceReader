@@ -49,7 +49,7 @@ public class SpritzFragment extends Fragment {
     protected static final int MSG_SPRITZ_TEXT = 1;
     protected static final int MSG_HIDE_CHAPTER_LABEL = 2;
 
-    private static AppSpritzer mSpritzer;
+    private AppSpritzer mSpritzer;
     private TextView mAuthorView;
     private TextView mTitleView;
     private TextView mChapterView;
