@@ -1,25 +1,26 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="pro.dbro.glance.CommunityActivity">
 
     <item
         android:id="@+id/action_book"
         android:icon="?attr/book_icon"
         android:orderInCategory="100"
-        android:showAsAction="ifRoom"
+        app:showAsAction="ifRoom"
         android:title="@string/open_epub" />
 
     <item
         android:id="@+id/action_open"
         android:icon="?attr/file_icon"
         android:orderInCategory="100"
-        android:showAsAction="ifRoom"
+        app:showAsAction="ifRoom"
         android:title="@string/open_epub" />
 
     <item
         android:id="@+id/action_settings"
         android:icon="?attr/settings_icon"
         android:orderInCategory="100"
-        android:showAsAction="ifRoom"
+        app:showAsAction="ifRoom"
         android:title="@string/action_settings" />
 </menu>
