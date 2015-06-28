@@ -4,14 +4,14 @@
 
     <item
         android:id="@+id/action_community"
-        android:icon="?attr/book_icon"
+        android:icon="?attr/feed_icon"
         android:title="@string/open_epub"
         android:orderInCategory="100"
         android:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_open"
-        android:icon="?attr/book_icon"
+        android:icon="?attr/file_icon"
         android:title="@string/open_epub"
         android:orderInCategory="100"
         android:showAsAction="ifRoom" />
