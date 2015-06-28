@@ -34,6 +34,7 @@ import pro.dbro.glance.GlanceApplication;
 import pro.dbro.glance.GlancePrefsManager;
 import pro.dbro.glance.R;
 import pro.dbro.glance.events.ChapterSelectRequested;
+import pro.dbro.glance.events.EpubDownloadedEvent;
 import pro.dbro.glance.events.HttpUrlParsedEvent;
 import pro.dbro.glance.events.NextChapterEvent;
 import pro.dbro.glance.formats.SpritzerMedia;
@@ -92,6 +93,9 @@ public class SpritzFragment extends Fragment {
      */
     public void updateMetaUi() {
         if (!mSpritzer.isMediaSelected()) {
+            mAuthorView.setText("");
+            mTitleView.setText("");
+            mChapterView.setText("");
             return;
         }
 
@@ -488,6 +492,14 @@ public class SpritzFragment extends Fragment {
     public void onHttpUrlParsed(HttpUrlParsedEvent event) {
         showIndeterminateProgress(false);
         //mSpritzer.pause();
+        updateMetaUi();
+        if (!mShowingTips)
+            showMetaUi(true);
+    }
+
+    @Subscribe
+    public void onEpubDownloaded(EpubDownloadedEvent event) {
+        showIndeterminateProgress(false);
         updateMetaUi();
         if (!mShowingTips)
             showMetaUi(true);

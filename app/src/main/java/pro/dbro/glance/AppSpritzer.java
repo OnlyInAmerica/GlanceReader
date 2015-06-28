@@ -40,6 +40,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import pro.dbro.glance.events.EpubDownloadedEvent;
 import pro.dbro.glance.events.HttpUrlParsedEvent;
 import pro.dbro.glance.events.NextChapterEvent;
 import pro.dbro.glance.formats.Epub;
@@ -92,6 +93,7 @@ public class AppSpritzer extends Spritzer {
         if (isHttpUri(uri)) {
             if (isRemoteEpub(uri)){
                 Timber.d("Remote epub.." + uri.toString());
+                // Media should be null here
                 openRemoteEpub(uri);
             } else {
                 openHtmlPage(uri);
@@ -118,12 +120,15 @@ public class AppSpritzer extends Spritzer {
 
     private void openRemoteEpub(Uri epubUri) {
 
+        mMediaUri = epubUri;
+        mMedia = null; // Important that we clear any previous media
+
         File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         File file = new File(path, "/" + epubUri.getLastPathSegment());
 
         if (file.exists()) {
             Timber.d("Epub already downloaded");
-            openMedia(Uri.fromFile(file));
+            openEpub(Uri.fromFile(file));
             return;
         }
 
@@ -149,8 +154,12 @@ public class AppSpritzer extends Spritzer {
                         setTextAndStart("Error downloading book :(", true);
                         return;
                     }
+
+                    if (mBus != null) {
+                        mBus.post(new EpubDownloadedEvent());
+                    }
                     Timber.d("Download complete");
-                    openMedia(Uri.fromFile(file));
+                    openEpub(Uri.fromFile(file));
                 }
             });
     }
