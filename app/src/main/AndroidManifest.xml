@@ -18,7 +18,8 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/Dark" >
-        <activity android:name=".activities.MainActivity" >
+        <activity android:name=".activities.MainActivity"
+            android:theme="@style/Dark.Spritzer">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 

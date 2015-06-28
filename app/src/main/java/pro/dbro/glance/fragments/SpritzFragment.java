@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.TextAppearanceSpan;
@@ -41,6 +43,7 @@ import pro.dbro.glance.events.SpritzMediaReadyEvent;
 import pro.dbro.glance.formats.SpritzerMedia;
 import pro.dbro.glance.lib.SpritzerTextView;
 import pro.dbro.glance.lib.events.SpritzFinishedEvent;
+import timber.log.Timber;
 
 public class SpritzFragment extends Fragment {
     private static final String TAG = "SpritzFragment";
@@ -157,11 +160,15 @@ public class SpritzFragment extends Fragment {
     }
 
     public void hideActionBar(boolean dim) {
-        if (getActivity().getActionBar() == null) return;
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar == null) {
+            Timber.w("Actionbar is null");
+            return;
+        }
         if (dim) {
-            getActivity().getActionBar().hide();
+            actionBar.hide();
         } else {
-            getActivity().getActionBar().show();
+            actionBar.show();
         }
     }
 

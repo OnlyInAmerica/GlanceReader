@@ -1,12 +1,13 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="Light" parent="@android:style/Theme.Holo.Light">
+    <style name="Light" parent="Theme.AppCompat.Light">
         <!-- Customize your theme here. -->
         <item name="android:textColor">@android:color/black</item>
         <item name="android:windowBackground">@android:color/white</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:actionBarStyle">@style/ActionBar</item>
+
 
         <item name="chrome_bg">@color/spritz_bg</item>
         <item name="settings_icon">@drawable/ic_settings_blk</item>
@@ -22,7 +23,7 @@
         <item name="spritz_history_curtain">@drawable/white_transparent_bg</item>
     </style>
 
-    <style name="Dark" parent="@android:style/Theme.Holo">
+    <style name="Dark" parent="Theme.AppCompat">
         <!-- Customize your theme here. -->
         <item name="android:textColor">@android:color/white</item>
         <item name="android:windowBackground">@android:color/black</item>
@@ -43,8 +44,23 @@
 
     </style>
 
+    <!-- Theme for spritzing activity. Adds ActionBar as overlay -->
+    <style name="Dark.Spritzer" parent="Dark">
+        <item name="android:windowActionBarOverlay">true</item>
+
+        <!-- Support library compatibility -->
+        <item name="windowActionBarOverlay">true</item>
+    </style>
+
+    <style name="Light.Spritzer" parent="Light">
+        <item name="android:windowActionBarOverlay">true</item>
+
+        <!-- Support library compatibility -->
+        <item name="windowActionBarOverlay">true</item>
+    </style>
+
     <!-- ActionBar -->
-    <style name="ActionBar" parent="@android:style/Widget.Holo.ActionBar.Solid">
+    <style name="ActionBar" parent="@style/Widget.AppCompat.Light.ActionBar.Solid">
         <item name="android:background">?attr/chrome_bg</item>
     </style>
 

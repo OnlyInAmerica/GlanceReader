@@ -1,27 +1,25 @@
 package pro.dbro.glance.activities;
 
-import android.app.ActionBar;
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.astuetz.PagerSlidingTabStrip;
 
-import net.hockeyapp.android.CrashManager;
-import net.hockeyapp.android.UpdateManager;
-
 import pro.dbro.glance.GlancePrefsManager;
 import pro.dbro.glance.R;
-//import pro.dbro.glance.SECRETS;
 import pro.dbro.glance.adapters.ReaderSectionAdapter;
 
-public class CommunityActivity extends FragmentActivity {
+//import pro.dbro.glance.SECRETS;
+
+public class CommunityActivity extends AppCompatActivity {
 
     /** Intent Code */
     private static final int SELECT_MEDIA = 42;
@@ -69,7 +67,7 @@ public class CommunityActivity extends FragmentActivity {
     }
 
     private void setupActionBar() {
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowTitleEnabled(false);
     }
 

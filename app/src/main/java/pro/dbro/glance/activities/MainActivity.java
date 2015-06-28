@@ -1,21 +1,20 @@
 package pro.dbro.glance.activities;
 
-import android.app.ActionBar;
-import android.app.AlertDialog;
-import android.app.DialogFragment;
-import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 
 import com.parse.FindCallback;
 import com.parse.ParseException;
@@ -26,11 +25,10 @@ import com.squareup.otto.Subscribe;
 
 import java.util.List;
 
-import pro.dbro.glance.adapters.AdapterUtils;
 import pro.dbro.glance.GlanceApplication;
 import pro.dbro.glance.GlancePrefsManager;
 import pro.dbro.glance.R;
-//import pro.dbro.glance.SECRETS;
+import pro.dbro.glance.adapters.AdapterUtils;
 import pro.dbro.glance.billing.Catalog;
 import pro.dbro.glance.billing.IabHelper;
 import pro.dbro.glance.billing.IabResult;
@@ -46,7 +44,9 @@ import pro.dbro.glance.fragments.TocDialogFragment;
 import pro.dbro.glance.fragments.WpmDialogFragment;
 import pro.dbro.glance.lib.events.SpritzFinishedEvent;
 
-public class MainActivity extends FragmentActivity implements View.OnSystemUiVisibilityChangeListener {
+//import pro.dbro.glance.SECRETS;
+
+public class MainActivity extends AppCompatActivity implements View.OnSystemUiVisibilityChangeListener {
     private static final String TAG = "MainActivity";
     public static final boolean VERBOSE = false;
     public static final String SPRITZ_FRAG_TAG = "spritzfrag";
@@ -124,10 +124,10 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
         int theme = GlancePrefsManager.getTheme(this);
         switch (theme) {
             case THEME_LIGHT:
-                setTheme(R.style.Light);
+                setTheme(R.style.Light_Spritzer);
                 break;
             case THEME_DARK:
-                setTheme(R.style.Dark);
+                setTheme(R.style.Dark_Spritzer);
                 break;
         }
         super.onCreate(savedInstanceState);
@@ -219,7 +219,7 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_speed) {
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             DialogFragment newFragment = WpmDialogFragment.newInstance();
             newFragment.show(ft, "dialog");
             return true;
@@ -287,7 +287,7 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
         SpritzFragment frag = getSpritzFragment();
         if (frag != null && frag.isResumed() && frag.getSpritzer() != null) {
             SpritzerMedia book = frag.getSpritzer().getMedia();
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             DialogFragment newFragment = TocDialogFragment.newInstance(book);
             newFragment.show(ft, "dialog");
         } else {
@@ -300,8 +300,7 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
     }
 
     private void setupActionBar() {
-        getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle("");
         actionBar.setDisplayShowHomeEnabled(false);
         actionBar.setDisplayShowTitleEnabled(false);
