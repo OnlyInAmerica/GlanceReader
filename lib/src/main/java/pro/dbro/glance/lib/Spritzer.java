@@ -24,7 +24,7 @@ import pro.dbro.glance.lib.events.SpritzProgressEvent;
  */
 public class Spritzer {
     protected static final String TAG = "Spritzer";
-    protected static final boolean VERBOSE = false;
+    protected static final boolean VERBOSE = true;
 
     protected static final int MSG_PRINT_WORD = 1;
     protected static final int MSG_SET_ENABLED = 2;
@@ -230,7 +230,7 @@ public class Spritzer {
             if (VERBOSE) Log.w(TAG, "Start called in invalid state");
             return;
         }
-        if (VERBOSE) Log.i(TAG, "Start called " + ((cb == null) ? "without" : "with") + " callback." );
+        if (VERBOSE) Log.i(TAG, "Start called " + ((cb == null) ? "without" : "with") + " callback. with " + mWordArray.length + " words");
 
         mPlayingRequested = true;
         startTimerThread(cb, fireFinishEvent);
