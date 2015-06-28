@@ -37,6 +37,7 @@ import pro.dbro.glance.events.ChapterSelectRequested;
 import pro.dbro.glance.events.EpubDownloadedEvent;
 import pro.dbro.glance.events.HttpUrlParsedEvent;
 import pro.dbro.glance.events.NextChapterEvent;
+import pro.dbro.glance.events.SpritzMediaReadyEvent;
 import pro.dbro.glance.formats.SpritzerMedia;
 import pro.dbro.glance.lib.SpritzerTextView;
 import pro.dbro.glance.lib.events.SpritzFinishedEvent;
@@ -76,9 +77,9 @@ public class SpritzFragment extends Fragment {
             mSpritzer.setMediaUri(mediaUri);
         }
 
-//        Why is this commented out?
+        // It is the Spritzer's responsibility to display loading text display
+        // It is this fragment's responsibility to toggle the progress indicator
         if (AppSpritzer.isHttpUri(mediaUri)) {
-            mSpritzer.setTextAndStart(getString(R.string.loading), false);
             showIndeterminateProgress(true);
         }
     }
@@ -500,6 +501,13 @@ public class SpritzFragment extends Fragment {
     @Subscribe
     public void onEpubDownloaded(EpubDownloadedEvent event) {
         showIndeterminateProgress(false);
+        updateMetaUi();
+        if (!mShowingTips)
+            showMetaUi(true);
+    }
+
+    @Subscribe
+    public void onSpritzMediaReady(SpritzMediaReadyEvent event) {
         updateMetaUi();
         if (!mShowingTips)
             showMetaUi(true);

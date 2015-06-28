@@ -43,6 +43,7 @@ import java.util.concurrent.ExecutionException;
 import pro.dbro.glance.events.EpubDownloadedEvent;
 import pro.dbro.glance.events.HttpUrlParsedEvent;
 import pro.dbro.glance.events.NextChapterEvent;
+import pro.dbro.glance.events.SpritzMediaReadyEvent;
 import pro.dbro.glance.formats.Epub;
 import pro.dbro.glance.formats.HtmlPage;
 import pro.dbro.glance.formats.SpritzerMedia;
@@ -82,7 +83,7 @@ public class AppSpritzer extends Spritzer {
     }
 
     public void setMediaUri(Uri uri) {
-        pause();
+        setStaticText("");
         openMedia(uri);
     }
 
@@ -138,8 +139,6 @@ public class AppSpritzer extends Spritzer {
                 @Override
                 public void onProgress(long downloaded, long total) {
                     int progress = (int) ((downloaded / ((float) total)) * 100);
-
-                    Timber.d("Progress %d", progress);
                     setStaticText("Loading " + progress + "%");
                 }
             })
@@ -324,6 +323,7 @@ public class AppSpritzer extends Spritzer {
             // automatically proceed to the next chapter
             mSpritzingSpecialMessage = true;
             mTarget.setEnabled(false);
+            if (mBus != null) mBus.post(new SpritzMediaReadyEvent());
             setTextAndStart(mTarget.getContext().getString(R.string.touch_to_start), new SpritzerCallback() {
                 @Override
                 public void onSpritzerFinished() {
