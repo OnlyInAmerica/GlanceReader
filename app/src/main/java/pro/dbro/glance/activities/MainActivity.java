@@ -46,7 +46,7 @@ import pro.dbro.glance.lib.events.SpritzFinishedEvent;
 
 //import pro.dbro.glance.SECRETS;
 
-public class MainActivity extends AppCompatActivity implements View.OnSystemUiVisibilityChangeListener {
+public class MainActivity extends ImmersiveActivityBase implements View.OnSystemUiVisibilityChangeListener {
     private static final String TAG = "MainActivity";
     public static final boolean VERBOSE = false;
     public static final String SPRITZ_FRAG_TAG = "spritzfrag";
