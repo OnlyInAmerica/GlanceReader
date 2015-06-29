@@ -375,10 +375,12 @@ public class AppSpritzer extends Spritzer {
         if (mCurWordIdx < 2 || mDisplayWordList.size() < 2) return "";
         StringBuilder builder = new StringBuilder();
         int numWords = 0;
-        while (builder.length() + mDisplayWordList.get(mCurWordIdx - (numWords + 2)).length() < maxChars) {
-            builder.insert(0, mDisplayWordList.get(mCurWordIdx - (numWords + 2)) + " ");
+        int curWordIdx = mCurWordIdx - (numWords + 2);
+        while (builder.length() + mDisplayWordList.get(curWordIdx).length() < maxChars) {
+            builder.insert(0, mDisplayWordList.get(curWordIdx) + " ");
             numWords++;
-            if (mCurWordIdx - (numWords + 2) < 0) break;
+            curWordIdx = mCurWordIdx - (numWords + 2);
+            if (mCurWordIdx < 0 || mCurWordIdx >= mDisplayWordList.size()) break;
         }
         return builder.toString();
     }
