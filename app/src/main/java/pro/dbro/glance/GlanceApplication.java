@@ -5,6 +5,8 @@ import android.app.Application;
 import com.squareup.otto.Bus;
 import com.squareup.otto.ThreadEnforcer;
 
+import timber.log.Timber;
+
 
 /**
  * A custom application that sets up common functionality.
@@ -18,6 +20,10 @@ public class GlanceApplication extends Application {
     public void onCreate() {
         super.onCreate();
         this.mBus = new Bus(ThreadEnforcer.ANY);
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(new Timber.DebugTree());
+        }
     }
 
     /**

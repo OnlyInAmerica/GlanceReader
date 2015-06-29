@@ -18,18 +18,23 @@ import com.parse.Parse;
 import com.parse.ParseObject;
 import com.parse.ParseQueryAdapter;
 
+import org.json.JSONObject;
+
+import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import pro.dbro.glance.adapters.AdapterUtils;
 import pro.dbro.glance.R;
-//import pro.dbro.glance.SECRETS;
+import pro.dbro.glance.adapters.AdapterUtils;
 import pro.dbro.glance.adapters.ArticleAdapter;
+import pro.dbro.glance.adapters.BookSectionAdapter;
 import pro.dbro.glance.adapters.ReaderSectionAdapter;
 import pro.dbro.glance.lib.SpritzerTextView;
 import timber.log.Timber;
 
-public class FeedFragment extends ListFragment {
+//import pro.dbro.glance.SECRETS;
+
+public class BookFeedFragment extends ListFragment {
 
     ArrayAdapter<JsonObject> mFeedItemAdapter;
     ParseQueryAdapter<ParseObject> mArticleAdapter;
@@ -40,12 +45,12 @@ public class FeedFragment extends ListFragment {
     Future<JsonObject> mFuture;
 
     private static final String ARG_FEED = "feed";
-    private ReaderSectionAdapter.Feed mFeed;
+    private BookSectionAdapter.BookFeed mFeed;
     private static boolean sParseSetup = false;
     private boolean mLoading = false;
 
-    public static FeedFragment newInstance(ReaderSectionAdapter.Feed feed) {
-        FeedFragment f = new FeedFragment();
+    public static BookFeedFragment newInstance(BookSectionAdapter.BookFeed feed) {
+        BookFeedFragment f = new BookFeedFragment();
         Bundle b = new Bundle();
         b.putSerializable(ARG_FEED, feed);
         f.setArguments(b);
@@ -60,7 +65,7 @@ public class FeedFragment extends ListFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mFeed = (ReaderSectionAdapter.Feed) getArguments().getSerializable(ARG_FEED);
+        mFeed = (BookSectionAdapter.BookFeed) getArguments().getSerializable(ARG_FEED);
         if (!sParseSetup) {
             setupParse();
         }
@@ -79,22 +84,9 @@ public class FeedFragment extends ListFragment {
 //        mLoadingView = (ProgressBar) myFragmentView.findViewById(android.R.id.empty);
         mLoadingView = (SpritzerTextView) myFragmentView.findViewById(android.R.id.empty);
 
-        switch (mFeed) {
-
-            case POPULAR:
-                mArticleAdapter = new ArticleAdapter(getActivity(), ArticleAdapter.ArticleFilter.RECENT);
-                listView.setAdapter(mArticleAdapter);
-                break;
-            case RECENT:
-                mArticleAdapter = new ArticleAdapter(getActivity(), ArticleAdapter.ArticleFilter.ALL);
-                listView.setAdapter(mArticleAdapter);
-                break;
-            default:
-                mFeedItemAdapter = createFeedAdapter();
-                listView.setAdapter(mFeedItemAdapter);
-                loadPipe(mFeed.getFeedUrl());
-                break;
-        }
+        mFeedItemAdapter = createFeedAdapter();
+        listView.setAdapter(mFeedItemAdapter);
+        loadPipe(mFeed.getFeedUrl());
 
         return myFragmentView;
     }
@@ -116,14 +108,17 @@ public class FeedFragment extends ListFragment {
                     handle.setText(title);
 
                     TextView text = (TextView) convertView.findViewById(R.id.url);
-                    convertView.setTag((post.get("link").getAsString()));
+                    Timber.d(post.get("link").getAsString().replace(".atom", ".epub"));
+                    convertView.setTag((post.get("link").getAsString().replace(".atom", ".epub")));
                     try {
-                        text.setText(new URL(post.get("link").getAsString()).getHost());
-                    } catch (MalformedURLException e) {
-                        text.setText(post.get("link").getAsString());
+                        JsonObject author = post.get("author").getAsJsonObject();
+                        String name = author.get("name").getAsString();
+                        text.setText(name);
+                    } catch (Exception e) {
+                        text.setText(post.get("author").getAsString());
                     }
 
-                    convertView.setOnClickListener(AdapterUtils.getArticleClickListener());
+                    convertView.setOnClickListener(AdapterUtils.getBookClickListener());
                     convertView.setOnLongClickListener(AdapterUtils.getArticleLongClickListener());
                 } catch (Exception e) {
                     Timber.e(e, "Bind error");

@@ -2,31 +2,54 @@ package pro.dbro.glance;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Application;
+import android.app.DownloadManager;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.UriPermission;
+import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.text.Html;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.koushikdutta.async.future.FutureCallback;
+import com.koushikdutta.ion.Ion;
+import com.koushikdutta.ion.ProgressCallback;
 import com.parse.FindCallback;
+import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.squareup.otto.Bus;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
-import de.jetwick.snacktory.JResult;
+import pro.dbro.glance.events.EpubDownloadedEvent;
 import pro.dbro.glance.events.HttpUrlParsedEvent;
 import pro.dbro.glance.events.NextChapterEvent;
+import pro.dbro.glance.events.SpritzMediaReadyEvent;
 import pro.dbro.glance.formats.Epub;
 import pro.dbro.glance.formats.HtmlPage;
 import pro.dbro.glance.formats.SpritzerMedia;
 import pro.dbro.glance.formats.UnsupportedFormatException;
 import pro.dbro.glance.lib.Spritzer;
+import timber.log.Timber;
 
 /**
  * A higher-level {@link pro.dbro.glance.lib.Spritzer} that operates
@@ -38,34 +61,53 @@ public class AppSpritzer extends Spritzer {
     public static final boolean VERBOSE = true;
     public static final int SPECIAL_MESSAGE_WPM = 100;
 
+    private Context context;
+
     private int mChapter;
     private SpritzerMedia mMedia;
     private Uri mMediaUri;
-    private boolean mSpritzingSpecialMessage;
+    private boolean mSpritzingSpecialMessage;   // Are we spritzing a special message like "Touch to Start"
+    private String mQueuedContent;              // Content to spritz after special message
 
     public AppSpritzer(Bus bus, TextView target) {
         super(target);
+        context = target.getContext().getApplicationContext();
         setEventBus(bus);
         restoreState(true);
     }
 
     public AppSpritzer(Bus bus, TextView target, Uri mediaUri) {
         super(target);
+        context = target.getContext().getApplicationContext();
         setEventBus(bus);
         openMedia(mediaUri);
     }
 
     public void setMediaUri(Uri uri) {
-        pause();
+        setStaticText("");
         openMedia(uri);
     }
 
     private void openMedia(Uri uri) {
+
+        Timber.d("Opening.." + uri.toString());
+
         if (isHttpUri(uri)) {
-            openHtmlPage(uri);
+            if (isRemoteEpub(uri)){
+                Timber.d("Remote epub.." + uri.toString());
+                // Media should be null here
+                openRemoteEpub(uri);
+            } else {
+                openHtmlPage(uri);
+            }
         } else {
             openEpub(uri);
         }
+    }
+
+    private void initParse() {
+        Parse.initialize(context, "IKXOwtsEGwpJxjD56rloizwwsB4pijEve8nU5wkB", "8K0yHwwEevmCiuuHTjGj7HRhFTzHmycBXXspmnPU");
+        Parse.enableLocalDatastore(context);
     }
 
     private void openEpub(Uri epubUri) {
@@ -78,12 +120,57 @@ public class AppSpritzer extends Spritzer {
         }
     }
 
+    private void openRemoteEpub(Uri epubUri) {
+
+        mMediaUri = epubUri;
+        mMedia = null; // Important that we clear any previous media
+
+        File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File file = new File(path, "/" + epubUri.getLastPathSegment());
+
+        if (file.exists()) {
+            Timber.d("Epub already downloaded");
+            openEpub(Uri.fromFile(file));
+            return;
+        }
+
+        Ion.with(context)
+            .load(epubUri.toString())
+            .progressHandler(new ProgressCallback() {
+                @Override
+                public void onProgress(long downloaded, long total) {
+                    int progress = (int) ((downloaded / ((float) total)) * 100);
+                    setStaticText("Loading " + progress + "%");
+                }
+            })
+            .write(file)
+            .setCallback(new FutureCallback<File>() {
+                @Override
+                public void onCompleted(Exception e, File file) {
+                    // download done...
+                    // do stuff with the File or error
+                    if (e != null) {
+                        Timber.e(e, "Error downloading file");
+                        setTextAndStart("Error downloading book :(", true);
+                        return;
+                    }
+
+                    if (mBus != null) {
+                        mBus.post(new EpubDownloadedEvent());
+                    }
+                    Timber.d("Download complete");
+                    openEpub(Uri.fromFile(file));
+                }
+            });
+    }
+
     private void openHtmlPage(Uri htmlUri) {
         try {
             mMediaUri = htmlUri;
-            mMedia = HtmlPage.fromUri(htmlUri.toString(), new HtmlPage.HtmlPageParsedCallback() {
+            setStaticText(context.getString(R.string.loading));
+            mMedia = HtmlPage.fromUri(mTarget.getContext().getApplicationContext(), htmlUri.toString(), new HtmlPage.HtmlPageParsedCallback() {
                 @Override
-                public void onPageParsed(JResult result) {
+                public void onPageParsed(HtmlPage result) {
                     restoreState(false);
                     if (mBus != null) {
                         mBus.post(new HttpUrlParsedEvent(result));
@@ -111,6 +198,18 @@ public class AppSpritzer extends Spritzer {
 
     public int getCurrentChapter() {
         return mChapter;
+    }
+
+    @Override
+    public int getMinutesRemainingInQueue() {
+        // If we're spritzing "Touch to Start" etc, let
+        // time remaining reflect actual content.  We also don't actually parse
+        // all the words, but use a completely bullshit estimate that seemed
+        // to relate decently well to the actual estimate
+        if (isSpritzingSpecialMessage() && mQueuedContent != null)
+            return (int) ((.4f * mQueuedContent.length() / mMaxWordLength) / (mWPM));
+
+        return super.getMinutesRemainingInQueue();
     }
 
     public int getMaxChapter() {
@@ -148,7 +247,7 @@ public class AppSpritzer extends Spritzer {
     /**
      * Load the given chapter as sanitized text, proceeding
      * to the next chapter until a non-zero length result is found.
-     *
+     * <p/>
      * This method is useful because some "Chapters" contain only HTML data
      * that isn't useful to a Spritzer.
      *
@@ -158,7 +257,7 @@ public class AppSpritzer extends Spritzer {
     private String loadCleanStringFromNextNonEmptyChapter(int chapter) {
         int chapterToTry = chapter;
         String result = "";
-        while(result.length() == 0 && chapterToTry <= getMaxChapter()) {
+        while (result.length() == 0 && chapterToTry <= getMaxChapter()) {
             result = loadCleanStringFromChapter(chapterToTry);
             chapterToTry++;
         }
@@ -177,7 +276,8 @@ public class AppSpritzer extends Spritzer {
 
     public void saveState() {
         if (mMedia != null) {
-            if (VERBOSE) Log.i(TAG, "Saving state at chapter " + mChapter + " word: " + mCurWordIdx);
+            if (VERBOSE)
+                Log.i(TAG, "Saving state at chapter " + mChapter + " word: " + mCurWordIdx);
             GlancePrefsManager.saveState(
                     mTarget.getContext(),
                     mChapter,
@@ -215,13 +315,14 @@ public class AppSpritzer extends Spritzer {
                     openMedia(mediaUri);
                 }
             }
-        } else if (state.hasTitle() && mMedia.getTitle().compareTo(state.getTitle()) == 0) {
+        } else if (state.hasTitle() && mMedia.getTitle().equals(state.getTitle())) {
             // Resume media at previous point
             mChapter = state.getChapter();
             content = loadCleanStringFromNextNonEmptyChapter(mChapter);
             setWpm(state.getWpm());
             mCurWordIdx = state.getWordIdx();
-            if (VERBOSE) Log.i(TAG, "Resuming " + mMedia.getTitle() + " from chapter " + mChapter + " word " + mCurWordIdx);
+            if (VERBOSE)
+                Log.i(TAG, "Resuming " + mMedia.getTitle() + " from chapter " + mChapter + " word " + mCurWordIdx);
         } else {
             // Begin content anew
             mChapter = 0;
@@ -229,17 +330,19 @@ public class AppSpritzer extends Spritzer {
             setWpm(state.getWpm());
             content = loadCleanStringFromNextNonEmptyChapter(mChapter);
         }
-        final String finalContent = content;
-        if (!mPlaying && finalContent.length() > 0) {
+        mQueuedContent = content;
+        if (!mPlaying && mQueuedContent.length() > 0) {
             setWpm(SPECIAL_MESSAGE_WPM);
             // Set mSpritzingSpecialMessage to true, so processNextWord doesn't
             // automatically proceed to the next chapter
             mSpritzingSpecialMessage = true;
             mTarget.setEnabled(false);
+            if (mBus != null) mBus.post(new SpritzMediaReadyEvent());
             setTextAndStart(mTarget.getContext().getString(R.string.touch_to_start), new SpritzerCallback() {
                 @Override
                 public void onSpritzerFinished() {
-                    setText(finalContent);
+                    setText(mQueuedContent);
+                    mQueuedContent = null;
                     setWpm(state.getWpm());
                     mSpritzHandler.sendMessage(mSpritzHandler.obtainMessage(MSG_SET_ENABLED));
                 }
@@ -255,6 +358,10 @@ public class AppSpritzer extends Spritzer {
         return uri.getScheme() != null && uri.getScheme().contains("http");
     }
 
+    public static boolean isRemoteEpub(Uri uri) {
+        return uri.getScheme() != null && uri.getScheme().contains("http") && uri.toString().contains(".epub");
+    }
+
     /**
      * Return a String representing the maxChars most recently
      * Spritzed characters.
@@ -263,16 +370,18 @@ public class AppSpritzer extends Spritzer {
      * @return The maxChars number of most recently spritzed characters during this segment
      */
     public String getHistoryString(int maxChars) {
+        if (mDisplayWordList == null) return "";
         if (maxChars <= 0) maxChars = Integer.MAX_VALUE;
         if (mCurWordIdx < 2 || mDisplayWordList.size() < 2) return "";
         StringBuilder builder = new StringBuilder();
         int numWords = 0;
-        while (builder.length() + mDisplayWordList.get(mCurWordIdx - (numWords + 2)).length() < maxChars) {
-            builder.insert(0, mDisplayWordList.get(mCurWordIdx - (numWords + 2)) + " ");
+        int curWordIdx = mCurWordIdx - (numWords + 2);
+        while (builder.length() + mDisplayWordList.get(curWordIdx).length() < maxChars) {
+            builder.insert(0, mDisplayWordList.get(curWordIdx) + " ");
             numWords++;
-            if (mCurWordIdx - (numWords + 2) < 0) break;
+            curWordIdx = mCurWordIdx - (numWords + 2);
+            if (mCurWordIdx < 0 || mCurWordIdx >= mDisplayWordList.size()) break;
         }
         return builder.toString();
     }
-
 }

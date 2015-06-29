@@ -1,12 +1,13 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="Light" parent="@android:style/Theme.Holo.Light">
+    <style name="Light" parent="Theme.AppCompat.Light">
         <!-- Customize your theme here. -->
         <item name="android:textColor">@android:color/black</item>
         <item name="android:windowBackground">@android:color/white</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:actionBarStyle">@style/ActionBar</item>
+
 
         <item name="chrome_bg">@color/spritz_bg</item>
         <item name="settings_icon">@drawable/ic_settings_blk</item>
@@ -14,13 +15,15 @@
         <item name="theme_icon">@drawable/ic_theme_blk</item>
         <item name="speed_icon">@drawable/ic_gauge_blk</item>
         <item name="book_icon">@drawable/ic_book_blk</item>
+        <item name="feed_icon">@drawable/ic_feed_blk</item>
+        <item name="file_icon">@drawable/ic_file_blk</item>
         <item name="subdued_text">@color/subdued_text</item>
         <item name="ultra_subdued_text">@color/ultra_subdued_text</item>
         <item name="list_bg">@color/light_list_bg</item>
         <item name="spritz_history_curtain">@drawable/white_transparent_bg</item>
     </style>
 
-    <style name="Dark" parent="@android:style/Theme.Holo">
+    <style name="Dark" parent="Theme.AppCompat">
         <!-- Customize your theme here. -->
         <item name="android:textColor">@android:color/white</item>
         <item name="android:windowBackground">@android:color/black</item>
@@ -32,6 +35,8 @@
         <item name="theme_icon">@drawable/ic_theme_white</item>
         <item name="speed_icon">@drawable/ic_gauge_white</item>
         <item name="book_icon">@drawable/ic_book_white</item>
+        <item name="feed_icon">@drawable/ic_feed</item>
+        <item name="file_icon">@drawable/ic_file</item>
         <item name="subdued_text">@color/subdued_text_dark</item>
         <item name="ultra_subdued_text">@color/ultra_subdued_text_dark</item>
         <item name="list_bg">@color/dark_list_bg</item>
@@ -39,8 +44,23 @@
 
     </style>
 
+    <!-- Theme for spritzing activity. Adds ActionBar as overlay -->
+    <style name="Dark.Spritzer" parent="Dark">
+        <item name="android:windowActionBarOverlay">true</item>
+
+        <!-- Support library compatibility -->
+        <item name="windowActionBarOverlay">true</item>
+    </style>
+
+    <style name="Light.Spritzer" parent="Light">
+        <item name="android:windowActionBarOverlay">true</item>
+
+        <!-- Support library compatibility -->
+        <item name="windowActionBarOverlay">true</item>
+    </style>
+
     <!-- ActionBar -->
-    <style name="ActionBar" parent="@android:style/Widget.Holo.ActionBar.Solid">
+    <style name="ActionBar" parent="@style/Widget.AppCompat.Light.ActionBar.Solid">
         <item name="android:background">?attr/chrome_bg</item>
     </style>
 
@@ -77,6 +97,8 @@
     <attr name="speed_icon" format="reference" />
     <attr name="book_icon" format="reference" />
     <attr name="settings_icon" format="reference" />
+    <attr name="feed_icon" format="reference" />
+    <attr name="file_icon" format="reference" />
 
     <attr name="subdued_text" format="reference" />
     <attr name="ultra_subdued_text" format="reference" />

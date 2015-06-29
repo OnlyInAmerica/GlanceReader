@@ -4,23 +4,22 @@
     tools:context="pro.dbro.glance.CommunityActivity">
 
     <item
-        android:id="@+id/action_book"
-        android:icon="?attr/book_icon"
+        android:id="@+id/action_community"
+        android:icon="?attr/feed_icon"
+        android:title="@string/open_epub"
         android:orderInCategory="100"
-        app:showAsAction="ifRoom"
-        android:title="@string/open_epub" />
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/action_open"
         android:icon="?attr/file_icon"
+        android:title="@string/open_epub"
         android:orderInCategory="100"
-        app:showAsAction="ifRoom"
-        android:title="@string/open_epub" />
+        app:showAsAction="always" />
 
-    <item
-        android:id="@+id/action_settings"
+    <item android:id="@+id/action_settings"
+        android:title="@string/action_settings"
         android:icon="?attr/settings_icon"
         android:orderInCategory="100"
-        app:showAsAction="ifRoom"
-        android:title="@string/action_settings" />
+        app:showAsAction="always" />
 </menu>

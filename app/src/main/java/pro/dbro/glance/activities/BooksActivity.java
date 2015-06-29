@@ -4,9 +4,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,11 +15,12 @@ import com.astuetz.PagerSlidingTabStrip;
 
 import pro.dbro.glance.GlancePrefsManager;
 import pro.dbro.glance.R;
+import pro.dbro.glance.adapters.BookSectionAdapter;
 import pro.dbro.glance.adapters.ReaderSectionAdapter;
 
 //import pro.dbro.glance.SECRETS;
 
-public class CommunityActivity extends AppCompatActivity {
+public class BooksActivity extends AppCompatActivity {
 
     /** Intent Code */
     private static final int SELECT_MEDIA = 42;
@@ -41,34 +42,28 @@ public class CommunityActivity extends AppCompatActivity {
                 break;
         }
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_community);
+        setContentView(R.layout.activity_books);
         setupActionBar();
 
         // Initialize the ViewPager and set an adapter
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
-        pager.setAdapter(new ReaderSectionAdapter(getSupportFragmentManager()));
+        pager.setAdapter(new BookSectionAdapter(getSupportFragmentManager()));
 
         // Bind the tabs to the ViewPager
         PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
         tabs.setViewPager(pager);
-
-        checkForUpdates();
-
-        if (GlancePrefsManager.getShouldShowOnboarder(this)) {
-            showOnboarder();
-        }
 
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        checkForCrashes();
     }
 
     private void setupActionBar() {
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayShowTitleEnabled(false);
+        if (actionBar != null)
+            actionBar.setDisplayShowTitleEnabled(false);
     }
 
     @Override
@@ -81,17 +76,17 @@ public class CommunityActivity extends AppCompatActivity {
             case R.id.action_settings:
                 showPreferencesActivity();
                 break;
-            case R.id.action_book:
-                showBookActivity();
+            case R.id.action_community:
+                showCommunityActivity();
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void showBookActivity() {
-        Intent bookIntent = new Intent(this, BooksActivity.class);
-        bookIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        startActivity(bookIntent);
+    private void showCommunityActivity() {
+        Intent commActivity = new Intent(this, CommunityActivity.class);
+        commActivity.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivity(commActivity);
     }
 
     private void showPreferencesActivity() {
@@ -124,7 +119,7 @@ public class CommunityActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.community, menu);
+        getMenuInflater().inflate(R.menu.books, menu);
         return true;
     }
 
@@ -142,22 +137,6 @@ public class CommunityActivity extends AppCompatActivity {
             spritzIntent.setData(uri);
             startActivity(spritzIntent);
         }
-    }
-
-    private void checkForCrashes() {
-        //CrashManager.register(this, SECRETS.getHockeyAppId());
-    }
-
-    private void checkForUpdates() {
-        // Remove this for store builds!
-        //UpdateManager.register(this, SECRETS.getHockeyAppId());
-    }
-
-    private void showOnboarder() {
-        new AlertDialog.Builder(this)
-                .setView(getLayoutInflater().inflate(R.layout.dialog_on_boarder, null))
-                .setPositiveButton("Got it", null)
-                .show();
     }
 }
 

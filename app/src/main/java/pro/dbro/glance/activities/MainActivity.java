@@ -1,22 +1,20 @@
 package pro.dbro.glance.activities;
 
-import android.app.ActionBar;
-import android.app.AlertDialog;
-import android.app.DialogFragment;
-import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.util.Log;
-import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 
 import com.parse.FindCallback;
 import com.parse.ParseException;
@@ -26,13 +24,11 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import java.util.List;
-import java.util.regex.Matcher;
 
-import pro.dbro.glance.adapters.AdapterUtils;
 import pro.dbro.glance.GlanceApplication;
 import pro.dbro.glance.GlancePrefsManager;
 import pro.dbro.glance.R;
-//import pro.dbro.glance.SECRETS;
+import pro.dbro.glance.adapters.AdapterUtils;
 import pro.dbro.glance.billing.Catalog;
 import pro.dbro.glance.billing.IabHelper;
 import pro.dbro.glance.billing.IabResult;
@@ -48,76 +44,17 @@ import pro.dbro.glance.fragments.TocDialogFragment;
 import pro.dbro.glance.fragments.WpmDialogFragment;
 import pro.dbro.glance.lib.events.SpritzFinishedEvent;
 
-public class MainActivity extends FragmentActivity implements View.OnSystemUiVisibilityChangeListener {
+//import pro.dbro.glance.SECRETS;
+
+public class MainActivity extends ImmersiveActivityBase implements View.OnSystemUiVisibilityChangeListener {
     private static final String TAG = "MainActivity";
     public static final boolean VERBOSE = false;
     public static final String SPRITZ_FRAG_TAG = "spritzfrag";
     private static final int THEME_LIGHT = 0;
     private static final int THEME_DARK = 1;
-    private IabHelper mBillingHelper;
-    private boolean mIsPremium;
     private Menu mMenu;
     private boolean mFinishAfterSpritz = false;
 
-    // Listener that's called when we finish querying the items and subscriptions we own
-    IabHelper.QueryInventoryFinishedListener mGotInventoryListener = new IabHelper.QueryInventoryFinishedListener() {
-        public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
-            if (VERBOSE) Log.d(TAG, "Query inventory finished.");
-
-            // Have we been disposed of in the meantime? If so, quit.
-            if (mBillingHelper == null) return;
-
-            // Is it a failure?
-            if (result.isFailure()) {
-                Log.i(TAG, "Failed to query inventory: " + result);
-                return;
-            }
-
-            if (VERBOSE) Log.d(TAG, "Query inventory was successful.");
-
-            /*
-             * Check for items we own. Notice that for each purchase, we check
-             * the developer payload to see if it's correct! See
-             * verifyDeveloperPayload().
-             */
-
-            // Do we have the premium upgrade?
-            Purchase premiumPurchase = inventory.getPurchase(Catalog.SKU_PREMIUM);
-            boolean isPremiumUser = (premiumPurchase != null && verifyDeveloperPayload(premiumPurchase));
-            if (VERBOSE) Log.d(TAG, "User is " + (isPremiumUser ? "PREMIUM" : "NOT PREMIUM"));
-            if (VERBOSE) Log.d(TAG, "Initial inventory query finished; enabling main UI.");
-            mIsPremium = isPremiumUser;
-            invalidateOptionsMenu();
-        }
-    };
-
-    IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener() {
-        public void onIabPurchaseFinished(IabResult result, Purchase purchase) {
-            if (VERBOSE) Log.d(TAG, "Purchase finished: " + result + ", purchase: " + purchase);
-
-            // if we were disposed of in the meantime, quit.
-            if (mBillingHelper == null) return;
-
-            if (result.isFailure()) {
-                Log.i(TAG, "Error purchasing: " + result);
-                return;
-            }
-            if (!verifyDeveloperPayload(purchase)) {
-                Log.i(TAG, "Error purchasing. Authenticity verification failed.");
-                return;
-            }
-
-            Log.d(TAG, "Purchase successful.");
-
-            if (purchase.getSku().equals(Catalog.SKU_PREMIUM)) {
-                // bought the premium upgrade!
-                if (VERBOSE) Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
-                showDonateCompleteDialog();
-                mIsPremium = true;
-                invalidateOptionsMenu();
-            }
-        }
-    };
 
     private Bus mBus;
 
@@ -126,19 +63,28 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
         int theme = GlancePrefsManager.getTheme(this);
         switch (theme) {
             case THEME_LIGHT:
-                setTheme(R.style.Light);
+                setTheme(R.style.Light_Spritzer);
                 break;
             case THEME_DARK:
-                setTheme(R.style.Dark);
+                setTheme(R.style.Dark_Spritzer);
                 break;
         }
         super.onCreate(savedInstanceState);
         setupActionBar();
         setContentView(R.layout.activity_main);
 
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, new SpritzFragment(), SPRITZ_FRAG_TAG)
-                .commit();
+        if (savedInstanceState == null) {
+            // Retain the SpritzFragment instance so it survives screen rotation
+            SpritzFragment frag = new SpritzFragment();
+            frag.setRetainInstance(true);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.container, frag, SPRITZ_FRAG_TAG)
+                    .commit();
+        } else if (getSpritzFragment().getSpritzer().isPlaying()) {
+            // If this Activity has been recreated while the SpritzFragment was playing
+            // hide our action bar
+            if (getSupportActionBar() != null) getSupportActionBar().hide();
+        }
 
         GlanceApplication app = (GlanceApplication) getApplication();
         mBus = app.getBus();
@@ -152,7 +98,7 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
     @Override
     public void onResume() {
         super.onResume();
-        dimSystemUi(true);
+//        dimSystemUi(true);
 
         boolean intentIncludesMediaUri = false;
         String action = getIntent().getAction();
@@ -163,7 +109,7 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
                 intentUri = getIntent().getData();
             } else if (action.equals(Intent.ACTION_SEND)) {
                 intentIncludesMediaUri = true;
-                intentUri = Uri.parse(findURL(getIntent().getStringExtra(Intent.EXTRA_TEXT)));
+                intentUri = Uri.parse(getIntent().getStringExtra(Intent.EXTRA_TEXT));
             }
 
             if (intentIncludesMediaUri && intentUri != null) {
@@ -188,10 +134,6 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
         super.onDestroy();
         if (mBus != null) {
             mBus.unregister(this);
-        }
-        if (mBillingHelper != null) {
-            mBillingHelper.dispose();
-            mBillingHelper = null;
         }
     }
 
@@ -221,7 +163,7 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_speed) {
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             DialogFragment newFragment = WpmDialogFragment.newInstance();
             newFragment.show(ft, "dialog");
             return true;
@@ -263,22 +205,6 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
         recreate();
     }
 
-    private String findURL (String Text)
-    {
-        int longest_URL_length=-1;
-        String longest_URL = Text;
-        Matcher matcher = Patterns.WEB_URL.matcher(Text);
-        while (matcher.find())
-        {
-            if (matcher.group().length()>longest_URL_length)
-            {
-                longest_URL_length=matcher.group().length();
-                longest_URL= matcher.group();
-            }
-        }
-        return longest_URL;
-    }
-
     @Subscribe
     public void onSpritzFinished(SpritzFinishedEvent event) {
         runOnUiThread(new Runnable() {
@@ -305,7 +231,7 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
         SpritzFragment frag = getSpritzFragment();
         if (frag != null && frag.isResumed() && frag.getSpritzer() != null) {
             SpritzerMedia book = frag.getSpritzer().getMedia();
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             DialogFragment newFragment = TocDialogFragment.newInstance(book);
             newFragment.show(ft, "dialog");
         } else {
@@ -318,8 +244,7 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
     }
 
     private void setupActionBar() {
-        getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle("");
         actionBar.setDisplayShowHomeEnabled(false);
         actionBar.setDisplayShowTitleEnabled(false);
@@ -345,63 +270,6 @@ public class MainActivity extends FragmentActivity implements View.OnSystemUiVis
         if ((visibility & View.SYSTEM_UI_FLAG_LOW_PROFILE) == 0) {
             dimSystemUi(true);
         }
-    }
-
-    private void setupBillingConnection(String base64EncodedPublicKey) {
-        // compute your public key and store it in base64EncodedPublicKey
-        mBillingHelper = new IabHelper(this, base64EncodedPublicKey);
-        mBillingHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
-            public void onIabSetupFinished(IabResult result) {
-                if (!result.isSuccess()) {
-                    // Oh noes, there was a problem.
-                    Log.d(TAG, "Problem setting up In-app Billing: " + result);
-                }
-                // Hooray, IAB is fully set up!
-                if (mBillingHelper == null) return;
-                // Query purchases
-                mBillingHelper.queryInventoryAsync(mGotInventoryListener);
-            }
-        });
-    }
-
-    /**
-     * Honor system payment validator.
-     */
-    private boolean verifyDeveloperPayload(Purchase p) {
-        return true;
-    }
-
-    private void showDonateDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.dialog_donate_title))
-                .setMessage(Html.fromHtml(getString(R.string.dialog_donate_msg)))
-                .setPositiveButton(getString(R.string.dialog_donate_positive_btn), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        mBillingHelper.launchPurchaseFlow(MainActivity.this, Catalog.SKU_PREMIUM, Catalog.PREMIUM_REQUEST,
-                                mPurchaseFinishedListener, "");
-                    }
-                })
-                .setNeutralButton(getString(R.string.dialog_donate_neutral_btn), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent i = new Intent(Intent.ACTION_VIEW);
-                        i.setData(Uri.parse("https://github.com/OnlyInAmerica/OpenSpritz-Android"));
-                        startActivity(i);
-                    }
-                })
-                .show();
-    }
-
-    private void showDonateCompleteDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.dialog_donate_complete_title))
-                .setPositiveButton(getString(R.string.dialog_donate_complete_positive_btn), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                }).show();
     }
 
     /**

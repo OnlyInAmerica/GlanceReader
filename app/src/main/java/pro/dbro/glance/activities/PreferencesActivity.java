@@ -2,17 +2,19 @@ package pro.dbro.glance.activities;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import pro.dbro.glance.R;
 
-public class PreferencesActivity extends Activity {
+public class PreferencesActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preferences);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override

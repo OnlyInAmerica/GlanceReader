@@ -1,5 +1,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="pro.dbro.glance.MainActivity">
 <!--
     <item
@@ -13,12 +14,12 @@
         android:id="@+id/action_speed"
         android:icon="?attr/speed_icon"
         android:title="@string/set_wpm"
-        android:showAsAction="ifRoom" />
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/action_theme"
         android:icon="?attr/theme_icon"
         android:title="@string/theme"
-        android:showAsAction="ifRoom" />
+        app:showAsAction="always" />
 
 </menu>

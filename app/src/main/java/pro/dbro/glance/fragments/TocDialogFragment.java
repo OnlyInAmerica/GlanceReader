@@ -1,9 +1,9 @@
 package pro.dbro.glance.fragments;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;

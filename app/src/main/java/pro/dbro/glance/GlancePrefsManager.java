@@ -30,6 +30,7 @@ public class GlancePrefsManager {
     public static final int DEFAULT_APP_WPM = 500;
 
     public static boolean getShouldShowOnboarder(Context context) {
+        if (context == null) return true;
         boolean result = context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
                 .getBoolean(APP_SAW_ONBOARDER, false);
 
@@ -40,17 +41,20 @@ public class GlancePrefsManager {
     }
 
     public static int getTheme(Context context) {
+        if (context == null) return 1;
         return context.getSharedPreferences(UI_PREFS, Context.MODE_PRIVATE)
                 .getInt(UI_THEME, 1);
     }
 
     public static void setTheme(Context context, int theme) {
+        if (context == null) return;
         context.getSharedPreferences(UI_PREFS, Context.MODE_PRIVATE).edit()
                 .putInt(UI_THEME, theme)
                 .commit();
     }
 
     public static void saveState(Context context, int chapter, String uri, int wordIdx, String title, int wpm) {
+        if (context == null) return;
         SharedPreferences.Editor editor = context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE).edit();
         editor.putInt(APP_CHAPTER, chapter)
                 .putString(APP_URI, uri)
@@ -61,32 +65,36 @@ public class GlancePrefsManager {
     }
 
     public static SpritzState getState(Context context) {
-        SharedPreferences prefs =  context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences prefs =  context == null ? null : context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE);
         return new SpritzState(
-                prefs.getInt(APP_CHAPTER, 0),
-                prefs.getString(APP_URI, null),
-                prefs.getInt(APP_WORD, 0),
-                prefs.getString(APP_TITLE, null),
-                prefs.getInt(APP_WPM, 500)
+                prefs != null ? prefs.getInt(APP_CHAPTER, 0) : 0,
+                prefs != null ? prefs.getString(APP_URI, null) : null,
+                prefs != null ? prefs.getInt(APP_WORD, 0) : 0,
+                prefs != null ? prefs.getString(APP_TITLE, null) : null,
+                prefs != null ? prefs.getInt(APP_WPM, DEFAULT_APP_WPM) : DEFAULT_APP_WPM
                 );
     }
 
     public static void clearState(Context context) {
+        if (context == null) return;
         context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE).edit().clear().apply();
     }
 
     public static void setWpm(Context context, int wpm) {
+        if (context == null) return;
         SharedPreferences.Editor editor = context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE).edit();
         editor.putInt(APP_WPM, Math.max(wpm, WpmDialogFragment.MIN_WPM))
                 .apply();
     }
 
     public static int getWpm(Context context) {
+        if (context == null) return DEFAULT_APP_WPM;
         SharedPreferences prefs = context.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE);
         return prefs.getInt(APP_WPM, DEFAULT_APP_WPM);
     }
 
     public static SharePref getShareMode(Context context) {
+        if (context == null) return SharePref.ASK;
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String sharePref = prefs.getString(context.getString(R.string.pref_key_share_mode),
                                                    context.getString(R.string.pref_share_mode_default));
