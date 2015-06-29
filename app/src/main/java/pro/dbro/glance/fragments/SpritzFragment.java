@@ -5,27 +5,26 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.TextAppearanceSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.facebook.rebound.SimpleSpringListener;
 import com.facebook.rebound.Spring;
 import com.facebook.rebound.SpringSystem;
-import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
-import com.github.amlcurran.showcaseview.ShowcaseView;
-import com.github.amlcurran.showcaseview.targets.PointTarget;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
@@ -33,7 +32,6 @@ import java.lang.ref.WeakReference;
 
 import pro.dbro.glance.AppSpritzer;
 import pro.dbro.glance.GlanceApplication;
-import pro.dbro.glance.GlancePrefsManager;
 import pro.dbro.glance.R;
 import pro.dbro.glance.events.ChapterSelectRequested;
 import pro.dbro.glance.events.EpubDownloadedEvent;
@@ -53,6 +51,7 @@ public class SpritzFragment extends Fragment {
     protected static final int MSG_HIDE_CHAPTER_LABEL = 2;
 
     private AppSpritzer mSpritzer;
+    private RelativeLayout mContainer;
     private TextView mAuthorView;
     private TextView mTitleView;
     private TextView mChapterView;
@@ -186,6 +185,7 @@ public class SpritzFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_spritz, container, false);
+        mContainer = (RelativeLayout) root.findViewById(R.id.container);
         mAuthorView = ((TextView) root.findViewById(R.id.author));
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             mAuthorView.setVisibility(View.GONE);
@@ -195,7 +195,7 @@ public class SpritzFragment extends Fragment {
         mChapterView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mSpritzer.getMaxChapter() > 1) {
+                if (mSpritzer.getMaxChapter() > 1) {
                     mBus.post(new ChapterSelectRequested());
                 }
             }
@@ -211,41 +211,9 @@ public class SpritzFragment extends Fragment {
 
     private void showTips() {
         mShowingTips = true;
-        int[] viewLocation = new int[2];
-        mSpritzView.getLocationOnScreen(viewLocation);
-        PointTarget target = new PointTarget(viewLocation[0] + mSpritzView.getWidth() / 3, viewLocation[1] + mSpritzView.getHeight() / 2);
-        final long SHOWCASE_SINGLESHOT_ID = 3141519;
-        new ShowcaseView.Builder(getActivity())
-                .setShowcaseEventListener(new OnShowcaseEventListener() {
-                    @Override
-                    public void onShowcaseViewHide(ShowcaseView showcaseView) {
-                        showMetaUi(true);
-                    }
-
-                    @Override
-                    public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
-
-                    }
-
-                    @Override
-                    public void onShowcaseViewShow(ShowcaseView showcaseView) {
-                        showcaseView.postDelayed(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                Log.i(TAG, "hiding meta uti");
-                                showMetaUi(false);
-                            }
-
-                        }, 500);
-                    }
-                })
-                .singleShot(SHOWCASE_SINGLESHOT_ID)
-                .setTarget(target)
-                .setContentTitle("Welcome to Glance")
-                .setContentText("Touch the glance view to pause or resume. If you miss something, pull down to view a brief history")
-                .hideOnTouchOutside()
-                .build();
+        // TODO : Waiting on ShowCaseView to update for AppCompatActivity
+        //https://github.com/amlcurran/ShowcaseView
+        mShowingTips = false;
     }
 
     private void pauseSpritzer() {
@@ -309,7 +277,8 @@ public class SpritzFragment extends Fragment {
                     lastTouchY = firstTouchY = event.getRawY();
                 }
                 if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                    if (mSpritzer.isPlaying() && (event.getEventTime() - event.getDownTime() > timeForPauseThreshold)) mSpritzer.pause();
+                    if (mSpritzer.isPlaying() && (event.getEventTime() - event.getDownTime() > timeForPauseThreshold))
+                        mSpritzer.pause();
                     if (!mSetText) {
                         mSpritzHistoryView.setText(mSpritzer.getHistoryString(400));
                         mSetText = true;

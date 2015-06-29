@@ -52,70 +52,9 @@ public class MainActivity extends AppCompatActivity implements View.OnSystemUiVi
     public static final String SPRITZ_FRAG_TAG = "spritzfrag";
     private static final int THEME_LIGHT = 0;
     private static final int THEME_DARK = 1;
-    private IabHelper mBillingHelper;
-    private boolean mIsPremium;
     private Menu mMenu;
     private boolean mFinishAfterSpritz = false;
 
-    // Listener that's called when we finish querying the items and subscriptions we own
-    IabHelper.QueryInventoryFinishedListener mGotInventoryListener = new IabHelper.QueryInventoryFinishedListener() {
-        public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
-            if (VERBOSE) Log.d(TAG, "Query inventory finished.");
-
-            // Have we been disposed of in the meantime? If so, quit.
-            if (mBillingHelper == null) return;
-
-            // Is it a failure?
-            if (result.isFailure()) {
-                Log.i(TAG, "Failed to query inventory: " + result);
-                return;
-            }
-
-            if (VERBOSE) Log.d(TAG, "Query inventory was successful.");
-
-            /*
-             * Check for items we own. Notice that for each purchase, we check
-             * the developer payload to see if it's correct! See
-             * verifyDeveloperPayload().
-             */
-
-            // Do we have the premium upgrade?
-            Purchase premiumPurchase = inventory.getPurchase(Catalog.SKU_PREMIUM);
-            boolean isPremiumUser = (premiumPurchase != null && verifyDeveloperPayload(premiumPurchase));
-            if (VERBOSE) Log.d(TAG, "User is " + (isPremiumUser ? "PREMIUM" : "NOT PREMIUM"));
-            if (VERBOSE) Log.d(TAG, "Initial inventory query finished; enabling main UI.");
-            mIsPremium = isPremiumUser;
-            invalidateOptionsMenu();
-        }
-    };
-
-    IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener() {
-        public void onIabPurchaseFinished(IabResult result, Purchase purchase) {
-            if (VERBOSE) Log.d(TAG, "Purchase finished: " + result + ", purchase: " + purchase);
-
-            // if we were disposed of in the meantime, quit.
-            if (mBillingHelper == null) return;
-
-            if (result.isFailure()) {
-                Log.i(TAG, "Error purchasing: " + result);
-                return;
-            }
-            if (!verifyDeveloperPayload(purchase)) {
-                Log.i(TAG, "Error purchasing. Authenticity verification failed.");
-                return;
-            }
-
-            Log.d(TAG, "Purchase successful.");
-
-            if (purchase.getSku().equals(Catalog.SKU_PREMIUM)) {
-                // bought the premium upgrade!
-                if (VERBOSE) Log.d(TAG, "Purchase is premium upgrade. Congratulating user.");
-                showDonateCompleteDialog();
-                mIsPremium = true;
-                invalidateOptionsMenu();
-            }
-        }
-    };
 
     private Bus mBus;
 
@@ -195,10 +134,6 @@ public class MainActivity extends AppCompatActivity implements View.OnSystemUiVi
         super.onDestroy();
         if (mBus != null) {
             mBus.unregister(this);
-        }
-        if (mBillingHelper != null) {
-            mBillingHelper.dispose();
-            mBillingHelper = null;
         }
     }
 
@@ -335,63 +270,6 @@ public class MainActivity extends AppCompatActivity implements View.OnSystemUiVi
         if ((visibility & View.SYSTEM_UI_FLAG_LOW_PROFILE) == 0) {
             dimSystemUi(true);
         }
-    }
-
-    private void setupBillingConnection(String base64EncodedPublicKey) {
-        // compute your public key and store it in base64EncodedPublicKey
-        mBillingHelper = new IabHelper(this, base64EncodedPublicKey);
-        mBillingHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
-            public void onIabSetupFinished(IabResult result) {
-                if (!result.isSuccess()) {
-                    // Oh noes, there was a problem.
-                    Log.d(TAG, "Problem setting up In-app Billing: " + result);
-                }
-                // Hooray, IAB is fully set up!
-                if (mBillingHelper == null) return;
-                // Query purchases
-                mBillingHelper.queryInventoryAsync(mGotInventoryListener);
-            }
-        });
-    }
-
-    /**
-     * Honor system payment validator.
-     */
-    private boolean verifyDeveloperPayload(Purchase p) {
-        return true;
-    }
-
-    private void showDonateDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.dialog_donate_title))
-                .setMessage(Html.fromHtml(getString(R.string.dialog_donate_msg)))
-                .setPositiveButton(getString(R.string.dialog_donate_positive_btn), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        mBillingHelper.launchPurchaseFlow(MainActivity.this, Catalog.SKU_PREMIUM, Catalog.PREMIUM_REQUEST,
-                                mPurchaseFinishedListener, "");
-                    }
-                })
-                .setNeutralButton(getString(R.string.dialog_donate_neutral_btn), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent i = new Intent(Intent.ACTION_VIEW);
-                        i.setData(Uri.parse("https://github.com/OnlyInAmerica/OpenSpritz-Android"));
-                        startActivity(i);
-                    }
-                })
-                .show();
-    }
-
-    private void showDonateCompleteDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.dialog_donate_complete_title))
-                .setPositiveButton(getString(R.string.dialog_donate_complete_positive_btn), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                }).show();
     }
 
     /**

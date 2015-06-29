@@ -35,4 +35,6 @@
     <string name="share_dialog_title">Share this Read?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="got_it">Got it</string>
+    <string name="spritz_frag_welcome_snackbar_body">Touch the text to resume or pause</string>
 </resources>
