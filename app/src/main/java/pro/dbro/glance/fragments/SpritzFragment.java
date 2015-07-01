@@ -388,6 +388,13 @@ public class SpritzFragment extends Fragment {
         } else {
             mSpritzer.setEventBus(mBus);
             mSpritzView.setSpritzer(mSpritzer);
+
+            // TODO: AppSpritzer reports onMediaReady before we register bus, so this is necessary
+            // to cancel an indeterminate progress from loading a local epub that finished
+            // before onResume here
+            if (mSpritzer.isMediaSelected() && mSpritzer.getMaxChapter() > 1 && mProgress.isIndeterminate())
+                showIndeterminateProgress(false);
+
             if (!mSpritzer.isPlaying()) {
                 updateMetaUi();
                 showMetaUi(true);
@@ -465,7 +472,7 @@ public class SpritzFragment extends Fragment {
 
     @Subscribe
     public void onHttpUrlParsed(HttpUrlParsedEvent event) {
-        showIndeterminateProgress(false);
+//        showIndeterminateProgress(false);
         //mSpritzer.pause();
         updateMetaUi();
         if (!mShowingTips)
@@ -476,7 +483,7 @@ public class SpritzFragment extends Fragment {
 
     @Subscribe
     public void onEpubDownloaded(EpubDownloadedEvent event) {
-        showIndeterminateProgress(false);
+//        showIndeterminateProgress(false);
         updateMetaUi();
         if (!mShowingTips)
             showMetaUi(true);
@@ -484,6 +491,7 @@ public class SpritzFragment extends Fragment {
 
     @Subscribe
     public void onSpritzMediaReady(SpritzMediaReadyEvent event) {
+        showIndeterminateProgress(false);
         updateMetaUi();
         if (!mShowingTips)
             showMetaUi(true);
