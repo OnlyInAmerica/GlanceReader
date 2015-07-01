@@ -465,11 +465,10 @@ public class Spritzer {
                                     if (cb != null) {
                                         cb.onSpritzerFinished();
                                     }
-                                }
-                                mCurWordIdx++;
+                                } else
+                                    mCurWordIdx++;
                             } catch (InterruptedException e) {
-                                Log.e(TAG, "Exception spritzing");
-                                e.printStackTrace();
+                                // do nothing.
                             }
                         }
                         if (VERBOSE) Log.i(TAG, "Stopping spritzThread");
