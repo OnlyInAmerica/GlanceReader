@@ -46,6 +46,7 @@ public class Spritzer {
     protected ArrayList<String> mDisplayWordList;   // The queue of words from mWordArray yet to be displayed
     protected TextView mTarget;
     protected int mWPM;                             // The user-selected WPM. This is the speed at which singlestop words will be presented
+    protected Thread mSpritzThread;
     protected Handler mSpritzHandler;
     protected final Object mSpritzThreadStartedSync = new Object();
     protected boolean mPlaying;
@@ -414,6 +415,7 @@ public class Spritzer {
         }
         mPlayingRequested = false;
         synchronized (mSpritzThreadStartedSync) {
+            if (mSpritzThread != null) mSpritzThread.interrupt();
             while (mPlaying) {
                 try {
                     mSpritzThreadStartedSync.wait();
@@ -434,7 +436,7 @@ public class Spritzer {
     private void startTimerThread(final SpritzerCallback cb, final boolean fireFinishEvent) {
         synchronized (mSpritzThreadStartedSync) {
             if (!mSpritzThreadStarted) {
-                new Thread(new Runnable() {
+                mSpritzThread = new Thread(new Runnable() {
                     @Override
                     public void run() {
                         if (VERBOSE) {
@@ -478,7 +480,8 @@ public class Spritzer {
                         mSpritzThreadStarted = false;
 
                     }
-                }).start();
+                });
+                mSpritzThread.start();
             }
         }
     }
