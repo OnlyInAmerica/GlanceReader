@@ -5,7 +5,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
 import pro.dbro.glance.fragments.BookFeedFragment;
-import pro.dbro.glance.fragments.FeedFragment;
 
 public class BookSectionAdapter extends FragmentPagerAdapter {
 

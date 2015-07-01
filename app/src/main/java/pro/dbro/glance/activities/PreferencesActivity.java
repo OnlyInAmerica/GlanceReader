@@ -1,10 +1,9 @@
 package pro.dbro.glance.activities;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Menu;
 import android.view.MenuItem;
+
 import pro.dbro.glance.R;
 
 public class PreferencesActivity extends AppCompatActivity {

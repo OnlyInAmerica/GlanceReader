@@ -18,17 +18,9 @@ import com.parse.Parse;
 import com.parse.ParseObject;
 import com.parse.ParseQueryAdapter;
 
-import org.json.JSONObject;
-
-import java.io.Reader;
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import pro.dbro.glance.R;
 import pro.dbro.glance.adapters.AdapterUtils;
-import pro.dbro.glance.adapters.ArticleAdapter;
 import pro.dbro.glance.adapters.BookSectionAdapter;
-import pro.dbro.glance.adapters.ReaderSectionAdapter;
 import pro.dbro.glance.lib.SpritzerTextView;
 import timber.log.Timber;
 

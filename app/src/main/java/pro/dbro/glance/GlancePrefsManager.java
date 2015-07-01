@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 
-import pro.dbro.glance.fragments.PreferencesFragment;
 import pro.dbro.glance.fragments.WpmDialogFragment;
 
 /**
