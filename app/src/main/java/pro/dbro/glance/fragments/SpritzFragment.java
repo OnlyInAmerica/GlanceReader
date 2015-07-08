@@ -5,7 +5,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -17,7 +16,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -390,6 +388,13 @@ public class SpritzFragment extends Fragment {
         } else {
             mSpritzer.setEventBus(mBus);
             mSpritzView.setSpritzer(mSpritzer);
+
+            // TODO: AppSpritzer reports onMediaReady before we register bus, so this is necessary
+            // to cancel an indeterminate progress from loading a local epub that finished
+            // before onResume here
+            if (mSpritzer.isMediaSelected() && mSpritzer.getMaxChapter() > 1 && mProgress.isIndeterminate())
+                showIndeterminateProgress(false);
+
             if (!mSpritzer.isPlaying()) {
                 updateMetaUi();
                 showMetaUi(true);
@@ -467,7 +472,7 @@ public class SpritzFragment extends Fragment {
 
     @Subscribe
     public void onHttpUrlParsed(HttpUrlParsedEvent event) {
-        showIndeterminateProgress(false);
+//        showIndeterminateProgress(false);
         //mSpritzer.pause();
         updateMetaUi();
         if (!mShowingTips)
@@ -478,7 +483,7 @@ public class SpritzFragment extends Fragment {
 
     @Subscribe
     public void onEpubDownloaded(EpubDownloadedEvent event) {
-        showIndeterminateProgress(false);
+//        showIndeterminateProgress(false);
         updateMetaUi();
         if (!mShowingTips)
             showMetaUi(true);
@@ -486,6 +491,7 @@ public class SpritzFragment extends Fragment {
 
     @Subscribe
     public void onSpritzMediaReady(SpritzMediaReadyEvent event) {
+        showIndeterminateProgress(false);
         updateMetaUi();
         if (!mShowingTips)
             showMetaUi(true);

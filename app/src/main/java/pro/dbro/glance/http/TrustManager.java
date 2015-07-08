@@ -2,7 +2,6 @@ package pro.dbro.glance.http;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.util.Pair;
 
 import com.google.gson.Gson;
@@ -14,9 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;

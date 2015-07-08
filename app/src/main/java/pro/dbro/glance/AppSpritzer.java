@@ -1,21 +1,11 @@
 package pro.dbro.glance;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
-import android.app.Application;
-import android.app.DownloadManager;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.UriPermission;
-import android.graphics.drawable.Drawable;
-import android.net.ConnectivityManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
-import android.support.annotation.NonNull;
-import android.text.Html;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,22 +13,11 @@ import android.widget.Toast;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 import com.koushikdutta.ion.ProgressCallback;
-import com.parse.FindCallback;
 import com.parse.Parse;
-import com.parse.ParseException;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
 import com.squareup.otto.Bus;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import pro.dbro.glance.events.EpubDownloadedEvent;
 import pro.dbro.glance.events.HttpUrlParsedEvent;
@@ -376,11 +355,12 @@ public class AppSpritzer extends Spritzer {
         StringBuilder builder = new StringBuilder();
         int numWords = 0;
         int curWordIdx = mCurWordIdx - (numWords + 2);
+        if (curWordIdx < 0) return builder.toString();
         while (builder.length() + mDisplayWordList.get(curWordIdx).length() < maxChars) {
             builder.insert(0, mDisplayWordList.get(curWordIdx) + " ");
             numWords++;
             curWordIdx = mCurWordIdx - (numWords + 2);
-            if (mCurWordIdx < 0 || mCurWordIdx >= mDisplayWordList.size()) break;
+            if (curWordIdx < 0 || curWordIdx >= mDisplayWordList.size()) break;
         }
         return builder.toString();
     }

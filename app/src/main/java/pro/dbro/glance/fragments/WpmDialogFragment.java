@@ -26,7 +26,7 @@ public class WpmDialogFragment extends DialogFragment {
 
     public static final int MAX_WPM = 1200;
     public static final int WHOAH_THRESHOLD_WPM = 800;
-    public static final int MIN_WPM = 300;
+    public static final int MIN_WPM = 10;
 
     private View mView;
     private Animation mCurrentAnimation;

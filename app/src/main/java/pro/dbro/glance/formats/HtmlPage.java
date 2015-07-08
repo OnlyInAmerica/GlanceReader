@@ -5,23 +5,18 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.text.Html;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
-import com.parse.FindCallback;
-import com.parse.ParseException;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 
-//import pro.dbro.glance.SECRETS;
 import pro.dbro.glance.http.TrustManager;
 import timber.log.Timber;
+
+//import pro.dbro.glance.SECRETS;
 
 /**
  * This provides an implementation of {@link pro.dbro.glance.formats.SpritzerMedia}
@@ -126,7 +121,7 @@ public class HtmlPage implements SpritzerMedia {
                             return;
                         }
 
-                        Timber.d("Got diffbot result " + result.toString());
+                        //Timber.d("Got diffbot result " + result.toString());
                         new AsyncTask<JsonObject, Void, HtmlPage>() {
 
                             @Override
