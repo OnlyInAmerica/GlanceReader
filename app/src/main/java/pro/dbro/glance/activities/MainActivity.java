@@ -109,7 +109,7 @@ public class MainActivity extends ImmersiveActivityBase implements View.OnSystem
                 intentUri = getIntent().getData();
             } else if (action.equals(Intent.ACTION_SEND)) {
                 intentIncludesMediaUri = true;
-                intentUri = Uri.parse(getIntent().getStringExtra(Intent.EXTRA_TEXT));
+                intentUri = Uri.parse(findURL(getIntent().getStringExtra(Intent.EXTRA_TEXT)));
             }
 
             if (intentIncludesMediaUri && intentUri != null) {
@@ -203,6 +203,20 @@ public class MainActivity extends ImmersiveActivityBase implements View.OnSystem
     private void applyLightTheme() {
         GlancePrefsManager.setTheme(this, THEME_LIGHT);
         recreate();
+    }
+
+    private String findURL (String Text)
+    {
+        int longest_URL_length=-1;
+        String longest_URL = Text;
+        Matcher matcher = Patterns.WEB_URL.matcher(Text);
+        while (matcher.find()) {
+            if (matcher.group().length() > longest_URL_length) {
+                longest_URL_length=matcher.group().length();
+                longest_URL= matcher.group();
+            }
+        }
+        return longest_URL;
     }
 
     @Subscribe
