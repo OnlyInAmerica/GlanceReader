@@ -22,6 +22,8 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import android.util.Patterns;
 
 import pro.dbro.glance.GlanceApplication;
 import pro.dbro.glance.GlancePrefsManager;
