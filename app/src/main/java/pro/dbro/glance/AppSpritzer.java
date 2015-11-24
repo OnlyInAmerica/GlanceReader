@@ -55,6 +55,11 @@ public class AppSpritzer extends Spritzer {
         restoreState(true);
     }
 
+    public AppSpritzer(TextView target) {
+        super(target);
+        context = target.getContext().getApplicationContext();
+    }
+
     public AppSpritzer(Bus bus, TextView target, Uri mediaUri) {
         super(target);
         context = target.getContext().getApplicationContext();
