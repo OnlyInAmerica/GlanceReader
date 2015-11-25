@@ -1,0 +1,13 @@
+<pro.dbro.glance.lib.SpritzerTextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/spritzText"
+        android:layout_width="@dimen/spritzer_text_view_width"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@android:color/black"
+        android:clickable="true"
+        android:focusableInTouchMode="true"
+        android:gravity="start"
+        android:keepScreenOn="true"
+        android:textSize="@dimen/spritzer_text_view_text_size"
+        android:typeface="monospace" />

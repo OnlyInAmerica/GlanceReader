@@ -51,6 +51,14 @@
         <!-- Support library compatibility -->
         <item name="windowActionBarOverlay">true</item>
     </style>
+    <style name="Transparent.Spritzer" parent="Theme.AppCompat">
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="speed_icon">@drawable/ic_gauge_white</item>
+
+        <!-- Support library compatibility -->
+        <item name="windowActionBarOverlay">true</item>
+    </style>
 
     <style name="Light.Spritzer" parent="Light">
         <item name="android:windowActionBarOverlay">true</item>
