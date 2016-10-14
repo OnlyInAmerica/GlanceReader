@@ -47,7 +47,7 @@ Some quick, incomplete thoughts on what's next.
 
 
 ## Thanks
-In no partiular order. Thanks everybody!
+In no particular order. Thanks everybody!
 
 + [Rich Jones](https://github.com/miserlou) for adding the curated feeds & community features.
 + [andrewgiang](https://github.com/andrewgiang) for contributing a re-usable library based on the early project, and other contributions
