@@ -17,7 +17,7 @@ android {
             // gradle.properties in the project's root directory
         }
     }
-
+/*
     buildTypes {
         release {
             runProguard false
@@ -27,7 +27,7 @@ android {
             zipAlign true
         }
     }
-
+*/
     packagingOptions {
         exclude 'log4j.properties'
     }
