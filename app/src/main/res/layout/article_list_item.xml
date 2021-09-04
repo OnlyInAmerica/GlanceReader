@@ -14,7 +14,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:ellipsize="none"
-        android:textAppearance="@android:style/TextAppearance.Large" />
+        android:textAppearance="@android:style/TextAppearance.Large"
+        android:textStyle="bold|italic"
+
+        />
 
     <TextView
         android:id="@+id/url"
@@ -24,6 +27,8 @@
         android:ellipsize="end"
         android:lines="1"
         android:textAppearance="@android:style/TextAppearance.Small"
-        android:textColor="?attr/subdued_text" />
+        android:textColor="?attr/subdued_text"
+        android:textStyle="bold|italic"
+        />
 
 </RelativeLayout>
